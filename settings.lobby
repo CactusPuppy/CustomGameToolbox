@@ -1,0 +1,33 @@
+{
+  "Mode Name": "Overwatch Content Creation Toolbox",
+  "Description": "v0.1-ALPHA\nCreated by CactusPuppy",
+  "Modes": {
+    "All": {
+      "Hero Limit": "Off",
+      "Game Mode Start": "Immediately"
+    },
+    "Assault": {
+      "Competitive Rules": true
+    },
+    "Control": {
+      "Competitive Rules": true
+    },
+    "Escort": {
+      "Competitive Rules": true
+    },
+    "Push": {
+      "Competitive Rules": true
+    },
+    "Hybrid": {
+      "Competitive Rules": true
+    },
+    "Skirmish": {
+      "Enabled Maps": [
+        "Shambali Monastery"
+      ]
+    }
+  },
+  "Lobby": {
+    "Match Voice Chat": true
+  }
+}

@@ -1,0 +1,85 @@
+import "../menu.ostw";
+
+import "endGame.ostw";
+
+enum GameControlAction {
+  BACK = 1,
+  END_GAME,
+  END_ROUND,
+  SKIP_SETUP
+}
+
+globalvar GameControlAction[] GameControlActionGrid = [];
+
+playervar GameControlAction gameControlActionID;
+
+void CreateGameControlButtons() {
+  CreateEndGameMainMenuButton();
+  # Create game control end round button
+  OnScreenText.CreateOnScreenText(
+    VisibleTo:      LocalPlayer().currentMenuState == MenuState.GAME_CONTROL ? LocalPlayer() : null,
+    Header:         menuText("End Round", isSelectingButton(LocalPlayer(), 1, 3)),
+    PositionX:      colIndexToX(1),
+    PositionY:      rowIndexToY(3),
+    Scale:          2,
+    Reevaluation:   InworldTextRev.VisibleToPositionAndString,
+    Color:          Color.Orange,
+    Spectators:     Spectators.VisibleNever);
+  GameControlActionGrid[gridIndex(1, 3)] = GameControlAction.END_ROUND;
+  # Create skip setup button
+  OnScreenText.CreateOnScreenText(
+    VisibleTo:      LocalPlayer().currentMenuState == MenuState.GAME_CONTROL ? LocalPlayer() : null,
+    Header:         menuText("Skip Setup", isSelectingButton(LocalPlayer(), 3, 1)),
+    PositionX:      colIndexToX(3),
+    PositionY:      rowIndexToY(1),
+    Scale:          2,
+    Reevaluation:   InworldTextRev.VisibleToPositionAndString,
+    Color:          Color.Aqua,
+    Spectators:     Spectators.VisibleNever
+  );
+  GameControlActionGrid[gridIndex(3, 1)] = GameControlAction.SKIP_SETUP;
+}
+
+void HandleGameControlClick() {
+  AbortIf (GameControlActionGrid[gridIndex(menuXIndex, menuYIndex)] == 0);
+  gameControlActionID = GameControlActionGrid[gridIndex(menuXIndex, menuYIndex)];
+  MinWait();
+  gameControlActionID = null;
+}
+
+rule: "[Game Control] When end game button pressed, trigger End Game screen"
+Event.OngoingPlayer
+if (gameControlActionID == GameControlAction.END_GAME)
+{
+  MinWait();
+  currentMenuState = MenuState.CONFIRMING_END_GAME;
+  menuXIndex = 1; menuYIndex = 0;
+}
+
+rule: "[Game Control] When end round button pressed, end the round"
+Event.OngoingPlayer
+if (gameControlActionID == GameControlAction.END_ROUND)
+{
+  if (Not(IsGameInProgress())) {
+    SmallMessage(EventPlayer(), " It doesn't seem like there's an active round happening.");
+    return;
+  }
+  if (CurrentGameMode() == GameMode.Control) {
+    DeclareRoundVictory(TeamOf(EventPlayer()));
+  } else {
+    SetMatchTime(0);
+  }
+  currentMenuState = MenuState.CLOSED;
+}
+
+rule: "[Game Control] Skip setup button"
+Event.OngoingPlayer
+if (gameControlActionID == GameControlAction.SKIP_SETUP)
+{
+  if (Not(IsInSetup())) {
+    SmallMessage(EventPlayer(), " It doesn't seem like we're in setup right now.");
+    return;
+  }
+  SetMatchTime(0);
+  SmallMessage(EventPlayer(), " Skipped setup!");
+}

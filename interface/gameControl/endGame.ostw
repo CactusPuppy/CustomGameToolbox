@@ -1,0 +1,82 @@
+import "../menu.ostw";
+
+Number endGameBtnsY: -0.7;
+Number endGameBtnsSpread: 0.7;
+Number endGameBtnsWidth: 0.4;
+Number endGameBtnsHeight: 0.2;
+
+void CreateEndGameMainMenuButton() {
+  # Create game control end game button
+  OnScreenText.CreateOnScreenText(
+    VisibleTo:     LocalPlayer().currentMenuState == MenuState.GAME_CONTROL ? LocalPlayer() : null,
+    Header:        menuText("End Game", isSelectingButton(LocalPlayer(), 3, 3)),
+    PositionX:     colIndexToX(3),
+    PositionY:     rowIndexToY(3),
+    Scale:         2,
+    Reevaluation:  InworldTextRev.VisibleToPositionAndString,
+    Color:         Color.Red,
+    Spectators:    Spectators.VisibleNever);
+  GameControlActionGrid[gridIndex(3, 3)] = GameControlAction.END_GAME;
+
+  # Create confirm and abort buttons
+  OnScreenText.CreateOnScreenText(
+    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
+    Header: "Are you sure you want to end the game?",
+    PositionX: 0,
+    PositionY: 1,
+    Scale: 3,
+    Reevaluation: InworldTextRev.VisibleToAndPosition,
+    Color: Color.Rose,
+    Spectators: Spectators.VisibleNever
+  );
+  OnScreenText.CreateOnScreenText(
+    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
+    Header: menuText("[YES]", isSelectingButton(LocalPlayer(), 0, 0)),
+    PositionX: -endGameBtnsSpread,
+    PositionY: endGameBtnsY,
+    Scale: 3,
+    Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
+    Color: cursorOnConfirmBtn(LocalPlayer()) ? Color.Rose : Color.Red,
+    Spectators: Spectators.VisibleNever
+  );
+  OnScreenText.CreateOnScreenText(
+    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
+    Header: menuText("[NO]", isSelectingButton(LocalPlayer(), 1, 0)),
+    PositionX: endGameBtnsSpread,
+    PositionY: endGameBtnsY,
+    Scale: 3,
+    Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
+    Color: cursorOnCancelBtn(LocalPlayer()) ? Color.Green : Color.LimeGreen,
+    Spectators: Spectators.VisibleNever
+  );
+}
+
+Boolean cursorOnMainEndGameBtn(Player p = EventPlayer()):
+  isSelectingButton(p, 3, 3);
+Boolean cursorOnConfirmBtn(Player p = EventPlayer()):
+  isSelectingButton(p, 0, 0);
+Boolean cursorOnCancelBtn(Player p = EventPlayer()):
+  isSelectingButton(p, 1, 0);
+
+rule: "Initiate confirmation dialog"
+Event.OngoingPlayer
+if (currentMenuState == MenuState.CONFIRMING_END_GAME)
+if (IsButtonHeld(Button: Button.PrimaryFire))
+{
+  menuXIndex = 1; menuYIndex = 0;
+}
+
+void HandleConfirmEndGameClick() "Handle confirm/cancel for ending game"
+{
+  if (cursorOnCancelBtn()) {
+    currentMenuState = MenuState.GAME_CONTROL;
+  } else if (cursorOnConfirmBtn()) {
+    DeclareMatchDraw();
+    Wait(0.25);
+    if (IsMatchComplete()) {
+      currentMenuState = MenuState.CLOSED;
+      return;
+    }
+    SmallMessage(EventPlayer(), "Can't seem to end the game right now. Try again in a bit!");
+  }
+}

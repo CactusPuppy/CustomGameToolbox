@@ -1,0 +1,280 @@
+import "../main.ostw";
+import "../OSTWUtils/OnScreenText.del";
+import "../OSTWUtils/Math.del";
+
+import "gameControl/gameControlMenu.ostw";
+
+enum MenuState
+{
+  CLOSED = 0,
+  MAIN_MENU,
+  REPLAY_BOTS,
+  SET_CAMERA,
+  SET_RESPAWN,
+  ENABLE_CHEATS,
+  GAME_CONTROL,
+  CONFIRMING_END_GAME,
+  CUSTOMIZE_HUD
+}
+
+// Index is rowIndex * numCols + colIndex
+globalvar MenuState[] mainMenuActionGrid = [];
+
+playervar MenuState currentMenuState = MenuState.CLOSED;
+// playervar Cursor | Number cursor = -1;
+playervar Number menuXIndex; // Positive to the right
+playervar Number menuYIndex; // Positive downwards
+
+Number xLim: 2.5;
+Number yLim: 1.25;
+Number firstRowY: 1;
+Number rowSeparation: 0.5;
+Number firstColumnX: -2.0;
+Number columnSeparation: 1.0;
+Number rowIndexToY(Number rowIndex): firstRowY - (rowSeparation * rowIndex);
+Number colIndexToX(Number colIndex): firstColumnX + (columnSeparation * colIndex);
+Number numCols: RoundToInteger((xLim - firstColumnX) / columnSeparation, Rounding.Down);
+Number numRows: RoundToInteger((firstRowY + yLim) / rowSeparation, Rounding.Down);
+Number gridIndex(Number colIndex, Number rowIndex): rowIndex * numCols + colIndex;
+Boolean isSelectingButton(Player p = LocalPlayer(), Number colIndex = 0, Number rowIndex = 0): p.menuXIndex == colIndex && p.menuYIndex == rowIndex;
+Any[] currentActionGrid(Player p = EventPlayer()): [mainMenuActionGrid, GameControlActionGrid, [true, true]][IndexOfArrayValue([MenuState.MAIN_MENU, MenuState.GAME_CONTROL, MenuState.CONFIRMING_END_GAME], p.currentMenuState)];
+
+String menuText(String label, Boolean isSelected = false): isSelected ? "> {0} <".Format([label]) : label;
+Boolean isSelectingGridIndex(Player p = EventPlayer(), Number x = 0, Number y = 0): p.menuXIndex == x && p.menuYIndex == y;
+
+void CreateMainMenuButtons() {
+  # Game control button
+  OnScreenText.CreateOnScreenText(
+    VisibleTo:     LocalPlayer().currentMenuState == MenuState.MAIN_MENU ? LocalPlayer() : null,
+    Header:        menuText("Game Control", isSelectingGridIndex(LocalPlayer(), x: 3, y: 3)),
+    PositionX:     colIndexToX(3),
+    PositionY:     rowIndexToY(3),
+    Scale:         2,
+    Reevaluation:  InworldTextRev.VisibleToPositionAndString,
+    Color:         Color.Rose,
+    Spectators:    Spectators.VisibleNever);
+  mainMenuActionGrid[gridIndex(3, 3)] = MenuState.GAME_CONTROL;
+  CreateGameControlButtons();
+}
+
+rule: "Global menu setup"
+{
+  # Create prompt to open mneu
+  CreateHudText(
+    VisibleTo:     LocalPlayer(),
+    Text:          <"Hold [<0>] to <1> menu",
+                      InputBindingString(Button.Interact),
+                      LocalPlayer().currentMenuState == MenuState.CLOSED ? "open" : "close">,
+    Location:      Location.Top,
+    SortOrder:     1,
+    TextColor:     LocalPlayer().currentMenuState == MenuState.CLOSED ? Color.Green : Color.Red,
+    Reevaluation:  HudTextRev.VisibleToStringAndColor,
+    Spectators:    Spectators.VisibleNever);
+  CreateHudText(
+    VisibleTo:     LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
+    Text:          "{0} SELECT | {2} {1}".Format([InputBindingString(Button.PrimaryFire), InputBindingString(Button.SecondaryFire), LocalPlayer().currentMenuState == MenuState.MAIN_MENU ? "CLOSE" : "BACK"]),
+    Location:      Location.Top,
+    SortOrder:     1.001,
+    TextColor:     Color.White,
+    Reevaluation:  HudTextRev.VisibleToStringAndColor,
+    Spectators:    Spectators.VisibleNever);
+  # Create main menu buttons
+  CreateMainMenuButtons();
+
+  # DEBUG: Show current menu state and current x/y menu indexes
+  CreateHudText(
+    VisibleTo: LocalPlayer(),
+    Text: $"currMenu: {LocalPlayer().currentMenuState} | x: {LocalPlayer().menuXIndex} | y: {LocalPlayer().menuYIndex} | val: {currentActionGrid(LocalPlayer())[gridIndex(LocalPlayer().menuXIndex, LocalPlayer().menuYIndex)]}",
+    Reevaluation: HudTextRev.VisibleToAndString
+  );
+}
+
+rule: "Initialize player and perform cleanup"
+Event.OngoingPlayer
+if (currentMenuState != MenuState.CLOSED)
+{
+  // cursor = new Cursor();
+  SetAimSpeed(EventPlayer(), 0);
+  StartFacing(EventPlayer(), FacingDirectionOf(EventPlayer()), 1000, Relative.ToWorld, FacingRev.None);
+  StartForcingPlayerPosition(EventPlayer(), PositionOf(EventPlayer()), false);
+  SetGravity(EventPlayer(), 0);
+  DisallowButton(Button: Button.PrimaryFire);
+  DisallowButton(Button: Button.SecondaryFire);
+  DisallowButton(Button: Button.Ability1);
+  DisallowButton(Button: Button.Ability2);
+  DisallowButton(Button: Button.Ultimate);
+  DisallowButton(Button: Button.Crouch);
+  DisallowButton(Button: Button.Jump);
+  DisallowButton(Button: Button.Reload);
+  SetInvisible(EventPlayer(), InvisibleTo.All);
+  SetStatus(EventPlayer(), null, Status.PhasedOut, 1000000);
+  DisableGameModeHud();
+  DisableHeroHud();
+  StartCamera(EventPlayer(), EyePosition(), EyePosition() + FacingDirectionOf(), 100);
+
+  menuXIndex = 0; menuYIndex = 0;
+
+  WaitUntil(currentMenuState == MenuState.CLOSED, 9999);
+
+  StopCamera();
+  EnableGameModeHud();
+  EnableHeroHud();
+  StopFacing(EventPlayer());
+  StopForcingPlayerPosition();
+  SetGravity(EventPlayer(), 100);
+  SetAimSpeed(EventPlayer(), 100);
+  Wait(0.25, WaitBehavior.RestartWhenTrue);
+  AllowButton(Button: Button.PrimaryFire);
+  AllowButton(Button: Button.SecondaryFire);
+  AllowButton(Button: Button.Ability1);
+  AllowButton(Button: Button.Ability2);
+  AllowButton(Button: Button.Ultimate);
+  AllowButton(Button: Button.Crouch);
+  AllowButton(Button: Button.Jump);
+  AllowButton(Button: Button.Reload);
+  SetInvisible(EventPlayer(), InvisibleTo.None);
+  ClearStatus(EventPlayer(), Status.PhasedOut);
+  // cursor.close();
+}
+
+rule: "When player holds Interact long enough, toggle menu"
+Event.OngoingPlayer
+if (IsAlive())
+if (IsButtonHeld(EventPlayer(), Button.Interact))
+{
+  Wait(0.25, WaitBehavior.AbortWhenFalse);
+  if (currentMenuState == MenuState.CLOSED) {
+    currentMenuState = MenuState.MAIN_MENU;
+  } else {
+    currentMenuState = MenuState.CLOSED;
+  }
+}
+
+rule: "Primary fire to select current item"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
+{
+  AbortIf(currentMenuState == MenuState.CLOSED);
+  AbortIf(currentActionGrid()[gridIndex(menuXIndex, menuYIndex)] == 0);
+  switch (currentMenuState) {
+    case MenuState.MAIN_MENU:
+      HandleMainMenuClick();
+      break;
+    case MenuState.GAME_CONTROL:
+      HandleGameControlClick();
+      break;
+    case MenuState.CONFIRMING_END_GAME:
+      HandleConfirmEndGameClick();
+      break;
+  }
+}
+
+rule: "Secondary fire to go back"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
+{
+  AbortIf(currentMenuState == MenuState.CLOSED);
+  if (currentMenuState == MenuState.MAIN_MENU) {
+    currentMenuState = MenuState.CLOSED;
+    return;
+  }
+  if (ArrayContains([MenuState.REPLAY_BOTS, MenuState.SET_CAMERA, MenuState.SET_RESPAWN,
+      MenuState.ENABLE_CHEATS, MenuState.GAME_CONTROL, MenuState.CUSTOMIZE_HUD], currentMenuState)) {
+    currentMenuState = MenuState.MAIN_MENU;
+  }
+  if (currentMenuState == MenuState.CONFIRMING_END_GAME) {
+    currentMenuState = MenuState.GAME_CONTROL;
+  }
+}
+
+playervar Number cache_startIndex;
+rule: "Menu left-right"
+Event.OngoingPlayer
+if (currentMenuState != MenuState.CLOSED)
+if (AbsoluteValue(XOf(ThrottleOf(EventPlayer()))) > 0.5)
+{
+  cache_startIndex = menuXIndex;
+  if (XOf(ThrottleOf(EventPlayer())) > 0) {
+    moveSelectionLeft();
+  } else {
+    moveSelectionRight();
+  }
+}
+
+rule: "Menu up-down"
+Event.OngoingPlayer
+if (currentMenuState != MenuState.CLOSED)
+if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
+  cache_startIndex = menuYIndex;
+  if (ZOf(ThrottleOf()) > 0) {
+    moveSelectionUp();
+  } else {
+    moveSelectionDown();
+  }
+}
+
+/* NOTE: These subroutines expect `cache_startIndex` to be set PRIOR TO CALL.
+ * These subroutines CAN infinitely loop if the menu is somehow in a bad state
+ * (i.e. somehow selecting a blank button).
+ */
+void moveSelectionLeft() playervar "[SUB] Move selection left"
+{
+  menuXIndex--;
+  if (menuXIndex < 0) { menuXIndex = numCols - 1; }
+  LoopIf(cache_startIndex != menuXIndex && currentActionGrid()[gridIndex(menuXIndex, menuYIndex)] == 0);
+}
+
+void moveSelectionRight() playervar "[SUB] Move selection right"
+{
+  menuXIndex++;
+  if (menuXIndex >= numCols) { menuXIndex = 0; }
+  LoopIf(cache_startIndex != menuXIndex && currentActionGrid()[gridIndex(menuXIndex, menuYIndex)] == 0);
+}
+
+void moveSelectionUp() playervar "[SUB] Move selection up"
+{
+  menuYIndex--;
+  if (menuYIndex < 0) { menuYIndex = numRows - 1; }
+  LoopIf(cache_startIndex != menuYIndex && currentActionGrid()[gridIndex(menuXIndex, menuYIndex)] == 0);
+}
+
+void moveSelectionDown() playervar "[SUB] Move selection down"
+{
+  menuYIndex++;
+  if (menuYIndex >= numRows) { menuYIndex = 0; }
+  LoopIf(cache_startIndex != menuYIndex && currentActionGrid()[gridIndex(menuXIndex, menuYIndex)] == 0);
+}
+
+MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMING_END_GAME];
+rule: "When menu state changes, find new first selection" -1
+Event.OngoingPlayer
+if (currentMenuState != MenuState.CLOSED)
+{
+  MinWait();
+  if (currentActionGrid() != 0 && !ArrayContains(NO_AUTO_SET_INDICES_MENUS, currentMenuState)) AutoSetMenuIndices();
+  WaitUntil(currentMenuState != EvaluateOnce(currentMenuState), 1000000);
+  // SmallMessage(EventPlayer(), "Detected menu state change");
+  LoopIfConditionIsTrue();
+}
+
+void AutoSetMenuIndices() {
+  menuXIndex = 0; menuYIndex = 0;
+  while (menuYIndex < numRows) {
+    while (menuXIndex < numCols) {
+      # DEBUG
+      LogToInspector($"load_menu | X: {menuXIndex} | Y: {menuYIndex} | ind: {gridIndex(menuXIndex, menuYIndex)} | val: {currentActionGrid()[gridIndex(menuXIndex, menuYIndex)]}");
+      if (currentActionGrid()[gridIndex(menuXIndex, menuYIndex)] != 0) {
+        # DEBUG
+        LogToInspector($"load_menu_final | X: {menuXIndex} | Y: {menuYIndex} | ind: {gridIndex(menuXIndex, menuYIndex)} | val: {currentActionGrid()[gridIndex(menuXIndex, menuYIndex)]}");
+        return;
+      }
+      menuXIndex = menuXIndex + 1;
+    }
+    menuYIndex = menuYIndex + 1;
+    menuXIndex = 0;
+  }
+}
+
+void HandleMainMenuClick() {
+  currentMenuState = mainMenuActionGrid[gridIndex(menuXIndex, menuYIndex)];
+}

@@ -1,0 +1,37 @@
+import "settings.lobby";
+
+import "interface/menu.ostw";
+
+globalvar Boolean resetVisibilityFlag;
+globalvar Boolean isReplaying;
+
+rule: "When player's menu state changes, refresh cursor"
+Event.OngoingPlayer
+{
+  Wait(0.032);
+  resetVisibilityFlag = true;
+  MinWait();
+  resetVisibilityFlag = false;
+  WaitUntil(EventPlayer().currentMenuState != EvaluateOnce(EventPlayer().currentMenuState), 9999);
+  Loop();
+}
+
+rule: "Skip assembling heroes"
+if (IsAssemblingHeroes())
+{
+  SetMatchTime(5);
+}
+
+// DEBUG: Pause match time upon start
+// rule: "pause match time on start"
+// if (IsGameInProgress())
+// {
+//   PauseMatchTime();
+// }
+
+rule: "Go back to lobby early, skipping victory poses and POTG"
+if (IsMatchComplete())
+{
+  Wait(3);
+  ReturnToLobby();
+}
