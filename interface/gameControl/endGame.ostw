@@ -16,7 +16,7 @@ void CreateEndGameMainMenuButton() {
     Reevaluation:  InworldTextRev.VisibleToPositionAndString,
     Color:         Color.Red,
     Spectators:    Spectators.VisibleNever);
-  GameControlActionGrid[gridIndex(3, 3)] = GameControlAction.END_GAME;
+  // GameControlActionGrid[gridIndex(3, 3)] = GameControlAction.END_GAME;
 
   # Create confirm and abort buttons
   OnScreenText.CreateOnScreenText(

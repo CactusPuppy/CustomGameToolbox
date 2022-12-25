@@ -3,15 +3,23 @@ import "../menu.ostw";
 import "endGame.ostw";
 
 enum GameControlAction {
+  EMPTY = 0,
   BACK = 1,
   END_GAME,
   END_ROUND,
   SKIP_SETUP
 }
 
-globalvar GameControlAction[] GameControlActionGrid = [];
+GameControlAction[] GameControlActionGrid: ActionGrid[MenuState.GAME_CONTROL];
 
 playervar GameControlAction gameControlActionID;
+
+GameControlAction[] gameControlActions: [
+  GameControlAction.EMPTY, GameControlAction.EMPTY,       GameControlAction.EMPTY, GameControlAction.EMPTY,
+  GameControlAction.EMPTY, GameControlAction.EMPTY, GameControlAction.EMPTY, GameControlAction.SKIP_SETUP,
+  GameControlAction.EMPTY, GameControlAction.EMPTY,       GameControlAction.EMPTY, GameControlAction.EMPTY,
+  GameControlAction.EMPTY, GameControlAction.END_ROUND,   GameControlAction.EMPTY, GameControlAction.END_GAME
+];
 
 void CreateGameControlButtons() {
   CreateEndGameMainMenuButton();
@@ -25,7 +33,7 @@ void CreateGameControlButtons() {
     Reevaluation:   InworldTextRev.VisibleToPositionAndString,
     Color:          Color.Orange,
     Spectators:     Spectators.VisibleNever);
-  GameControlActionGrid[gridIndex(1, 3)] = GameControlAction.END_ROUND;
+  // GameControlActionGrid[gridIndex(1, 3)] = GameControlAction.END_ROUND;
   # Create skip setup button
   OnScreenText.CreateOnScreenText(
     VisibleTo:      LocalPlayer().currentMenuState == MenuState.GAME_CONTROL ? LocalPlayer() : null,
@@ -37,7 +45,7 @@ void CreateGameControlButtons() {
     Color:          Color.Aqua,
     Spectators:     Spectators.VisibleNever
   );
-  GameControlActionGrid[gridIndex(3, 1)] = GameControlAction.SKIP_SETUP;
+  // GameControlActionGrid[gridIndex(3, 1)] = GameControlAction.SKIP_SETUP;
 }
 
 void HandleGameControlClick() {

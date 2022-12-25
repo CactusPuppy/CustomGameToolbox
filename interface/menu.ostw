@@ -17,13 +17,28 @@ enum MenuState
   CUSTOMIZE_HUD
 }
 
+globalvar Any[][] ActionGrid;
+rule: "[Menu] Set up action grid" -100
+{
+  ActionGrid = [];
+  ActionGrid[MenuState.MAIN_MENU] = mainMenuActions;
+  ActionGrid[MenuState.GAME_CONTROL] = gameControlActions;
+  ActionGrid[MenuState.CONFIRMING_END_GAME] = [true, true];
+}
 // Index is rowIndex * numCols + colIndex
-globalvar MenuState[] mainMenuActionGrid = [];
+MenuState[] mainMenuActionGrid: ActionGrid[MenuState.MAIN_MENU];
 
 playervar MenuState currentMenuState = MenuState.CLOSED;
 // playervar Cursor | Number cursor = -1;
 playervar Number menuXIndex; // Positive to the right
 playervar Number menuYIndex; // Positive downwards
+
+MenuState[] mainMenuActions: [
+  MenuState.CLOSED, MenuState.CLOSED, MenuState.CLOSED, MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED, MenuState.CLOSED, MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED, MenuState.CLOSED, MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED, MenuState.CLOSED, MenuState.GAME_CONTROL
+];
 
 Number xLim: 2.5;
 Number yLim: 1.25;
@@ -37,7 +52,7 @@ Number numCols: RoundToInteger((xLim - firstColumnX) / columnSeparation, Roundin
 Number numRows: RoundToInteger((firstRowY + yLim) / rowSeparation, Rounding.Down);
 Number gridIndex(Number colIndex, Number rowIndex): rowIndex * numCols + colIndex;
 Boolean isSelectingButton(Player p = LocalPlayer(), Number colIndex = 0, Number rowIndex = 0): p.menuXIndex == colIndex && p.menuYIndex == rowIndex;
-Any[] currentActionGrid(Player p = EventPlayer()): [mainMenuActionGrid, GameControlActionGrid, [true, true]][IndexOfArrayValue([MenuState.MAIN_MENU, MenuState.GAME_CONTROL, MenuState.CONFIRMING_END_GAME], p.currentMenuState)];
+Any[] currentActionGrid(Player p = EventPlayer()): ActionGrid[p.currentMenuState];
 
 String menuText(String label, Boolean isSelected = false): isSelected ? "> {0} <".Format([label]) : label;
 Boolean isSelectingGridIndex(Player p = EventPlayer(), Number x = 0, Number y = 0): p.menuXIndex == x && p.menuYIndex == y;
@@ -53,7 +68,6 @@ void CreateMainMenuButtons() {
     Reevaluation:  InworldTextRev.VisibleToPositionAndString,
     Color:         Color.Rose,
     Spectators:    Spectators.VisibleNever);
-  mainMenuActionGrid[gridIndex(3, 3)] = MenuState.GAME_CONTROL;
   CreateGameControlButtons();
 }
 
@@ -251,9 +265,14 @@ Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 {
   MinWait();
-  if (currentActionGrid() != 0 && !ArrayContains(NO_AUTO_SET_INDICES_MENUS, currentMenuState)) AutoSetMenuIndices();
+  // # DEBUG
+  // SmallMessage(AllPlayers(), $"Current action grid element count: {CountOf(currentActionGrid())}");
+  if (currentActionGrid() != 0 && !ArrayContains(NO_AUTO_SET_INDICES_MENUS, currentMenuState)) {
+    // # DEBUG
+    // SmallMessage(AllPlayers(), "Entering autoset");
+    AutoSetMenuIndices();
+  }
   WaitUntil(currentMenuState != EvaluateOnce(currentMenuState), 1000000);
-  // SmallMessage(EventPlayer(), "Detected menu state change");
   LoopIfConditionIsTrue();
 }
 
