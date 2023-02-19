@@ -1,0 +1,30 @@
+import "../settings.lobby";
+playervar Any[] TwoDCachedArray!;
+
+void SetValueIn2DArray(ref Any[][] Array, in Number outerIndex, in Number innerIndex, in Any value)
+{
+  TwoDCachedArray = Array[outerIndex];
+  TwoDCachedArray[innerIndex] = value;
+  Array[outerIndex] = TwoDCachedArray;
+}
+
+/**
+ * Example/sanity check of above function
+ */
+
+// playervar Any[][] exampleArray;
+// playervar Number i;
+// rule: "test setvalin2darray"
+// Event.OngoingPlayer
+// {
+//   exampleArray = [
+//     ["A", "B", "C"]
+//   ];
+//   for (i = 0; i < CountOf(exampleArray[0]); i++) {
+//     LogToInspector($"{exampleArray[0][i]}"); // Should give "A", "B", "C"
+//   }
+//   SetValueIn2DArray(exampleArray, 0, 1, EventPlayer());
+//   for (i = 0; i < CountOf(exampleArray[0]); i++) {
+//     LogToInspector($"{exampleArray[0][i]}"); // Should give "A", <PlayerName>, "C"
+//   }
+// }

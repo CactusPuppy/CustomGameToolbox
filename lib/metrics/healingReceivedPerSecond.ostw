@@ -1,0 +1,62 @@
+import "./config.del";
+
+struct HealingInstance {
+  public Number timestamp;
+  public Number amount;
+  // public Number timeSinceLastHeal;
+  public Player healer;
+  public Player healee;
+}
+
+playervar HealingInstance[] healingReceivedEvents = [];
+playervar Number healingReceivedInPastSecond;
+playervar HealingInstance[] healingDealtEvents = [];
+playervar Number healingDealtInPastSecond;
+
+playervar Number structArraysStartIndex!;
+playervar Number structArraysCount!;
+
+rule: "[lib/healingReceivedPerSecond.ostw] Track when a player receives healing"
+Event.OnHealingTaken
+{
+  Number eventTimestamp! = TotalTimeElapsed();
+  Healee().healingReceivedEvents.ModAppend({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
+  Healer().healingDealtEvents.ModAppend({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
+
+  if (eventTimestamp < Healee().healingReceivedEvents.First.timestamp + 1) Healee().healingReceivedInPastSecond += EventHealing();
+  if (eventTimestamp < Healer().healingDealtEvents.First.timestamp + 1) Healee().healingDealtInPastSecond += EventHealing();
+}
+
+rule: "[lib/healingReceivedPerSecond.ostw] When the head of the healing received array has expired, remove all expired events"
+Event.OngoingPlayer
+if (healingReceivedEvents.Length > 0)
+if (UpdateEveryFrame(TotalTimeElapsed()) >= healingReceivedEvents.First.timestamp + 1 + perSecondBufferRetentionSeconds)
+{
+  structArraysStartIndex = 0;
+  structArraysCount = healingReceivedEvents.Length;
+  while (healingReceivedEvents[structArraysStartIndex].timestamp + 1 + perSecondBufferRetentionSeconds <= TotalTimeElapsed()) {
+    structArraysStartIndex++;
+    structArraysCount--;
+  }
+  # Slice arrays instead of doing incremental updates for perf
+  healingReceivedEvents.Slice(structArraysStartIndex, structArraysCount);
+  MinWait();
+  LoopIfConditionIsTrue();
+}
+
+rule: "[lib/healingDealtPerSecond.ostw] When the head of the healing dealt array has expired, remove all expired events"
+Event.OngoingPlayer
+if (healingDealtEvents.Length > 0)
+if (UpdateEveryFrame(TotalTimeElapsed()) >= healingDealtEvents.First.timestamp + 1 + perSecondBufferRetentionSeconds)
+{
+  structArraysStartIndex = 0;
+  structArraysCount = healingDealtEvents.Length;
+  while (healingDealtEvents[structArraysStartIndex].timestamp + 1 + perSecondBufferRetentionSeconds <= TotalTimeElapsed()) {
+    structArraysStartIndex++;
+    structArraysCount--;
+  }
+  # Slice arrays instead of doing incremental updates for perf
+  healingDealtEvents.Slice(structArraysStartIndex, structArraysCount);
+  MinWait();
+  LoopIfConditionIsTrue();
+}

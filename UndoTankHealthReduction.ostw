@@ -1,0 +1,13 @@
+globalvar Boolean UseRoleQueueHealth = WorkshopSettingToggle("Hero Settings", "Use Role Queue Tank Health", true, 0);
+
+rule: "Create tank health pool"
+Event.OngoingPlayer
+if (UseRoleQueueHealth)
+{
+  AddHealthPoolToPlayer(
+    Player: EventPlayer(),
+    HealthType: HealthType.Health,
+    MaxHealth: AllTankHeroes().Contains(HeroOf()) && !(
+      (HeroOf() == Hero.Dva && IsInAlternateForm())
+    ) ? 150 : 0);
+}

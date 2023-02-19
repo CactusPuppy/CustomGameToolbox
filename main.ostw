@@ -1,35 +1,36 @@
 import "settings.lobby";
 
+import "UndoTankHealthReduction.ostw";
 import "interface/menu.ostw";
 
-globalvar Boolean resetVisibilityFlag;
-globalvar Boolean isReplaying;
-
-rule: "When player's menu state changes, refresh cursor"
-Event.OngoingPlayer
+// DEBUG: Diagnostics
+import "OSTWUtils/Diagnostics.del";
+rule: "[DEBUG | main.ostw] Show diagnostics"
 {
-  Wait(0.032);
-  resetVisibilityFlag = true;
-  MinWait();
-  resetVisibilityFlag = false;
-  WaitUntil(EventPlayer().currentMenuState != EvaluateOnce(EventPlayer().currentMenuState), 9999);
-  Loop();
+  new Diagnostics(ShowTextCount: true, ShowServerLoad: true, ShowServerLoadAverage: true, ShowServerLoadPeak: true);
 }
 
-rule: "Skip assembling heroes"
+rule: "[main.ostw] Skip assembling heroes"
 if (IsAssemblingHeroes())
 {
   SetMatchTime(5);
+  if (isTimePaused) {
+    UnpauseMatchTime();
+    isTimePaused = false;
+    WaitUntil(!IsAssemblingHeroes(), 7);
+    PauseMatchTime();
+    isTimePaused = true;
+  }
 }
 
-rule: "pause match time on start"
+rule: "[main.ostw] pause match time on start"
 if (!IsAssemblingHeroes())
 {
   PauseMatchTime();
   isTimePaused = true;
 }
 
-rule: "Go back to lobby early, skipping victory poses and POTG"
+rule: "[main.ostw] Go back to lobby early, skipping victory poses and POTG"
 if (IsMatchComplete())
 {
   Wait(3);

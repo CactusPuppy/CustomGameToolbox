@@ -1,0 +1,43 @@
+import "../menu.ostw";
+
+enum ToolsAction {
+  EMPTY,
+  SET_RESPAWN,
+  CHANGE_HERO,
+  NO_CLIP,
+  SKIP_PHASE,
+  END_GAME,
+  TOGGLE_PAUSE
+}
+
+playervar ToolsAction toolsActionID;
+
+ToolsAction[] ToolsActionGrid: ButtonActionGrid[MenuState.TOOLS];
+
+ToolsAction[] toolsMenuButtonActions: [
+  ToolsAction.EMPTY, ToolsAction.EMPTY,        ToolsAction.EMPTY,       ToolsAction.EMPTY,    ToolsAction.EMPTY,
+  ToolsAction.EMPTY, ToolsAction.SET_RESPAWN,  ToolsAction.CHANGE_HERO, ToolsAction.NO_CLIP,  ToolsAction.EMPTY,
+  ToolsAction.EMPTY, ToolsAction.TOGGLE_PAUSE, ToolsAction.SKIP_PHASE,  ToolsAction.END_GAME, ToolsAction.EMPTY,
+  ToolsAction.EMPTY, ToolsAction.EMPTY,        ToolsAction.EMPTY,       ToolsAction.EMPTY,    ToolsAction.EMPTY
+];
+
+String[] toolsMenuButtonLabels: [
+  "", "",                   "",             "",           "",
+  "", "Set Respawn Point",  "Change Hero",  "No Clip",    "",
+  "", "Pause Match Time",   "Skip Setup",   "End Match",  "",
+  "", "",                   "",             "",           ""
+];
+
+Color[] toolsMenuButtonColors: [
+  Colors.Hidden, Colors.Hidden,                   Colors.Hidden, Colors.Hidden, Colors.Hidden,
+  Colors.Hidden, CustomColor(80, 187, 217, 255),  Color.Blue,    Color.Green, Colors.Hidden,
+  Colors.Hidden, Color.Purple,                    Color.Aqua,    Color.Red,     Colors.Hidden,
+  Colors.Hidden, Colors.Hidden,                   Colors.Hidden, Colors.Hidden, Colors.Hidden
+];
+
+void HandleToolsMenuClick() {
+  AbortIf(ToolsActionGrid[currentGridIndex()] == 0);
+  toolsActionID = ToolsActionGrid[currentGridIndex()];
+  MinWait();
+  toolsActionID = null;
+}

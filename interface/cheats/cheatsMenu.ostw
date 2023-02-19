@@ -12,20 +12,25 @@ enum CheatAction {
 playervar CheatAction cheatActionID;
 playervar Boolean[] ActiveCheat;
 
-CheatAction[] cheatActions: [
-  CheatAction.FULL_HEAL, CheatAction.RESET_COOLDOWNS, CheatAction.NONE, CheatAction.NONE,
+CheatAction[] cheatButtonActions: [
+  CheatAction.FULL_HEAL, CheatAction.INSTANT_COOLDOWNS, CheatAction.NONE, CheatAction.NONE,
   CheatAction.NONE,      CheatAction.NONE,            CheatAction.NONE, CheatAction.NONE,
   CheatAction.NONE,      CheatAction.NONE,            CheatAction.NONE, CheatAction.NONE,
   CheatAction.NONE,      CheatAction.NONE,            CheatAction.NONE, CheatAction.NONE
 ];
-CheatAction[] CheatActionGrid: ActionGrid[MenuState.CHEATS];
-
-void CreateCheatButtons() {
-  # Create main menu button
-  menuButton("Cheats", 0, 0, MenuState.MAIN_MENU, Color.Purple);
-  menuButton("Full Heal", 0, 0, MenuState.CHEATS, Color.Yellow);
-  menuButton("Reset Cooldowns", 1, 0, MenuState.CHEATS, Color.Yellow);
-}
+String[] cheatButtonLabels: [
+  "Full Heal", "Fast Abilities", "", "",
+  "", "", "", "",
+  "", "", "", "",
+  "", "", "", ""
+];
+Color[] cheatButtonColors: [
+  Color.White, Color.White, null, null,
+  null, null, null, null,
+  null, null, null, null,
+  null, null, null, null
+];
+CheatAction[] CheatActionGrid: ButtonActionGrid[MenuState.CHEATS];
 
 void HandleCheatClick() {
   AbortIf(CheatActionGrid[currentGridIndex()] == 0);
@@ -40,12 +45,85 @@ if (cheatActionID == CheatAction.FULL_HEAL)
 {
   SetPlayerHealth(EventPlayer(), MaxHealth());
   PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, PositionOf(), 200);
-  SmallMessage(EventPlayer(), "Health restored");
+  SmallMessage(EventPlayer(), "   Health restored");
 }
 
-rule: "[Cheats] Reset cooldowns handler"
+Boolean isInstantCooldownsActive(Player p = EventPlayer()): ActiveCheat[CheatAction.INSTANT_COOLDOWNS];
+rule: "[Cheats] Make cooldowns faster handler"
 Event.OngoingPlayer
-if (cheatActionID == CheatAction.RESET_COOLDOWNS)
+if (cheatActionID == CheatAction.INSTANT_COOLDOWNS)
+{
+  ActiveCheat[CheatAction.INSTANT_COOLDOWNS] = !ActiveCheat[CheatAction.INSTANT_COOLDOWNS];
+  if (ActiveCheat[CheatAction.INSTANT_COOLDOWNS]) {
+    SetValueIn2DArray(ButtonLabelGrid, <Number>MenuState.CHEATS, <Number>gridIndex(1, 0), "Normal Abilities");
+    SmallMessage(EventPlayer(), "   Fast Abilities Activated");
+    PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, EventPlayer(), 200);
+  } else {
+    SetValueIn2DArray(ButtonLabelGrid, <Number>MenuState.CHEATS, <Number>gridIndex(1, 0), "Fast Abilities");
+    SmallMessage(EventPlayer(), "   Fast Abilities Deactivated");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 200);
+  }
+}
+
+rule: "[Cheats] Primary fire ability cooldown faster"
+Event.OngoingPlayer
+if (isInstantCooldownsActive())
+if (AbilityCooldown(Button: Button.PrimaryFire) > 1)
+{
+  SetAbilityCooldown(Button: Button.PrimaryFire, Cooldown: 1);
+}
+
+rule: "[Cheats] Secondary fire ability cooldown faster"
+Event.OngoingPlayer
+if (isInstantCooldownsActive())
+if (AbilityCooldown(Button: Button.SecondaryFire) > 1)
+{
+  SetAbilityCooldown(Button: Button.SecondaryFire, Cooldown: 1);
+}
+
+rule: "[Cheats] Ability 1 cooldown faster"
+Event.OngoingPlayer
+if (isInstantCooldownsActive())
+if (AbilityCooldown(Button: Button.Ability1) > 1)
+{
+  SetAbilityCooldown(Button: Button.Ability1, Cooldown: 1);
+}
+
+rule: "[Cheats] Ability 2 cooldown faster"
+Event.OngoingPlayer
+if (isInstantCooldownsActive())
+if (AbilityCooldown(Button: Button.Ability2) > 1)
+{
+  SetAbilityCooldown(Button: Button.Ability2, Cooldown: 1);
+}
+
+rule: "[Cheats] Ability 2 - Reinhardt recharge (Currently broken)"
+Event.OngoingPlayer
+Player.Reinhardt
+if (AbilityCharge(EventPlayer(), Button.Ability2) < 2)
+{
+  SetAbilityCharge(EventPlayer(), Button.Ability2, 2);
+}
+
+rule: "[Cheats] Crouch ability cooldown faster"
+Event.OngoingPlayer
+if (isInstantCooldownsActive())
+if (AbilityCooldown(Button: Button.Crouch) > 1)
+{
+  SetAbilityCooldown(Button: Button.Crouch, Cooldown: 1);
+}
+
+rule: "[Cheats] Ultimate charges faster"
+Event.OngoingPlayer
+if (isInstantCooldownsActive())
+if (UltimateChargePercent() < 100)
+{
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  SetUltimateCharge(EventPlayer(), 100);
+  Loop();
+}
+
+void ResetAbilities() playervar "[SUB] Reset cooldowns and weapons"
 {
   SetAmmo(EventPlayer(), 0, MaxAmmo(EventPlayer(), 0));
   SetAmmo(EventPlayer(), 1, MaxAmmo(EventPlayer(), 1));
@@ -77,6 +155,6 @@ if (cheatActionID == CheatAction.RESET_COOLDOWNS)
       break;
   }
   PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, PositionOf(), 200);
-  SmallMessage(EventPlayer(), "Cooldowns reset");
+  SmallMessage(EventPlayer(), "   Abilities and weapons reset");
 }
 

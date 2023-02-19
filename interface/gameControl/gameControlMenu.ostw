@@ -11,16 +11,29 @@ enum GameControlAction {
   PAUSE_TIMER
 }
 
-GameControlAction[] GameControlActionGrid: ActionGrid[MenuState.GAME_CONTROL];
+GameControlAction[] GameControlActionGrid: ButtonActionGrid[MenuState.GAME_CONTROL];
 
 playervar GameControlAction gameControlActionID;
 
-GameControlAction[] gameControlActions: [
+GameControlAction[] gameControlButtonActions: [
   GameControlAction.EMPTY, GameControlAction.EMPTY,       GameControlAction.EMPTY, GameControlAction.EMPTY,
   GameControlAction.EMPTY, GameControlAction.PAUSE_TIMER, GameControlAction.EMPTY, GameControlAction.SKIP_SETUP,
   GameControlAction.EMPTY, GameControlAction.EMPTY,       GameControlAction.EMPTY, GameControlAction.EMPTY,
   GameControlAction.EMPTY, GameControlAction.END_ROUND,   GameControlAction.EMPTY, GameControlAction.END_GAME
 ];
+String[] gameControlButtonLabels: [
+  "", "", "", "",
+  "", "Pause Timer", "", "Skip Setup",
+  "", "", "", "",
+  "", "End Round", "", "End Game"
+];
+Color[] gameControlButtonColors: [
+  Colors.Hidden, Colors.Hidden, Colors.Hidden, Colors.Hidden,
+  Colors.Hidden, Color.Aqua,    Colors.Hidden, Color.Yellow,
+  Colors.Hidden, Colors.Hidden, Colors.Hidden, Colors.Hidden,
+  Colors.Hidden, Color.Orange, Colors.Hidden, Color.Red
+];
+
 globalvar Boolean isGameInProgress;
 globalvar Boolean isInSetup;
 rule: "[Menu - BODGE] server-side updates for IsGameInProgress"
@@ -37,18 +50,6 @@ if (IsInSetup())
   isInSetup = true;
   WaitUntil(!IsInSetup(), 1000000);
   isInSetup = false;
-}
-
-void CreateGameControlButtons() {
-  # Create game control end game button
-  menuButton("End Game", 3, 3, MenuState.GAME_CONTROL, Color.Red);
-  CreateEndGameConfirmationScreen();
-  # Create game control end round button
-  menuButtonDynamicColor("End Round", 1, 3, MenuState.GAME_CONTROL, isGameInProgress ? Color.Orange : Color.Gray);
-  # Create skip setup button
-  menuButtonDynamicColor("Skip Setup", 3, 1, MenuState.GAME_CONTROL, isInSetup ? Color.Aqua : Color.Gray);
-  # Create Pause Timer button
-  menuButtonDynamicColor(isTimePaused ? "Unpause Timer" : "Pause Timer", 1, 1, MenuState.GAME_CONTROL, isTimePaused ? Color.Green : Color.Rose);
 }
 
 void HandleGameControlClick() {

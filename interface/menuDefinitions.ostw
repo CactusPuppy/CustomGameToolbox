@@ -1,0 +1,161 @@
+import "../OSTWUtils/OnScreenText.del";
+import "../OSTWUtils/Math.del";
+
+enum MenuState
+{
+  CLOSED = 0,
+  MAIN_MENU,
+  REPLAY_BOTS,
+  SET_CAMERA,
+  SET_RESPAWN,
+  CHEATS,
+  GAME_CONTROL,
+  CONFIRMING_END_GAME,
+  CUSTOMIZE_HUD,
+  INFORMATION,
+  MODIFICATIONS,
+  TOOLS,
+  DUMMY_BOTS_AND_REPLAY
+}
+
+globalvar Any[][] ButtonActionGrid;
+playervar String[][] ButtonLabelGrid; // Player variable so that the display may update per-player
+playervar Color[][] ButtonColorGrid; // Player variable so that the display may update per-player
+
+playervar MenuState currentMenuState = MenuState.CLOSED;
+// playervar Cursor | Number cursor = -1;
+playervar Number menuXIndex; // Positive to the right
+playervar Number menuYIndex; // Positive downwards
+playervar Boolean hideMenuOpenTooltip;
+
+// Index is rowIndex * numCols + colIndex
+MenuState[] mainMenuActionGrid: ButtonActionGrid[MenuState.MAIN_MENU];
+
+/** Menu parameters */
+Number xLim: 3.0;
+Number yLim: 1.5;
+Number firstRowY: 1.5;
+Number rowSeparation: 0.75;
+Number firstColumnX: -3.0;
+Number columnSeparation: 1.5;
+
+/** Utility function definitions */
+Number rowIndexToY(Number rowIndex): firstRowY - (rowSeparation * rowIndex);
+Number colIndexToX(Number colIndex): firstColumnX + (columnSeparation * colIndex);
+Number numCols: RoundToInteger((xLim - firstColumnX) / columnSeparation, Rounding.Down) + 1; // 5
+Number numRows: RoundToInteger((firstRowY + yLim) / rowSeparation, Rounding.Down) + 1; // 5
+Number gridIndex(Number colIndex, Number rowIndex): rowIndex * numCols + colIndex;
+Boolean isSelectingButton(Player p = LocalPlayer(), Number colIndex = 0, Number rowIndex = 0): p.menuXIndex == colIndex && p.menuYIndex == rowIndex;
+Any[] currentActionGrid(Player p = EventPlayer()): ButtonActionGrid[p.currentMenuState];
+String[] currentLabelGrid(Player p = LocalPlayer()): p.ButtonLabelGrid[p.currentMenuState];
+Color[] currentColorGrid(Player p = LocalPlayer()): p.ButtonColorGrid[p.currentMenuState];
+Number currentGridIndex(Player p = EventPlayer()): gridIndex(p.menuXIndex, p.menuYIndex);
+Any currentActionItem(Player p = EventPlayer()): currentActionGrid(p)[currentGridIndex(p)];
+
+void printMenuValues() {
+  LogToInspector(<"Limits | xLeft: <0>, xRight: <1>, yTop: <2>, yBottom: <3>", firstColumnX, xLim, firstRowY, -yLim>);
+  LogToInspector("Separations | row: {0}, col: {1}".Format([rowSeparation, columnSeparation]));
+  LogToInspector(<"numCols calc | numerator: <0>, denominator: <1>, raw result: <2>, final result: <3>", xLim - firstColumnX, columnSeparation, (xLim - firstColumnX) / columnSeparation + 1, numCols>);
+  LogToInspector(<"numRows calc | numerator: <0>, denominator: <1>, raw result: <2>, final result: <3>", firstRowY + yLim, rowSeparation, (firstRowY + yLim) / rowSeparation + 1, numRows>);
+}
+
+String menuText(String label, Boolean isSelected = false): isSelected ? <"><0><1><0><", SineFromDegrees((TotalTimeElapsed() * 360) % 360) > 0 ? "   " : " ", label> : label;
+Boolean isSelectingGridIndex(Player p = EventPlayer(), Number x = 0, Number y = 0): p.menuXIndex == x && p.menuYIndex == y;
+
+Any menuButton(Number colIndex, Number rowIndex):
+  OnScreenText.CreateOnScreenText(
+    VisibleTo: LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
+    Header: menuText(currentLabelGrid()[gridIndex(colIndex, rowIndex)], isSelectingGridIndex(LocalPlayer(), colIndex, rowIndex)),
+    PositionX: colIndexToX(colIndex),
+    PositionY: rowIndexToY(rowIndex),
+    Scale: 2,
+    Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
+    Color: currentColorGrid()[gridIndex(colIndex, rowIndex)],
+    Spectators: Spectators.VisibleNever
+  );
+
+/** Menu navigation definitions and helper functions */
+playervar Number cache_startIndex1;
+playervar Number cache_startIndex2;
+
+/* NOTE: The following subroutines expect `cache_startIndex1` to be set PRIOR TO CALL.
+ * These subroutines CAN infinitely loop if the menu is somehow in a bad state
+ * (i.e. somehow selecting a blank button).
+ */
+void findLeft() playervar "[SUB] Find first item to the left" {
+  menuXIndex--;
+  if (menuXIndex < 0) menuXIndex = numCols - 1;
+  AbortIf(currentActionItem() != 0);
+  cache_startIndex2 = menuYIndex;
+  moveSelectionDown();
+  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+
+  LoopIf(cache_startIndex1 != menuXIndex && currentActionItem() == 0);
+}
+
+void findRight() playervar "[SUB] Find first item to the right" {
+  menuXIndex++;
+  if (menuXIndex >= numCols) menuXIndex = 0;
+  AbortIf(currentActionItem() != 0);
+  cache_startIndex2 = menuYIndex;
+  moveSelectionUp();
+  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+
+  LoopIf(cache_startIndex1 != menuXIndex && currentActionItem() == 0);
+}
+
+void findUp() playervar "[SUB] Find first item upwards" {
+  menuYIndex--;
+  if (menuYIndex < 0) menuYIndex = numRows - 1;
+  AbortIf(currentActionItem() != 0);
+  cache_startIndex2 = menuXIndex;
+  moveSelectionLeft();
+  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+  LoopIf(cache_startIndex1 != menuYIndex && currentActionItem() == 0);
+}
+
+void findDown() playervar "[SUB] Find first item downwards" {
+  menuYIndex++;
+  if (menuYIndex >= numRows) menuYIndex = 0;
+  AbortIf(currentActionItem() != 0);
+  cache_startIndex2 = menuXIndex;
+  moveSelectionRight();
+  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+  LoopIf(cache_startIndex1 != menuYIndex && currentActionItem() == 0);
+}
+
+/* NOTE: These subroutines expect `cache_startIndex2` to be set PRIOR TO CALL.
+ * These subroutines CAN infinitely loop if the menu is somehow in a bad state
+ * (i.e. somehow selecting a blank button).
+ */
+void moveSelectionLeft() playervar "[SUB] Move selection left"
+{
+  menuXIndex--;
+  if (menuXIndex < 0) { menuXIndex = numCols - 1; }
+  // LogToInspector($"  sub (left): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+  LoopIf(cache_startIndex2 != menuXIndex && currentActionItem() == 0);
+}
+
+void moveSelectionRight() playervar "[SUB] Move selection right"
+{
+  menuXIndex++;
+  if (menuXIndex >= numCols) { menuXIndex = 0; }
+  // LogToInspector($"  sub (right): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+  LoopIf(cache_startIndex2 != menuXIndex && currentActionItem() == 0);
+}
+
+void moveSelectionUp() playervar "[SUB] Move selection up"
+{
+  menuYIndex--;
+  if (menuYIndex < 0) { menuYIndex = numRows - 1; }
+  // LogToInspector($"  sub (up): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+  LoopIf(cache_startIndex2 != menuYIndex && currentActionItem() == 0);
+}
+
+void moveSelectionDown() playervar "[SUB] Move selection down"
+{
+  menuYIndex++;
+  if (menuYIndex >= numRows) { menuYIndex = 0; }
+  // LogToInspector($"  sub (down): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
+  LoopIf(cache_startIndex2 != menuYIndex && currentActionItem() == 0);
+}
