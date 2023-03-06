@@ -1,6 +1,6 @@
 import "../main.ostw";
 import "./menuDefinitions.ostw";
-import "../utils/2DArray.ostw";
+import "../utils/2DArray.del";
 
 import "gameControl/gameControlMenu.ostw";
 import "cheats/cheatsMenu.ostw";
