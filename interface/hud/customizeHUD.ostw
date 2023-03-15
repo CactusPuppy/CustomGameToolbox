@@ -1,5 +1,0 @@
-import "../menu.ostw";
-
-enum CustomizeHudAction {
-  TOGGLE_MOVE_SPEED
-}

@@ -1,0 +1,45 @@
+import "../menu.ostw";
+
+enum InfoAction {
+  NONE,
+  TOGGLE_MOVE_SPEED_DISPLAY,
+  TOGGLE_DISTANCE_TO_CROSSHAIR_DISPLAY,
+  TOGGLE_HEALING_DEALT_PER_SECOND_DISPLAY,
+  TOGGLE_DAMAGE_DEALT_PER_SECOND_DISPLAY,
+  TOGGLE_POSITION_DISPLAY,
+  TOGGLE_FACING_DISPLAY,
+  TOGGLE_ALTITUDE_DISPLAY,
+  TOGGLE_ON_GROUND_DISPLAY,
+  TOGGLE_ON_WALL_DISPLAY
+}
+
+Number maxActiveDisplays: 5;
+playervar InfoAction[] activeDisplays = [];
+
+InfoAction[] informationMenuButtonActions: [
+  InfoAction.NONE,  InfoAction.NONE,                                     InfoAction.NONE,                                  InfoAction.NONE,                                    InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.TOGGLE_POSITION_DISPLAY,                  InfoAction.TOGGLE_FACING_DISPLAY,                 InfoAction.TOGGLE_MOVE_SPEED_DISPLAY,               InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.TOGGLE_ALTITUDE_DISPLAY,                  InfoAction.TOGGLE_ON_GROUND_DISPLAY,              InfoAction.TOGGLE_ON_WALL_DISPLAY,                  InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.TOGGLE_HEALING_DEALT_PER_SECOND_DISPLAY,  InfoAction.TOGGLE_DISTANCE_TO_CROSSHAIR_DISPLAY,  InfoAction.TOGGLE_DAMAGE_DEALT_PER_SECOND_DISPLAY,  InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.NONE,                                     InfoAction.NONE,                                  InfoAction.NONE,                                    InfoAction.NONE
+];
+
+String[] informationMenuButtonLabels: [
+  "",  "",  "",  "",  "",
+  "",  "Show Position",  "Show Facing Direction",  "Show Move Speed",  "",
+  "",  "Show Altitude",  "Show If On Ground",  "Show If On Wall",  "",
+  "",  "Show Heals Per Second",  "Show Distance To Crosshair",  "Show Damage Per Second",  "",
+  "",  "",  "",  "",  ""
+];
+
+Color[] informationMenuButtonColors: [
+  null, null, null, null, null,
+  null, Color.Green, Color.Rose, Color.Orange, null,
+  null, Color.SkyBlue, Color.Purple, Color.Violet, null,
+  null, Color.Yellow, Color.Aqua, Color.Red, null,
+  null, null, null, null, null
+];
+
+void HandleInformationMenuClick() {
+
+}

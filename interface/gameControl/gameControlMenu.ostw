@@ -11,7 +11,7 @@ enum GameControlAction {
   PAUSE_TIMER
 }
 
-GameControlAction[] GameControlActionGrid: ButtonActionGrid[MenuState.GAME_CONTROL];
+GameControlAction[] GameControlActionGrid: ButtonActionGrid[-1];
 
 playervar GameControlAction gameControlActionID;
 
@@ -88,7 +88,7 @@ if (gameControlActionID == GameControlAction.END_ROUND)
     PauseMatchTime();
     isTimePaused = true;
   }
-  currentMenuState = MenuState.CLOSED;
+  CloseMenu(EventPlayer());
 }
 
 rule: "[Game Control] Skip setup button"

@@ -30,7 +30,7 @@ Color[] cheatButtonColors: [
   null, null, null, null,
   null, null, null, null
 ];
-CheatAction[] CheatActionGrid: ButtonActionGrid[MenuState.CHEATS];
+CheatAction[] CheatActionGrid: ButtonActionGrid[-1];
 
 void HandleCheatClick() {
   AbortIf(CheatActionGrid[currentGridIndex()] == 0);
@@ -48,18 +48,18 @@ if (cheatActionID == CheatAction.FULL_HEAL)
   SmallMessage(EventPlayer(), "   Health restored");
 }
 
-Boolean isInstantCooldownsActive(Player p = EventPlayer()): ActiveCheat[CheatAction.INSTANT_COOLDOWNS];
+Boolean isInstantCooldownsActive(in Player p = EventPlayer()): p.ActiveCheat[CheatAction.INSTANT_COOLDOWNS];
 rule: "[Cheats] Make cooldowns faster handler"
 Event.OngoingPlayer
 if (cheatActionID == CheatAction.INSTANT_COOLDOWNS)
 {
   ActiveCheat[CheatAction.INSTANT_COOLDOWNS] = !ActiveCheat[CheatAction.INSTANT_COOLDOWNS];
   if (ActiveCheat[CheatAction.INSTANT_COOLDOWNS]) {
-    SetValueIn2DArray(ButtonLabelGrid, <Number>MenuState.CHEATS, <Number>gridIndex(1, 0), "Normal Abilities");
+    SetValueIn2DArray(ButtonLabelGrid, -1, <Number>gridIndex(1, 0), "Normal Abilities");
     SmallMessage(EventPlayer(), "   Fast Abilities Activated");
     PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, EventPlayer(), 200);
   } else {
-    SetValueIn2DArray(ButtonLabelGrid, <Number>MenuState.CHEATS, <Number>gridIndex(1, 0), "Fast Abilities");
+    SetValueIn2DArray(ButtonLabelGrid, -1, <Number>gridIndex(1, 0), "Fast Abilities");
     SmallMessage(EventPlayer(), "   Fast Abilities Deactivated");
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 200);
   }

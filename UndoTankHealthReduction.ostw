@@ -3,11 +3,25 @@ globalvar Boolean UseRoleQueueHealth = WorkshopSettingToggle("Hero Settings", "U
 rule: "Create tank health pool"
 Event.OngoingPlayer
 if (UseRoleQueueHealth)
+if (AllTankHeroes().Contains(HeroOf()))
+if ((HeroOf() == Hero.Dva && IsInAlternateForm()) == false)
 {
   AddHealthPoolToPlayer(
     Player: EventPlayer(),
     HealthType: HealthType.Health,
-    MaxHealth: AllTankHeroes().Contains(HeroOf()) && !(
-      (HeroOf() == Hero.Dva && IsInAlternateForm())
-    ) ? 150 : 0);
+    MaxHealth: 150);
+  WaitUntil(!UseRoleQueueHealth
+    || !AllTankHeroes().Contains(HeroOf())
+    || (HeroOf() == Hero.Dva && IsInAlternateForm()), 1000000);
+  RemoveHealthPoolFromPlayer(LastCreatedHealthPool());
+}
+
+// DEBUG
+disabled rule: "[DEBUG] kill then respawn"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact))
+{
+  Kill(EventPlayer(), null);
+  Wait(3);
+  if (IsDead()) Respawn(EventPlayer());
 }

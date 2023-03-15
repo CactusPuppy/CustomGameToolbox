@@ -1,14 +1,24 @@
 import "../menu.ostw";
 
+import "endGame.ostw";
+import "ruler.ostw";
+import "../../lib/player/resetPoint.del";
+import "../../lib/player/noClip.del";
+
 enum ToolsAction {
   EMPTY,
   SET_RESPAWN,
   CHANGE_HERO,
   NO_CLIP,
-  SKIP_PHASE,
+  FAST_FORWARD,
   END_GAME,
-  TOGGLE_PAUSE
+  TOGGLE_PAUSE,
+  RULER
 }
+
+globalvar Boolean isTimePaused;
+globalvar Boolean isGameInProgress;
+globalvar Boolean isInSetup;
 
 playervar ToolsAction toolsActionID;
 
@@ -17,22 +27,25 @@ ToolsAction[] ToolsActionGrid: ButtonActionGrid[MenuState.TOOLS];
 ToolsAction[] toolsMenuButtonActions: [
   ToolsAction.EMPTY, ToolsAction.EMPTY,        ToolsAction.EMPTY,       ToolsAction.EMPTY,    ToolsAction.EMPTY,
   ToolsAction.EMPTY, ToolsAction.SET_RESPAWN,  ToolsAction.CHANGE_HERO, ToolsAction.NO_CLIP,  ToolsAction.EMPTY,
-  ToolsAction.EMPTY, ToolsAction.TOGGLE_PAUSE, ToolsAction.SKIP_PHASE,  ToolsAction.END_GAME, ToolsAction.EMPTY,
+  ToolsAction.EMPTY, ToolsAction.EMPTY,        ToolsAction.RULER,       ToolsAction.EMPTY,    ToolsAction.EMPTY,
+  ToolsAction.EMPTY, ToolsAction.TOGGLE_PAUSE, ToolsAction.FAST_FORWARD,  ToolsAction.END_GAME, ToolsAction.EMPTY,
   ToolsAction.EMPTY, ToolsAction.EMPTY,        ToolsAction.EMPTY,       ToolsAction.EMPTY,    ToolsAction.EMPTY
 ];
 
 String[] toolsMenuButtonLabels: [
   "", "",                   "",             "",           "",
-  "", "Set Respawn Point",  "Change Hero",  "No Clip",    "",
-  "", "Pause Match Time",   "Skip Setup",   "End Match",  "",
+  "", "Set Respawn Point",  "Change Hero",  "Enable NoClip",    "",
+  "", "",                   "Place Ruler",  "",           "",
+  "", "Unpause Match Time", "Skip Setup",   "End Match",  "",
   "", "",                   "",             "",           ""
 ];
 
 Color[] toolsMenuButtonColors: [
-  Colors.Hidden, Colors.Hidden,                   Colors.Hidden, Colors.Hidden, Colors.Hidden,
-  Colors.Hidden, CustomColor(80, 187, 217, 255),  Color.Blue,    Color.Green, Colors.Hidden,
-  Colors.Hidden, Color.Purple,                    Color.Aqua,    Color.Red,     Colors.Hidden,
-  Colors.Hidden, Colors.Hidden,                   Colors.Hidden, Colors.Hidden, Colors.Hidden
+  Colors.Hidden, Colors.Hidden,                   Colors.Hidden, Colors.Hidden,      Colors.Hidden,
+  Colors.Hidden, CustomColor(80, 187, 217, 255),  Color.Blue,    Color.Green,        Colors.Hidden,
+  Colors.Hidden, Colors.Hidden,                   Color.Yellow,  Colors.Hidden,      Colors.Hidden,
+  Colors.Hidden, CustomColor(50, 220, 27, 255),   Color.Aqua,    Colors.LighterRed,  Colors.Hidden,
+  Colors.Hidden, Colors.Hidden,                   Colors.Hidden, Colors.Hidden,      Colors.Hidden
 ];
 
 void HandleToolsMenuClick() {
@@ -40,4 +53,168 @@ void HandleToolsMenuClick() {
   toolsActionID = ToolsActionGrid[currentGridIndex()];
   MinWait();
   toolsActionID = null;
+}
+
+playervar ResetPoint respawnPoint!;
+rule: "[interface/toolsMenu.ostw] Respawn point"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.SET_RESPAWN)
+{
+  if (respawnPoint.location == null) {
+    respawnPoint = NewResetFromPlayer(EventPlayer());
+    PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, EventPlayer(), 100);
+    SmallMessage(EventPlayer(), "Respawn point set!");
+
+    # Set new button look
+    UpdateButtonAppearance(MenuState.TOOLS, 1, 1, "Clear Respawn Point", Color.Gray);
+  } else {
+    respawnPoint.location = null;
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+    SmallMessage(EventPlayer(), "Respawn point cleared");
+
+    # Set new button look
+    UpdateButtonAppearance(MenuState.TOOLS, 1, 1, "Set Respawn Point", CustomColor(80, 187, 217, 255));
+  }
+  Wait(0.5);
+}
+
+rule: "[interface/toolsMenu.ostw] If respawn point is set, and player dies, respawn them at the respawn point"
+Event.OnDeath
+if (respawnPoint.location != null)
+{
+  WaitUntil(IsAlive(), 9999);
+  TeleportPlayerToResetPoint(EventPlayer(), respawnPoint);
+}
+
+rule: "[interface/toolsMenu.ostw] Change hero"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.CHANGE_HERO)
+{
+  SetAllowedHeroes(EventPlayer(), AllowedHeroes().Remove(HeroOf()));
+  WaitUntil(!HasSpawned(), 3);
+  ResetHeroAvailability(EventPlayer());
+  WaitUntil(HasSpawned(), 9999);
+  StopForcingPlayerPosition();
+  StartForcingPlayerPosition(EventPlayer(), EventPlayer().menuActivationPoint.location, true);
+  Wait(0.064);
+  WaitUntil(DistanceBetween(EventPlayer(), EventPlayer().menuActivationPoint.location) < 0.05
+    && AngleBetweenVectors(EventPlayer().FacingDirection(), menuActivationPoint.facing) < 0.1, 1);
+  CloseMenu(EventPlayer());
+}
+
+rule: "[interface/toolsMenu.ostw] Toggle noclip"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.NO_CLIP)
+{
+  if (isNoClipActive) {
+    isNoClipActive = false;
+    # Set new button look
+    UpdateButtonAppearance(MenuState.TOOLS, 3, 1, "Enable NoClip", Color.Green);
+
+  } else {
+    isNoClipActive = true;
+    # Set new button look
+    UpdateButtonAppearance(MenuState.TOOLS, 3, 1, "Disable NoClip", Color.Red);
+  }
+  CloseMenu(EventPlayer());
+}
+
+rule: "[interface/toolsMenu.ostw] Toggle pause button"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.TOGGLE_PAUSE)
+{
+  if (isTimePaused) {
+    UnpauseMatchTime();
+  } else {
+    PauseMatchTime();
+  }
+  isTimePaused = !isTimePaused;
+}
+
+rule: "[interface/toolsMenu.ostw] Keep pause button appearance updated for everyone - Unpause"
+Event.OngoingPlayer
+if (isTimePaused)
+{
+  UpdateButtonAppearance(MenuState.TOOLS, 1, 3, "Unpause Match Time", CustomColor(50, 220, 27, 255));
+}
+
+rule: "[interface/toolsMenu.ostw] Keep pause button appearance update for everyone - Pause"
+Event.OngoingPlayer
+if (!isTimePaused)
+{
+  UpdateButtonAppearance(MenuState.TOOLS, 1, 3, "Pause Match Time", Color.Purple);
+}
+
+rule: "[interface/toolsMenu.ostw] When fast-forward is requested, make it happen"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.FAST_FORWARD)
+{
+  # Setup skip
+  if (IsInSetup()) {
+    SetMatchTime(0);
+  # Otherwise, logic to end round
+  } else if (IsGameInProgress()) {
+    if (CurrentGameMode() == GameMode.Control) {
+      DeclareRoundVictory(TeamOf());
+    } else {
+      SetMatchTime(0);
+    }
+  # We don't know how to handle this situation
+  } else {
+    SmallMessage(EventPlayer(), " Current phase can't be skipped?");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+    return;
+  }
+  CloseMenu(EventPlayer());
+  if (isTimePaused) {
+    UnpauseMatchTime();
+    isTimePaused = false;
+    Wait(0.032);
+    PauseMatchTime();
+    isTimePaused = true;
+  }
+}
+
+rule: "[interface/toolsMenu.ostw] When in setup, change fast-forward button to skip setup"
+Event.OngoingPlayer
+if (IsInSetup())
+{
+  UpdateButtonAppearance(MenuState.TOOLS, 2, 3, "Skip Setup", Color.Aqua);
+}
+
+rule: "[interface/toolsMenu.ostw] When game is in progress, change fast-forward button to end round"
+Event.OngoingPlayer
+if (IsGameInProgress())
+{
+  UpdateButtonAppearance(MenuState.TOOLS, 2, 3, "End Round", CustomColor(212, 62, 62, 255));
+}
+
+rule: "[interface/toolsMenu.ostw] Handle request to end match"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.END_GAME)
+{
+  MinWait();
+  currentMenuState = MenuState.CONFIRMING_END_GAME;
+  menuXIndex = 1; menuYIndex = 0;
+}
+
+rule: "[interface/toolsMenu.ostw] Handle request to toggle ruler"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.RULER)
+{
+  switch (playerRulerState) {
+    case RulerState.HIDDEN:
+      UpdateButtonAppearance(MenuState.TOOLS, 2, 2, "Freeze Ruler", Color.Orange);
+      playerRulerState = RulerState.PLACING;
+      CloseMenu(EventPlayer());
+      break;
+    case RulerState.PLACING:
+      UpdateButtonAppearance(MenuState.TOOLS, 2, 2, "Hide Ruler", Colors.LighterRed);
+      playerRulerState = RulerState.SHOW;
+      break;
+    case RulerState.SHOW:
+      UpdateButtonAppearance(MenuState.TOOLS, 2, 2, "Place Ruler", Color.Yellow);
+      playerRulerState = RulerState.HIDDEN;
+      break;
+  }
 }

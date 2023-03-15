@@ -2,12 +2,14 @@ import "settings.lobby";
 
 import "UndoTankHealthReduction.ostw";
 import "interface/menu.ostw";
+import "lib/logs/logs.del";
 
 // DEBUG: Diagnostics
 import "OSTWUtils/Diagnostics.del";
-rule: "[DEBUG | main.ostw] Show diagnostics"
+disabled rule: "[DEBUG | main.ostw] Show diagnostics"
 {
-  new Diagnostics(ShowTextCount: true, ShowServerLoad: true, ShowServerLoadAverage: true, ShowServerLoadPeak: true);
+  new Diagnostics(ShowEntityCount: true, ShowTextCount: true, ShowServerLoad: true, ShowServerLoadAverage: true, ShowServerLoadPeak: true);
+  printMenuValues();
 }
 
 rule: "[main.ostw] Skip assembling heroes"
@@ -17,7 +19,7 @@ if (IsAssemblingHeroes())
   if (isTimePaused) {
     UnpauseMatchTime();
     isTimePaused = false;
-    WaitUntil(!IsAssemblingHeroes(), 7);
+    WaitUntil(!IsAssemblingHeroes(), 9999);
     PauseMatchTime();
     isTimePaused = true;
   }
@@ -31,8 +33,16 @@ if (!IsAssemblingHeroes())
 }
 
 rule: "[main.ostw] Go back to lobby early, skipping victory poses and POTG"
+if (WorkshopSettingToggle("Settings", "Skip Post-Match Flow", true))
 if (IsMatchComplete())
 {
   Wait(3);
   ReturnToLobby();
+}
+
+rule: "[main.ostw] Avoid getting people stuck in menu"
+Event.OngoingPlayer
+if (IsBetweenRounds())
+{
+  currentMenuState = MenuState.CLOSED;
 }

@@ -1,0 +1,94 @@
+import "../../main.ostw";
+import "../../lib/player/buttonControl.del";
+
+enum RulerState {
+  HIDDEN,
+  PLACING,
+  SHOW
+}
+
+playervar Vector position1;
+playervar Boolean isMovingPosition1;
+playervar Vector position2;
+playervar Boolean isMovingPosition2;
+playervar RulerState playerRulerState;
+playervar Any[] rulerEffects;
+
+Vector MovablePosition(Boolean isBeingMoved, ref Vector currentPosition): isBeingMoved ?
+  RayCastHitPosition(EyePosition(), EyePosition() + 5 * FacingDirectionOf(), AllPlayers(), EventPlayer(), true) :
+  currentPosition;
+
+Vector visiblePosition1: MovablePosition(isMovingPosition1, position1);
+Vector visiblePosition2: MovablePosition(isMovingPosition2, position2);
+
+rule: "[interface/tools/ruler.ostw] Create help text for ruler"
+{
+  CreateHudText(
+    VisibleTo: LocalPlayer().currentMenuState == MenuState.CLOSED && LocalPlayer().playerRulerState == RulerState.PLACING ? LocalPlayer() : null,
+    Subheader: "Placing Ruler Endpoints",
+    Text: <"[<0>] Move Blue Point\n[<1>] Move Orange Point", InputBindingString(Button.PrimaryFire), InputBindingString(Button.SecondaryFire)>,
+    Location: Location.Left,
+    SubheaderColor: Color.Yellow,
+    TextColor: Color.White,
+    Reevaluation: HudTextRev.VisibleToAndString
+  );
+}
+
+rule: "[interface/tools/ruler.ostw] When ruler is active, disable primary + secondary until ruler placement is not active"
+Event.OngoingPlayer
+if (playerRulerState == RulerState.PLACING)
+{
+  AddOneLockToButton(button: Button.PrimaryFire);
+  AddOneLockToButton(button: Button.SecondaryFire);
+
+  WaitUntil(playerRulerState != RulerState.PLACING, 99999);
+
+  RemoveOneLockFromButton(button: Button.PrimaryFire);
+  RemoveOneLockFromButton(button: Button.SecondaryFire);
+}
+
+rule: "[interface/tools/ruler.ostw] Manage ruler visual effects lifecycle"
+Event.OngoingPlayer
+if (playerRulerState != RulerState.HIDDEN)
+{
+  # Need to initialize ruler if it hasn't been placed before
+  if (position1 == null) position1 = RayCastHitPosition(EyePosition(), EyePosition() + 5 * FacingDirectionOf() + WorldVectorOf(Left(), EventPlayer(), LocalVector.Rotation), null, null, false);
+  if (position2 == null) position2 = RayCastHitPosition(EyePosition(), EyePosition() + 5 * FacingDirectionOf() + WorldVectorOf(Right(), EventPlayer(), LocalVector.Rotation), null, null, false);
+  rulerEffects[0] = CreateEffect(AllPlayers(), Effect.Sphere, Color.Blue, UpdateEveryFrame(visiblePosition1), 0.2, EffectRev.VisibleToPositionAndRadius);
+  rulerEffects[1] = CreateEffect(AllPlayers(), Effect.Sphere, Color.Orange, UpdateEveryFrame(visiblePosition2), 0.2, EffectRev.VisibleToPositionAndRadius);
+  rulerEffects[2] = CreateBeamEffect(AllPlayers(), BeamType.GrappleBeam, UpdateEveryFrame(visiblePosition1), UpdateEveryFrame(visiblePosition2), null, EffectRev.VisibleToPositionAndRadius);
+  rulerEffects[3] = CreateInWorldText(AllPlayers().FilteredArray((player) => player.currentMenuState == MenuState.CLOSED), <"<0>m\n", DistanceBetween(visiblePosition1, visiblePosition2)>, UpdateEveryFrame((visiblePosition1 + visiblePosition2) / 2), 1.5, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.VisibleAlways);
+  rulerEffects[4] = CreateInWorldText(AllPlayers().FilteredArray((player) => player.currentMenuState == MenuState.CLOSED), <" \nLOS: <0>", IsInLineOfSight(visiblePosition1, visiblePosition2)>, UpdateEveryFrame((visiblePosition1 + visiblePosition2) / 2), 1.5, Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, IsInLineOfSight(visiblePosition1, visiblePosition2) ? Color.Green : Color.Red, Spectators.VisibleAlways);
+
+  WaitUntil(playerRulerState == RulerState.HIDDEN, 99999);
+
+  DestroyEffect(rulerEffects.Slice(0,3));
+  DestroyInWorldText(rulerEffects[3]);
+  DestroyInWorldText(rulerEffects[4]);
+}
+
+rule: "[interface/tools/ruler.ostw] Handle player setting first point"
+Event.OngoingPlayer
+if (IsAlive())
+if (playerRulerState == RulerState.PLACING)
+if (IsButtonHeld(Button: Button.PrimaryFire))
+{
+  AbortIf(currentMenuState != MenuState.CLOSED);
+  isMovingPosition1 = true;
+  WaitUntil(!IsButtonHeld(Button: Button.PrimaryFire), 99999);
+  isMovingPosition1 = false;
+  position1 = RayCastHitPosition(EyePosition(), EyePosition() + 5 * FacingDirectionOf(), AllPlayers(), EventPlayer(), true);
+}
+
+rule: "[interface/tools/ruler.ostw] Handle player setting second point"
+Event.OngoingPlayer
+if (IsAlive())
+if (playerRulerState == RulerState.PLACING)
+if (IsButtonHeld(Button: Button.SecondaryFire))
+{
+  AbortIf(currentMenuState != MenuState.CLOSED);
+  isMovingPosition2 = true;
+  WaitUntil(!IsButtonHeld(Button: Button.SecondaryFire), 99999);
+  isMovingPosition2 = false;
+  position2 = RayCastHitPosition(EyePosition(), EyePosition() + 5 * FacingDirectionOf(), AllPlayers(), EventPlayer(), true);
+}

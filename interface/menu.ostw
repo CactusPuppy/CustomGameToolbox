@@ -1,57 +1,59 @@
 import "../main.ostw";
 import "./menuDefinitions.ostw";
-import "../utils/2DArray.del";
+import "../lib/utils/2DArray.del";
+import "../lib/player/buttonControl.del";
 
-import "gameControl/gameControlMenu.ostw";
 import "cheats/cheatsMenu.ostw";
 import "tools/toolsMenu.ostw";
+import "information/informationMenu.ostw";
 
+playervar ResetPoint menuActivationPoint;
 
 rule: "[Menu] Set up action grid" -100
 {
   ButtonActionGrid = [];
   ButtonActionGrid[MenuState.MAIN_MENU] = mainMenuButtonActions;
-  ButtonActionGrid[MenuState.GAME_CONTROL] = gameControlButtonActions;
   ButtonActionGrid[MenuState.CONFIRMING_END_GAME] = [true, true];
-  ButtonActionGrid[MenuState.CHEATS] = cheatButtonActions;
   ButtonActionGrid[MenuState.TOOLS] = toolsMenuButtonActions;
+  ButtonActionGrid[MenuState.INFORMATION] = informationMenuButtonActions;
 }
 rule: "[Menu] Set up button label grid" -100
 Event.OngoingPlayer
 {
   ButtonLabelGrid = [];
   ButtonLabelGrid[MenuState.MAIN_MENU] = mainMenuButtonLabels;
-  ButtonLabelGrid[MenuState.GAME_CONTROL] = gameControlButtonLabels;
-  ButtonLabelGrid[MenuState.CHEATS] = cheatButtonLabels;
   ButtonLabelGrid[MenuState.TOOLS] = toolsMenuButtonLabels;
+  ButtonLabelGrid[MenuState.INFORMATION] = informationMenuButtonLabels;
 }
 rule: "[Menu] Set up color grid" -100
 Event.OngoingPlayer
 {
   ButtonColorGrid = [];
   ButtonColorGrid[MenuState.MAIN_MENU] = mainMenuButtonColors;
-  ButtonColorGrid[MenuState.GAME_CONTROL] = gameControlButtonColors;
-  ButtonColorGrid[MenuState.CHEATS] = cheatButtonColors;
   ButtonColorGrid[MenuState.TOOLS] = toolsMenuButtonColors;
+  ButtonColorGrid[MenuState.INFORMATION] = informationMenuButtonColors;
 }
 
 MenuState[] mainMenuButtonActions: [
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED, MenuState.CLOSED,                MenuState.CLOSED,
   MenuState.CLOSED, MenuState.INFORMATION, MenuState.CLOSED, MenuState.MODIFICATIONS,         MenuState.CLOSED,
   MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED, MenuState.CLOSED,                MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED, MenuState.CLOSED,                MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.TOOLS,       MenuState.CLOSED, MenuState.DUMMY_BOTS_AND_REPLAY, MenuState.CLOSED
+  MenuState.CLOSED, MenuState.TOOLS,       MenuState.CLOSED, MenuState.DUMMY_BOTS_AND_REPLAY, MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED, MenuState.CLOSED,                MenuState.CLOSED
 ];
 String[] mainMenuButtonLabels: [
+  "", "",            "", "",                  "",
   "", "Information", "", "Modifications",     "",
   "", "",            "", "",                  "",
-  "", "",            "", "",                  "",
-  "", "Tools",       "", "Dummy Bots/Replay", ""
+  "", "Tools",       "", "Dummy Bots/Replay", "",
+  "", "",            "", "",                  ""
 ];
 Color[] mainMenuButtonColors: [
-  null, Color.White,  null, Color.White, null,
-  null, null,         null, null,        null,
-  null, null,         null, null,        null,
-  null, Color.White,  null, Color.White, null
+  null, null,               null, null,         null,
+  null, Colors.LighterRed,  null, Color.Green,  null,
+  null, null,               null, null,         null,
+  null, Color.SkyBlue,      null, Color.Yellow, null,
+  null, null,               null, null,         null
 ];
 
 rule: "Global menu setup"
@@ -59,8 +61,7 @@ rule: "Global menu setup"
   # Create prompt to open mneu
   CreateHudText(
     VisibleTo:     (!LocalPlayer().hideMenuOpenTooltip || (LocalPlayer().currentMenuState != MenuState.CLOSED)) ? LocalPlayer() : null,
-    Text:          <"Hold [<0> + <1>] to <2> menu",
-                      InputBindingString(Button.Crouch),
+    Text:          <"Hold [<0>] to <1> menu",
                       InputBindingString(Button.Interact),
                       LocalPlayer().currentMenuState == MenuState.CLOSED ? "open" : "close">,
     Location:      Location.Top,
@@ -78,22 +79,32 @@ rule: "Global menu setup"
     Color:         Color.White,
     Reevaluation:  InworldTextRev.VisibleToPositionAndString,
     Spectators:    Spectators.VisibleNever);
-  # DEBUG: grid params
-  printMenuValues();
-  // # Create grid menu items
+  // # DEBUG: grid params
+  // printMenuValues();
+  # Create grid menu items
   for (Number colIndex = 0; colIndex < numCols; colIndex++) {
     for (Number rowIndex = 0; rowIndex < numRows; rowIndex++) {
       menuButton(EvaluateOnce(colIndex), EvaluateOnce(rowIndex));
     }
   }
+  # Create bespoke end match confirm screen
   CreateEndGameConfirmationScreen();
+  # Create background orbie
+  CreateEffect(
+    VisibleTo:    LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
+    Type:         Effect.Orb,
+    Color:        Color.Black,
+    Position:     LocalPlayer().menuActivationPoint.eyePosition - 0.325 * LocalPlayer().menuActivationPoint.facing,
+    Radius:       0.25,
+    Reevaluation: EffectRev.VisibleToPositionAndRadius
+  );
 
   # DEBUG: Show current menu state and current x/y menu indexes
-  CreateHudText(
-    VisibleTo: LocalPlayer(),
-    Text: $"shape: {numCols}, {numRows} | x: {LocalPlayer().menuXIndex} | y: {LocalPlayer().menuYIndex} | val: {currentActionGrid(LocalPlayer())[gridIndex(LocalPlayer().menuXIndex, LocalPlayer().menuYIndex)]}",
-    Reevaluation: HudTextRev.VisibleToAndString
-  );
+  // CreateHudText(
+  //   VisibleTo: LocalPlayer(),
+  //   Text: $"shape: {numCols}, {numRows} | x: {LocalPlayer().menuXIndex} | y: {LocalPlayer().menuYIndex} | val: {currentActionGrid(LocalPlayer())[gridIndex(LocalPlayer().menuXIndex, LocalPlayer().menuYIndex)]}",
+  //   Reevaluation: HudTextRev.VisibleToAndString
+  // );
 }
 
 rule: "When player first opens menu, hide tooltip when menu is closed"
@@ -109,25 +120,20 @@ Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 {
   // cursor = new Cursor();
+  # Note that we store it for reevaluation, because changing heroes causes a respawn which overwrites non-reeval force pos and facing
+  menuActivationPoint = NewResetFromPlayer(EventPlayer());
   SetAimSpeed(EventPlayer(), 0);
-  StartFacing(EventPlayer(), FacingDirectionOf(EventPlayer()), 1000, Relative.ToWorld, FacingRev.None);
-  StartForcingPlayerPosition(EventPlayer(), PositionOf(EventPlayer()), false);
+  StartFacing(EventPlayer(), menuActivationPoint.facing, 1000, Relative.ToWorld, FacingRev.None);
+  StartForcingPlayerPosition(EventPlayer(), menuActivationPoint.location, false);
   SetGravity(EventPlayer(), 0);
-  DisallowButton(Button: Button.PrimaryFire);
-  DisallowButton(Button: Button.SecondaryFire);
-  DisallowButton(Button: Button.Ability1);
-  DisallowButton(Button: Button.Ability2);
-  DisallowButton(Button: Button.Ultimate);
-  DisallowButton(Button: Button.Crouch);
-  DisallowButton(Button: Button.Jump);
-  DisallowButton(Button: Button.Reload);
+  AddOneLockToAllButtons();
   SetInvisible(EventPlayer(), InvisibleTo.All);
   SetStatus(EventPlayer(), null, Status.PhasedOut, 1000000);
   DisableKillFeed();
   DisableGameModeInworldUI();
   DisableGameModeHud();
   DisableHeroHud();
-  StartCamera(EventPlayer(), EyePosition(), EyePosition() + FacingDirectionOf(), 100);
+  StartCamera(EventPlayer(), menuActivationPoint.eyePosition, menuActivationPoint.eyePosition + menuActivationPoint.facing, 100);
 
   menuXIndex = 0; menuYIndex = 0;
 
@@ -140,29 +146,21 @@ if (currentMenuState != MenuState.CLOSED)
   EnableHeroHud();
   StopFacing(EventPlayer());
   StopForcingPlayerPosition();
-  SetGravity(EventPlayer(), 100);
+  if (!isNoClipActive) SetGravity(EventPlayer(), 100);
   SetAimSpeed(EventPlayer(), 100);
   # Give a leniency period for buttons to be let go of
   Wait(0.25, WaitBehavior.RestartWhenTrue);
-  AllowButton(Button: Button.PrimaryFire);
-  AllowButton(Button: Button.SecondaryFire);
-  AllowButton(Button: Button.Ability1);
-  AllowButton(Button: Button.Ability2);
-  AllowButton(Button: Button.Ultimate);
-  AllowButton(Button: Button.Crouch);
-  AllowButton(Button: Button.Jump);
-  AllowButton(Button: Button.Reload);
+  RemoveOneLockFromAllButtons();
   SetInvisible(EventPlayer(), InvisibleTo.None);
   ClearStatus(EventPlayer(), Status.PhasedOut);
 }
 
-rule: "When player holds Crouch + Interact long enough, toggle menu"
+rule: "When player holds Interact long enough, toggle menu"
 Event.OngoingPlayer
 if (IsAlive())
-if (IsButtonHeld(EventPlayer(), Button.Crouch))
 if (IsButtonHeld(EventPlayer(), Button.Interact))
 {
-  Wait(0.25, WaitBehavior.AbortWhenFalse);
+  Wait(0.5, WaitBehavior.AbortWhenFalse);
   if (currentMenuState == MenuState.CLOSED) {
     currentMenuState = MenuState.MAIN_MENU;
   } else {
@@ -180,14 +178,8 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     case MenuState.MAIN_MENU:
       HandleMainMenuClick();
       break;
-    case MenuState.GAME_CONTROL:
-      HandleGameControlClick();
-      break;
     case MenuState.CONFIRMING_END_GAME:
       HandleConfirmEndGameClick();
-      break;
-    case MenuState.CHEATS:
-      HandleCheatClick();
       break;
     case MenuState.TOOLS:
       HandleToolsMenuClick();
@@ -201,7 +193,8 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
 {
   AbortIf(currentMenuState == MenuState.CLOSED);
   if (currentMenuState == MenuState.MAIN_MENU) {
-    currentMenuState = MenuState.CLOSED;
+    # Avoid having input count for something else by allowing other modules to read that an input was processed in the menu.
+    CloseMenu(EventPlayer());
     return;
   }
   if (ArrayContains([MenuState.INFORMATION, MenuState.MODIFICATIONS, MenuState.TOOLS,
@@ -209,7 +202,7 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
     currentMenuState = MenuState.MAIN_MENU;
   }
   if (currentMenuState == MenuState.CONFIRMING_END_GAME) {
-    currentMenuState = MenuState.GAME_CONTROL;
+    currentMenuState = MenuState.TOOLS;
   }
 }
 
@@ -243,12 +236,10 @@ rule: "When menu state changes, find new first selection" -1
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 {
-  MinWait();
+  Wait(0.064, WaitBehavior.AbortWhenFalse);
   // # DEBUG
-  // SmallMessage(AllPlayers(), $"Current action grid element count: {CountOf(currentActionGrid())}");
+  // LogToInspector($"Current action grid element count: {CountOf(currentActionGrid())}");
   if (currentActionGrid() != 0 && !ArrayContains(NO_AUTO_SET_INDICES_MENUS, currentMenuState)) {
-    // # DEBUG
-    // SmallMessage(AllPlayers(), "Entering autoset");
     AutoSetMenuIndices();
   }
   WaitUntil(currentMenuState != EvaluateOnce(currentMenuState), 1000000);

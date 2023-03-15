@@ -5,13 +5,7 @@ enum MenuState
 {
   CLOSED = 0,
   MAIN_MENU,
-  REPLAY_BOTS,
-  SET_CAMERA,
-  SET_RESPAWN,
-  CHEATS,
-  GAME_CONTROL,
   CONFIRMING_END_GAME,
-  CUSTOMIZE_HUD,
   INFORMATION,
   MODIFICATIONS,
   TOOLS,
@@ -33,8 +27,8 @@ MenuState[] mainMenuActionGrid: ButtonActionGrid[MenuState.MAIN_MENU];
 
 /** Menu parameters */
 Number xLim: 3.0;
-Number yLim: 1.5;
-Number firstRowY: 1.5;
+Number yLim: 1.25;
+Number firstRowY: 1.75;
 Number rowSeparation: 0.75;
 Number firstColumnX: -3.0;
 Number columnSeparation: 1.5;
@@ -45,12 +39,12 @@ Number colIndexToX(Number colIndex): firstColumnX + (columnSeparation * colIndex
 Number numCols: RoundToInteger((xLim - firstColumnX) / columnSeparation, Rounding.Down) + 1; // 5
 Number numRows: RoundToInteger((firstRowY + yLim) / rowSeparation, Rounding.Down) + 1; // 5
 Number gridIndex(Number colIndex, Number rowIndex): rowIndex * numCols + colIndex;
-Boolean isSelectingButton(Player p = LocalPlayer(), Number colIndex = 0, Number rowIndex = 0): p.menuXIndex == colIndex && p.menuYIndex == rowIndex;
-Any[] currentActionGrid(Player p = EventPlayer()): ButtonActionGrid[p.currentMenuState];
-String[] currentLabelGrid(Player p = LocalPlayer()): p.ButtonLabelGrid[p.currentMenuState];
-Color[] currentColorGrid(Player p = LocalPlayer()): p.ButtonColorGrid[p.currentMenuState];
-Number currentGridIndex(Player p = EventPlayer()): gridIndex(p.menuXIndex, p.menuYIndex);
-Any currentActionItem(Player p = EventPlayer()): currentActionGrid(p)[currentGridIndex(p)];
+Boolean isSelectingButton(in Player p = LocalPlayer(), Number colIndex = 0, Number rowIndex = 0): p.menuXIndex == colIndex && p.menuYIndex == rowIndex;
+Any[] currentActionGrid(in Player p = EventPlayer()): ButtonActionGrid[p.currentMenuState];
+String[] currentLabelGrid(in Player p = LocalPlayer()): p.ButtonLabelGrid[p.currentMenuState];
+Color[] currentColorGrid(in Player p = LocalPlayer()): p.ButtonColorGrid[p.currentMenuState];
+Number currentGridIndex(in Player p = EventPlayer()): gridIndex(p.menuXIndex, p.menuYIndex);
+Any currentActionItem(in Player p = EventPlayer()): currentActionGrid(p)[currentGridIndex(p)];
 
 void printMenuValues() {
   LogToInspector(<"Limits | xLeft: <0>, xRight: <1>, yTop: <2>, yBottom: <3>", firstColumnX, xLim, firstRowY, -yLim>);
@@ -59,24 +53,30 @@ void printMenuValues() {
   LogToInspector(<"numRows calc | numerator: <0>, denominator: <1>, raw result: <2>, final result: <3>", firstRowY + yLim, rowSeparation, (firstRowY + yLim) / rowSeparation + 1, numRows>);
 }
 
-String menuText(String label, Boolean isSelected = false): isSelected ? <"><0><1><0><", SineFromDegrees((TotalTimeElapsed() * 360) % 360) > 0 ? "   " : " ", label> : label;
+void CloseMenu(in Player player) {
+  MinWait();
+  player.currentMenuState = MenuState.CLOSED;
+}
+
+Color selectedColor: CustomColor(255,255,255,155 + 100 * SineFromDegrees((TotalTimeElapsed() * 720) % 360));
 Boolean isSelectingGridIndex(Player p = EventPlayer(), Number x = 0, Number y = 0): p.menuXIndex == x && p.menuYIndex == y;
 
-Any menuButton(Number colIndex, Number rowIndex):
+MenuState[] MenuStatesToHideDefaultButtonsIn: [MenuState.CLOSED, MenuState.CONFIRMING_END_GAME];
+Any menuButton(in Number colIndex, in Number rowIndex):
   OnScreenText.CreateOnScreenText(
-    VisibleTo: LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
-    Header: menuText(currentLabelGrid()[gridIndex(colIndex, rowIndex)], isSelectingGridIndex(LocalPlayer(), colIndex, rowIndex)),
+    VisibleTo: MenuStatesToHideDefaultButtonsIn.Contains(LocalPlayer().currentMenuState) ? null : LocalPlayer(),
+    Header: currentLabelGrid()[gridIndex(colIndex, rowIndex)],
     PositionX: colIndexToX(colIndex),
     PositionY: rowIndexToY(rowIndex),
     Scale: 2,
     Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
-    Color: currentColorGrid()[gridIndex(colIndex, rowIndex)],
+    Color: isSelectingGridIndex(LocalPlayer(), colIndex, rowIndex) && ButtonActionGrid[LocalPlayer().currentMenuState][currentGridIndex(LocalPlayer())] ? selectedColor : currentColorGrid()[gridIndex(colIndex, rowIndex)],
     Spectators: Spectators.VisibleNever
   );
 
 /** Menu navigation definitions and helper functions */
-playervar Number cache_startIndex1;
-playervar Number cache_startIndex2;
+playervar Number cache_startIndex1!;
+playervar Number cache_startIndex2!;
 
 /* NOTE: The following subroutines expect `cache_startIndex1` to be set PRIOR TO CALL.
  * These subroutines CAN infinitely loop if the menu is somehow in a bad state
@@ -158,4 +158,11 @@ void moveSelectionDown() playervar "[SUB] Move selection down"
   if (menuYIndex >= numRows) { menuYIndex = 0; }
   // LogToInspector($"  sub (down): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
   LoopIf(cache_startIndex2 != menuYIndex && currentActionItem() == 0);
+}
+
+# Sets the appearance of a given button
+void UpdateButtonAppearance(in MenuState menuPage, in Number colIndex, in Number rowIndex, in String newLabel = null, in Color newColor = null, in Player p = EventPlayer())
+{
+  if (newLabel != null) p.ButtonLabelGrid[menuPage][gridIndex(colIndex, rowIndex)] = newLabel;
+  if (newColor != null) p.ButtonColorGrid[menuPage][gridIndex(colIndex, rowIndex)] = newColor;
 }

@@ -19,22 +19,22 @@ void CreateEndGameConfirmationScreen() {
   );
   OnScreenText.CreateOnScreenText(
     VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
-    Header: menuText("[YES]", isSelectingButton(LocalPlayer(), 0, 0)),
+    Header: "[YES]",
     PositionX: -endGameBtnsSpread,
     PositionY: endGameBtnsY,
     Scale: 3,
     Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
-    Color: cursorOnConfirmBtn(LocalPlayer()) ? Color.Rose : Color.Red,
+    Color: cursorOnConfirmBtn(LocalPlayer()) ? selectedColor : Color.Red,
     Spectators: Spectators.VisibleNever
   );
   OnScreenText.CreateOnScreenText(
     VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
-    Header: menuText("[NO]", isSelectingButton(LocalPlayer(), 1, 0)),
+    Header: "[NO]",
     PositionX: endGameBtnsSpread,
     PositionY: endGameBtnsY,
     Scale: 3,
     Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
-    Color: cursorOnCancelBtn(LocalPlayer()) ? Color.Green : Color.LimeGreen,
+    Color: cursorOnCancelBtn(LocalPlayer()) ? selectedColor : Color.LimeGreen,
     Spectators: Spectators.VisibleNever
   );
 }
@@ -57,7 +57,7 @@ if (IsButtonHeld(Button: Button.PrimaryFire))
 void HandleConfirmEndGameClick() "Handle confirm/cancel for ending game"
 {
   if (cursorOnCancelBtn()) {
-    currentMenuState = MenuState.GAME_CONTROL;
+    currentMenuState = MenuState.TOOLS;
   } else if (cursorOnConfirmBtn()) {
     DeclareMatchDraw();
     Wait(0.25);

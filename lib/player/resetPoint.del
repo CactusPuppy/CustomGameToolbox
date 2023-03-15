@@ -1,0 +1,14 @@
+struct ResetPoint {
+  public Vector location;
+  public Vector eyePosition;
+  public Vector facing;
+}
+
+ResetPoint NewResetFromPlayer(Player p = EventPlayer()): { location: PositionOf(p), eyePosition: EyePosition(p), facing: FacingDirectionOf(p) };
+
+void TeleportPlayerToResetPoint(in Player p, in ResetPoint resetPoint) {
+  Teleport(p, resetPoint.location);
+  # Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT
+  MinWait();
+  SetFacing(p, resetPoint.facing, Relative.ToWorld);
+}

@@ -1,4 +1,3 @@
-import "../settings.lobby";
 playervar Any[] TwoDCachedArray!;
 
 void SetValueIn2DArray(ref Any[][] Array, in Number outerIndex, in Number innerIndex, in Any value)

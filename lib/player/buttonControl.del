@@ -1,0 +1,56 @@
+globalvar Button[] AllButtons = [
+  Button.PrimaryFire,
+  Button.SecondaryFire,
+  Button.Ability1,
+  Button.Ability2,
+  Button.Crouch,
+  Button.Jump,
+  Button.Melee,
+  Button.Reload,
+  Button.Ultimate,
+  Button.Interact
+];
+
+playervar Number[] buttonLocks = [];
+
+rule: "[lib/player/buttonControl.del] Initialize buttonLocks array"
+Event.OngoingPlayer
+{
+  buttonLocks[CountOf(AllButtons)] = 0;
+}
+
+void AddOneLockToAllButtons(in Player player = EventPlayer())
+{
+  player.buttonLocks = player.buttonLocks.Map((lockCount) => lockCount + 1);
+  UpdatePlayerButtonStatus(player);
+}
+
+void RemoveOneLockFromAllButtons(in Player player = EventPlayer())
+{
+  player.buttonLocks = player.buttonLocks.Map((lockCount) => Max(0, lockCount - 1));
+  UpdatePlayerButtonStatus(player);
+}
+
+void AddOneLockToButton(in Player player = EventPlayer(), in Button button)
+{
+  player.buttonLocks[AllButtons.IndexOf(button)] += 1;
+  DisallowButton(player, button);
+}
+
+void RemoveOneLockFromButton(in Player player = EventPlayer(), in Button button)
+{
+  player.buttonLocks[AllButtons.IndexOf(button)] = Max(0, player.buttonLocks[AllButtons.IndexOf(button)] - 1);
+  if (player.buttonLocks[AllButtons.IndexOf(button)] == 0) AllowButton(player, button);
+}
+
+void UpdatePlayerButtonStatus(Player player = EventPlayer()) "[lib/player/buttonControl.del] update player button status"
+{
+  foreach (Button button in AllButtons)
+  {
+    if (buttonLocks[AllButtons.IndexOf(button)] == 0) {
+      AllowButton(player, button);
+    } else {
+      DisallowButton(player, button);
+    }
+  }
+}

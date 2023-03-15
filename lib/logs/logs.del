@@ -1,0 +1,23 @@
+enum LogLevel {
+  DEBUG,
+  INFO,
+  WARNING,
+  ERROR
+}
+globalvar Number LOG_LEVEL! = WorkshopSettingCombo("Settings", "Log Level", 0, ["Debug", "Info", "Warning", "Error"], 0);
+
+void Debug(in Any message) {
+  if (LOG_LEVEL <= LogLevel.DEBUG) LogToInspector(<"[DEBUG] <0>", message>);
+}
+
+void Info(in Any message) {
+  if (LOG_LEVEL <= LogLevel.INFO) LogToInspector(<"[INFO] <0>", message>);
+}
+
+void Warning(in Any message) {
+  if (LOG_LEVEL <= LogLevel.WARNING) LogToInspector(<"[WARN] <0>", message>);
+}
+
+void Error(in Any message) {
+  if (LOG_LEVEL <= LogLevel.ERROR) LogToInspector(<"[ERROR] <0>", message>);
+}
