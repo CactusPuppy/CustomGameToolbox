@@ -1,6 +1,7 @@
 import "../main.ostw";
 import "./menuDefinitions.ostw";
 import "../lib/utils/2DArray.del";
+import "../lib/utils/Colors.del";
 import "../lib/player/buttonControl.del";
 
 import "cheats/cheatsMenu.ostw";
@@ -17,7 +18,7 @@ rule: "[Menu] Set up action grid" -100
   ButtonActionGrid[MenuState.TOOLS] = toolsMenuButtonActions;
   ButtonActionGrid[MenuState.INFORMATION] = informationMenuButtonActions;
 }
-rule: "[Menu] Set up button label grid" -100
+rule: "[interface/menu.ostw] Set up button label grid" -100
 Event.OngoingPlayer
 {
   ButtonLabelGrid = [];
@@ -25,7 +26,7 @@ Event.OngoingPlayer
   ButtonLabelGrid[MenuState.TOOLS] = toolsMenuButtonLabels;
   ButtonLabelGrid[MenuState.INFORMATION] = informationMenuButtonLabels;
 }
-rule: "[Menu] Set up color grid" -100
+rule: "[interface/menu.ostw] Set up color grid" -100
 Event.OngoingPlayer
 {
   ButtonColorGrid = [];
@@ -50,13 +51,13 @@ String[] mainMenuButtonLabels: [
 ];
 Color[] mainMenuButtonColors: [
   null, null,               null, null,         null,
-  null, Colors.LighterRed,  null, Color.Green,  null,
+  null, LighterRed,  null, Color.Green,  null,
   null, null,               null, null,         null,
   null, Color.SkyBlue,      null, Color.Yellow, null,
   null, null,               null, null,         null
 ];
 
-rule: "Global menu setup"
+rule: "[interface/menu.ostw] Global menu setup"
 {
   # Create prompt to open mneu
   CreateHudText(
@@ -107,7 +108,7 @@ rule: "Global menu setup"
   // );
 }
 
-rule: "When player first opens menu, hide tooltip when menu is closed"
+rule: "[interface/menu.ostw] When player first opens menu, hide tooltip when menu is closed"
 Event.OngoingPlayer
 if (!hideMenuOpenTooltip)
 if (currentMenuState != MenuState.CLOSED)
@@ -115,7 +116,7 @@ if (currentMenuState != MenuState.CLOSED)
   hideMenuOpenTooltip = true;
 }
 
-rule: "Initialize player and perform cleanup"
+rule: "[interface/menu.ostw] Initialize player and perform cleanup"
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 {
@@ -155,7 +156,7 @@ if (currentMenuState != MenuState.CLOSED)
   ClearStatus(EventPlayer(), Status.PhasedOut);
 }
 
-rule: "When player holds Interact long enough, toggle menu"
+rule: "[interface/menu.ostw] When player holds Interact long enough, toggle menu"
 Event.OngoingPlayer
 if (IsAlive())
 if (IsButtonHeld(EventPlayer(), Button.Interact))
@@ -168,7 +169,7 @@ if (IsButtonHeld(EventPlayer(), Button.Interact))
   }
 }
 
-rule: "Primary fire to select current item"
+rule: "[interface/menu.ostw] Primary fire to select current item"
 Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
 {
@@ -184,10 +185,16 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     case MenuState.TOOLS:
       HandleToolsMenuClick();
       break;
+    case MenuState.INFORMATION:
+      HandleInformationMenuClick();
+      break;
+    case MenuState.MODIFICATIONS:
+      HandleModificationClick();
+      break;
   }
 }
 
-rule: "Secondary fire to go back"
+rule: "[interface/menu.ostw] Secondary fire to go back"
 Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
 {
@@ -206,7 +213,7 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
   }
 }
 
-rule: "Menu left-right"
+rule: "[interface/menu.ostw] Menu left-right"
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 if (AbsoluteValue(XOf(ThrottleOf(EventPlayer()))) > 0.5)
@@ -219,7 +226,7 @@ if (AbsoluteValue(XOf(ThrottleOf(EventPlayer()))) > 0.5)
   }
 }
 
-rule: "Menu up-down"
+rule: "[interface/menu.ostw] Menu up-down"
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
@@ -232,7 +239,7 @@ if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
 }
 
 MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMING_END_GAME];
-rule: "When menu state changes, find new first selection" -1
+rule: "[interface/menu.ostw] When menu state changes, find new first selection" -1
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 {
