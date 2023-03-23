@@ -1,1 +1,5 @@
+Number healOverTimePeriod: 0.192;
+Number healOverTimePeriodsInOneSecond: RoundToInteger(1 / healOverTimePeriod, Rounding.Down);
+
+Number durationToAverageOver: healOverTimePeriod * healOverTimePeriodsInOneSecond;
 Number perSecondBufferRetentionSeconds: 0.25;

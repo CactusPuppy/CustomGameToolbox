@@ -1,45 +1,71 @@
 import "../menu.ostw";
+import "../../lib/utils/Colors.del";
 
 enum InfoAction {
   NONE,
-  TOGGLE_MOVE_SPEED_DISPLAY,
-  TOGGLE_DISTANCE_TO_CROSSHAIR_DISPLAY,
-  TOGGLE_HEALING_DEALT_PER_SECOND_DISPLAY,
-  TOGGLE_DAMAGE_DEALT_PER_SECOND_DISPLAY,
-  TOGGLE_POSITION_DISPLAY,
-  TOGGLE_FACING_DISPLAY,
-  TOGGLE_ALTITUDE_DISPLAY,
-  TOGGLE_ON_GROUND_DISPLAY,
-  TOGGLE_ON_WALL_DISPLAY
+  MOVE_SPEED_DISPLAY,
+  DISTANCE_TO_CROSSHAIR_DISPLAY,
+  HEALING_DEALT_PER_SECOND_DISPLAY,
+  HEALING_RECEIVED_PER_SECOND_DISPLAY,
+  DAMAGE_DEALT_PER_SECOND_DISPLAY,
+  DAMAGE_RECEIVED_PER_SECOND_DISPLAY,
+  POSITION_DISPLAY,
+  FACING_DISPLAY,
+  ALTITUDE_DISPLAY,
+  ON_GROUND_DISPLAY,
+  ON_WALL_DISPLAY,
+  IN_AIR_DISPLAY,
+  STATUS_EFFECT_READOUT,
+  ON_OBJECTIVE,
+  EXACT_HEALTH,
+  DAMAGE_HEAL_NUMBERS
 }
 
 Number maxActiveDisplays: 5;
-playervar InfoAction[] activeDisplays = [];
+playervar InfoAction[] activeInfoDisplays = [];
+playervar Any[] infoDisplayEntities = [];
 
+InfoAction[] InfoActionGrid: ButtonActionGrid[MenuState.INFORMATION];
 InfoAction[] informationMenuButtonActions: [
-  InfoAction.NONE,  InfoAction.NONE,                                     InfoAction.NONE,                                  InfoAction.NONE,                                    InfoAction.NONE,
-  InfoAction.NONE,  InfoAction.TOGGLE_POSITION_DISPLAY,                  InfoAction.TOGGLE_FACING_DISPLAY,                 InfoAction.TOGGLE_MOVE_SPEED_DISPLAY,               InfoAction.NONE,
-  InfoAction.NONE,  InfoAction.TOGGLE_ALTITUDE_DISPLAY,                  InfoAction.TOGGLE_ON_GROUND_DISPLAY,              InfoAction.TOGGLE_ON_WALL_DISPLAY,                  InfoAction.NONE,
-  InfoAction.NONE,  InfoAction.TOGGLE_HEALING_DEALT_PER_SECOND_DISPLAY,  InfoAction.TOGGLE_DISTANCE_TO_CROSSHAIR_DISPLAY,  InfoAction.TOGGLE_DAMAGE_DEALT_PER_SECOND_DISPLAY,  InfoAction.NONE,
-  InfoAction.NONE,  InfoAction.NONE,                                     InfoAction.NONE,                                  InfoAction.NONE,                                    InfoAction.NONE
+  InfoAction.NONE,  InfoAction.EXACT_HEALTH,                             InfoAction.DISTANCE_TO_CROSSHAIR_DISPLAY,  InfoAction.ON_OBJECTIVE,                       InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.POSITION_DISPLAY,                         InfoAction.FACING_DISPLAY,                 InfoAction.MOVE_SPEED_DISPLAY,                 InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.ALTITUDE_DISPLAY,                         InfoAction.ON_GROUND_DISPLAY,              InfoAction.ON_WALL_DISPLAY,                    InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.HEALING_DEALT_PER_SECOND_DISPLAY,         InfoAction.STATUS_EFFECT_READOUT,          InfoAction.DAMAGE_DEALT_PER_SECOND_DISPLAY,    InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.HEALING_RECEIVED_PER_SECOND_DISPLAY,      InfoAction.NONE,                           InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY, InfoAction.NONE
 ];
 
 String[] informationMenuButtonLabels: [
-  "",  "",  "",  "",  "",
-  "",  "Show Position",  "Show Facing Direction",  "Show Move Speed",  "",
-  "",  "Show Altitude",  "Show If On Ground",  "Show If On Wall",  "",
-  "",  "Show Heals Per Second",  "Show Distance To Crosshair",  "Show Damage Per Second",  "",
-  "",  "",  "",  "",  ""
+  "",  "Show Exact Health",      "Show Distance To Crosshair",  "Show Is On Objective",    "",
+  "",  "Show Position",          "Show Facing Direction",       "Show Move Speed",         "",
+  "",  "Show Altitude",          "Show If On Ground",           "Show If On Wall",         "",
+  "",  "Show HPS Dealt",         "Show Status Effects",         "Show DPS Dealt",          "",
+  "",  "Show HPS Received",      "",                            "Show DPS Received",       ""
 ];
 
 Color[] informationMenuButtonColors: [
-  null, null, null, null, null,
+  null, LighterRed, Color.Aqua, Color.Turquoise, null,
   null, Color.Green, Color.Rose, Color.Orange, null,
   null, Color.SkyBlue, Color.Purple, Color.Violet, null,
-  null, Color.Yellow, Color.Aqua, Color.Red, null,
-  null, null, null, null, null
+  null, Color.Yellow, Color.LimeGreen, Color.Red, null,
+  null, CustomColor(245, 200, 0, 255), null, CustomColor(218, 76, 10, 255), null
 ];
 
 void HandleInformationMenuClick() {
-
+  AbortIf(InfoActionGrid[currentGridIndex()] == InfoAction.NONE);
+  if (CountOf(activeInfoDisplays) >= maxActiveDisplays) {
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 200);
+    SmallMessage(EventPlayer(), <"<0> Too many active readouts (max <1>).", IconString(Icon.Warning), maxActiveDisplays>);
+    Wait(0.15);
+    SmallMessage(EventPlayer(), <"<0> Remove some readouts and try again", IconString(Icon.Warning)>);
+    return;
+  }
+  if (activeInfoDisplays.Contains((InfoActionGrid[currentGridIndex()]))) {
+    activeInfoDisplays.ModRemoveByValue(InfoActionGrid[currentGridIndex()]);
+  } else {
+    activeInfoDisplays.ModAppend(InfoActionGrid[currentGridIndex()]);
+  }
 }
+
+import "simpleInfoReadouts.ostw";
+import "metricsReadouts.ostw";
+import "statusEffects.ostw";

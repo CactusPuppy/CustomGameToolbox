@@ -1,0 +1,112 @@
+import "informationMenu.ostw";
+
+enum StatusEffect {
+  Asleep,
+  Burning,
+  Frozen,
+  Hacked,
+  Invincible,
+  KnockedDown,
+  PhasedOut,
+  Rooted,
+  Stunned,
+  Unkillable
+}
+
+Player[] PlayersToInformOfStatuses: AllPlayers().FilteredArray((p) => p.activeInfoDisplays.Contains(InfoAction.STATUS_EFFECT_READOUT));
+
+playervar Number[] effectStartTimestamp;
+playervar Number[] effectDuration;
+
+void ProcessStatusEffect(in StatusEffect statusEffect, Status status, in String statusName, in String statusIcon) {
+  effectStartTimestamp[statusEffect] = TotalTimeElapsed();
+  WaitUntil(!HasStatus(EventPlayer(), status), 99999);
+  effectDuration[statusEffect] = TotalTimeElapsed() - effectStartTimestamp[statusEffect];
+  SmallMessage(PlayersToInformOfStatuses, <" <0> <1> had status <2> for <3> secs (<4> ticks)", statusIcon, EventPlayer(), statusName, effectDuration[statusEffect] + 0.016, RoundToInteger(effectDuration[statusEffect] * 62.5 + 1, Rounding.Nearest)>);
+}
+
+rule: "[interface/information/statusEffects.ostw] Keep Status Effect button appearance up to date"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.STATUS_EFFECT_READOUT))
+{
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 3, "Hide Status Effects", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.STATUS_EFFECT_READOUT), 99999);
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 3, "Show Status Effects", Color.LimeGreen);
+}
+
+rule: "[interface/information/statusEffects.ostw] Sleep"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Asleep))
+{
+ ProcessStatusEffect(StatusEffect.Asleep, Status.Asleep, "ASLEEP", AbilityIconString(Hero.Ana, Button.Ability1));
+}
+
+rule: "[interface/information/statusEffects.ostw] Burning"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Burning))
+{
+  ProcessStatusEffect(StatusEffect.Burning, Status.Burning, "BURNING", IconString(Icon.Fire));
+}
+
+rule: "[interface/information/statusEffects.ostw] Frozen"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Frozen))
+{
+  ProcessStatusEffect(StatusEffect.Frozen, Status.Frozen, "FROZEN", AbilityIconString(Hero.Mei, Button.Ultimate));
+}
+
+rule: "[interface/information/statusEffects.ostw] Hacked"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Hacked))
+{
+  ProcessStatusEffect(StatusEffect.Hacked, Status.Hacked, "HACKED", AbilityIconString(Hero.Sombra, Button.Ultimate));
+}
+
+rule: "[interface/information/statusEffects.ostw] Invincible"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Invincible))
+{
+  ProcessStatusEffect(StatusEffect.Invincible, Status.Invincible, "INVINCIBLE", AbilityIconString(Hero.Brigitte, Button.SecondaryFire));
+}
+
+rule: "[interface/information/statusEffects.ostw] Knocked Down"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.KnockedDown))
+{
+  ProcessStatusEffect(StatusEffect.KnockedDown, Status.KnockedDown, "KNOCKED DOWN", IconString(Icon.ArrowDown));
+}
+
+rule: "[interface/information/statusEffects.ostw] Phased Out"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.PhasedOut))
+{
+  # This needs to be handled differently because spawn room gives phased out, as does opening menu
+  AbortIf(EventPlayer().currentMenuState != MenuState.CLOSED || IsInSpawnRoom());
+  effectStartTimestamp[StatusEffect.PhasedOut] = TotalTimeElapsed();
+  WaitUntil(!HasStatus(EventPlayer(), Status.PhasedOut) || EventPlayer().currentMenuState != MenuState.CLOSED || IsInSpawnRoom(), 99999);
+  # If the player entered the spawn room or entered the menu, don't print a message
+  AbortIf(EventPlayer().currentMenuState != MenuState.CLOSED || IsInSpawnRoom());
+  effectDuration[StatusEffect.PhasedOut] = TotalTimeElapsed() - effectStartTimestamp[StatusEffect.PhasedOut];
+  SmallMessage(PlayersToInformOfStatuses, <" <0> <1> had status <2> for <3> secs (<4> ticks)", AbilityIconString(Hero.Reaper, Button.Ability1), EventPlayer(), "PHASED OUT", effectDuration[StatusEffect.PhasedOut] + 0.016, RoundToInteger(effectDuration[StatusEffect.PhasedOut] * 62.5 + 1, Rounding.Nearest)>);
+}
+
+rule: "[interface/information/statusEffects.ostw] Rooted"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Rooted))
+{
+  ProcessStatusEffect(StatusEffect.Rooted, Status.Rooted, "ROOTED", AbilityIconString(Hero.Junkrat, Button.Ability2));
+}
+
+rule: "[interface/information/statusEffects.ostw] Stunned"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Stunned))
+{
+  ProcessStatusEffect(StatusEffect.Stunned, Status.Stunned, "STUNNED", IconString(Icon.Dizzy));
+}
+
+rule: "[interface/information/statusEffects.ostw] Unkillable"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Unkillable))
+{
+  ProcessStatusEffect(StatusEffect.Unkillable, Status.Unkillable, "UNKILLABLE", AbilityIconString(Hero.Baptiste, Button.Ability2));
+}

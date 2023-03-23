@@ -1,0 +1,189 @@
+import "informationMenu.ostw";
+
+import "../../lib/utils/String.del";
+import "../../OSTWUtils/OnScreenText.del";
+import "../../lib/utils/Colors.del";
+import "../../OSTWUtils/Colors.del";
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has Position HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.POSITION_DISPLAY))
+{
+  infoDisplayEntities[InfoAction.POSITION_DISPLAY] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" POS: <0> ", UpdateEveryFrame(PositionOf(EventPlayer()))>,
+    Subheader: " ",
+    Text: <"<0>", MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: Color.White,
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.POSITION_DISPLAY),
+    Reevaluation: HudTextRev.VisibleToSortOrderAndString
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 1, "Hide Position", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.POSITION_DISPLAY), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.POSITION_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 1, "Show Position", Color.Green);
+}
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has Facing Direction HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.FACING_DISPLAY))
+{
+  infoDisplayEntities[InfoAction.FACING_DISPLAY] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" LOOK: <0> ", UpdateEveryFrame(FacingDirectionOf(EventPlayer()))>,
+    Subheader: " ",
+    Text: <"<0>", MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: Color.White,
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.FACING_DISPLAY),
+    Reevaluation: HudTextRev.VisibleToSortOrderAndString
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 1, "Hide Facing Direction", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.FACING_DISPLAY), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.FACING_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 1, "Show Facing Direction", Color.Rose);
+}
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has Move Speed HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.MOVE_SPEED_DISPLAY))
+{
+  infoDisplayEntities[InfoAction.MOVE_SPEED_DISPLAY] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" SPEED: <0> ", UpdateEveryFrame(SpeedOf(EventPlayer()))>,
+    Subheader: <"Vert: <0>", VerticalSpeedOf(EventPlayer())>,
+    Text: <"Horiz: <0><1>", HorizontalSpeedOf(EventPlayer()), MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: Color.White,
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.MOVE_SPEED_DISPLAY),
+    Reevaluation: HudTextRev.VisibleToSortOrderAndString
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 1, "Hide Move Speed", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.MOVE_SPEED_DISPLAY), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.MOVE_SPEED_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 1, "Show Move Speed", Color.Orange);
+}
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has Altitude HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.ALTITUDE_DISPLAY))
+{
+  infoDisplayEntities[InfoAction.ALTITUDE_DISPLAY] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" ALT: <0> ", UpdateEveryFrame(AltitudeOf(EventPlayer()))>,
+    Subheader: " ",
+    Text: <"<0>", MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: Color.White,
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.ALTITUDE_DISPLAY),
+    Reevaluation: HudTextRev.VisibleToSortOrderAndString
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 2, "Hide Altitude", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.ALTITUDE_DISPLAY), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.ALTITUDE_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 2, "Show Altitude", Color.SkyBlue);
+}
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has On Ground HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.ON_GROUND_DISPLAY))
+{
+  infoDisplayEntities[InfoAction.ON_GROUND_DISPLAY] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" ON GROUND: <0> ", UpdateEveryFrame(IsOnGround(EventPlayer()))>,
+    Subheader: " ",
+    Text: <"<0>", MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: IsOnGround() ? Color.Green : Color.Red,
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.ON_GROUND_DISPLAY),
+    Reevaluation: HudTextRev.VisibleToSortOrderStringAndColor
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 2, "Hide If On Ground", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.ON_GROUND_DISPLAY), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.ON_GROUND_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 2, "Show If On Ground", Color.Purple);
+}
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has On Wall HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.ON_WALL_DISPLAY))
+{
+  infoDisplayEntities[InfoAction.ON_WALL_DISPLAY] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" ON WALL: <0> ", UpdateEveryFrame(IsOnWall(EventPlayer())) ? "True" : "False">,
+    Subheader: " ",
+    Text: <"<0>", MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: IsOnWall() ? Color.Green : Color.Red,
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.ON_WALL_DISPLAY),
+    Reevaluation: HudTextRev.VisibleToSortOrderStringAndColor
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 2, "Hide If On Wall", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.ON_WALL_DISPLAY), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.ON_WALL_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 2, "Show If On Wall", Color.Violet);
+}
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has On Objective HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.ON_OBJECTIVE))
+{
+  infoDisplayEntities[InfoAction.ON_OBJECTIVE] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" ON OBJECTIVE: <0> ", UpdateEveryFrame(IsOnObjective(EventPlayer())) ? "True" : "False">,
+    Subheader: " ",
+    Text: <"<0>", MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: IsOnWall() ? Color.Green : Color.Red,
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.ON_OBJECTIVE),
+    Reevaluation: HudTextRev.VisibleToSortOrderStringAndColor
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 0, "Hide Is On Objective", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.ON_OBJECTIVE), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.ON_OBJECTIVE]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 0, "Show Is On Objective", Color.Turquoise);
+}
+Number s: 0.8;
+Number v: 0.8;
+Number maxHue: 100;
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has Exact Health HUD, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.EXACT_HEALTH))
+{
+  infoDisplayEntities[InfoAction.EXACT_HEALTH] = CreateHudText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <" Exact Health: <0> ", UpdateEveryFrame(Health(EventPlayer()))>,
+    Subheader: " ",
+    Text: <"<0>", MANY_SPACES>,
+    Location: Location.Left,
+    HeaderColor: UpdateEveryFrame(CustomColor(
+      red: ((maxHue * NormalizedHealth() < 60 ? Colors.hsv_C(s,v) : Colors.hsv_X(maxHue * NormalizedHealth(), s,v)) + Colors.hsv_M(s,v)) * 255,
+      green: ((maxHue * NormalizedHealth() < 60 ? Colors.hsv_X(maxHue * NormalizedHealth(),s,v) : Colors.hsv_C(s,v)) + Colors.hsv_M(s,v)) * 255,
+      blue: Colors.hsv_M(s,v) * 255,
+      alpha: 255)),
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.EXACT_HEALTH),
+    Reevaluation: HudTextRev.VisibleToSortOrderStringAndColor
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 0, "Hide Exact Health", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.EXACT_HEALTH), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.EXACT_HEALTH]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 0, "Show Exact Health", LighterRed);
+}
+
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has Distance Crosshair, enable it"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.DISTANCE_TO_CROSSHAIR_DISPLAY))
+{
+  infoDisplayEntities[InfoAction.DISTANCE_TO_CROSSHAIR_DISPLAY] = OnScreenText.CreateOnScreenText(
+    VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
+    Header: <"DIST: <0>", DistanceBetween(EyePosition(), RayCastHitPosition(EyePosition(), EyePosition() + 200 * FacingDirectionOf(), AllPlayers(), EventPlayer(), true))>,
+    PositionY: 0.1,
+    Reevaluation: InworldTextRev.VisibleToPositionAndString,
+    Spectators: Spectators.DefaultVisibility
+  );
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 0, "Hide Distance To Crosshair", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.DISTANCE_TO_CROSSHAIR_DISPLAY), 99999);
+  DestroyInWorldText(infoDisplayEntities[InfoAction.DISTANCE_TO_CROSSHAIR_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 0, "Show Distance To Crosshair", Color.Aqua);
+}

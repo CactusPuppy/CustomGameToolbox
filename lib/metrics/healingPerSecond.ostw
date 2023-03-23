@@ -1,0 +1,118 @@
+import "./shared.del";
+import "./config.del";
+
+struct HealingInstance {
+  public Number timestamp;
+  public Number amount;
+  public Player healer;
+  public Player healee;
+}
+
+playervar HealingInstance[] healingReceivedEvents = [];
+playervar Number healReceivedInPeriod;
+playervar Number healReceivedInPeriodNonSelf;
+playervar HealingInstance[] healingDealtEvents = [];
+playervar Number healDealtInPeriod;
+playervar Number healDealtInPeriodNonSelf;
+
+rule: "[lib/healingPerSecond.ostw] Track when a player receives healing"
+Event.OnHealingTaken
+if (EventHealing() > 0)
+{
+  Number eventTimestamp! = TotalTimeElapsed();
+  Healee().healingReceivedEvents.ModAppend({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
+  Healer().healingDealtEvents.ModAppend({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
+
+  if (eventTimestamp < Healee().healingReceivedEvents.First.timestamp + durationToAverageOver) {
+    Healee().healReceivedInPeriod += EventHealing();
+    if (Healer() != Healee()) Healee().healReceivedInPeriodNonSelf += EventHealing();
+  }
+  if (eventTimestamp < Healer().healingDealtEvents.First.timestamp + durationToAverageOver) {
+    Healer().healDealtInPeriod += EventHealing();
+    if (Healer() != Healee()) Healer().healDealtInPeriodNonSelf += EventHealing();
+  }
+}
+
+rule: "[lib/healingPerSecond.ostw] When the head of the healing received array has expired, remove all expired events"
+Event.OngoingPlayer
+if (healingReceivedEvents.Length > 0)
+if (UpdateEveryFrame(TotalTimeElapsed()) >= healingReceivedEvents.First.timestamp + durationToAverageOver + perSecondBufferRetentionSeconds)
+{
+  oldTimeAcceptanceThreshold = healingReceivedEvents.First.timestamp + durationToAverageOver;
+  structArraysStartIndex = 0;
+  structArraysCount = healingReceivedEvents.Length;
+
+  # Remove expired events
+  while (healingReceivedEvents[structArraysStartIndex].timestamp + durationToAverageOver + perSecondBufferRetentionSeconds < TotalTimeElapsed() && structArraysStartIndex < healingReceivedEvents.Length) {
+    healReceivedInPeriod = Max(0, healReceivedInPeriod - healingReceivedEvents[structArraysStartIndex].amount);
+    if (healingReceivedEvents[structArraysStartIndex].healee != healingReceivedEvents[structArraysStartIndex].healer)
+      healReceivedInPeriodNonSelf = Max(0, healReceivedInPeriodNonSelf - healingReceivedEvents[structArraysStartIndex].amount);
+    structArraysStartIndex++;
+    structArraysCount--;
+  }
+  # Early termination optimization/safety clause
+  if (healingReceivedEvents.Length == 0) {
+    healReceivedInPeriod = 0; healReceivedInPeriodNonSelf = 0;
+    MinWait();
+    LoopIfConditionIsTrue();
+    return;
+  }
+  sweepNewlyValidEventsIndex = structArraysStartIndex;
+  # Add newly valid events
+  while (healingReceivedEvents[sweepNewlyValidEventsIndex].timestamp < healingReceivedEvents[structArraysStartIndex].timestamp + durationToAverageOver && sweepNewlyValidEventsIndex < healingReceivedEvents.Length) {
+    # Make sure to only include NEWLY valid events
+    if (healingReceivedEvents[sweepNewlyValidEventsIndex].timestamp >= oldTimeAcceptanceThreshold) {
+      healReceivedInPeriod += healingReceivedEvents[sweepNewlyValidEventsIndex].amount;
+      if (healingReceivedEvents[sweepNewlyValidEventsIndex].healer != healingReceivedEvents[sweepNewlyValidEventsIndex].healee) {
+        healReceivedInPeriodNonSelf += healingReceivedEvents[sweepNewlyValidEventsIndex].amount;
+      }
+    }
+    sweepNewlyValidEventsIndex++;
+  }
+  # Slice arrays instead of doing incremental updates for perf
+  healingReceivedEvents = healingReceivedEvents.Slice(structArraysStartIndex, structArraysCount);
+  MinWait();
+  LoopIfConditionIsTrue();
+}
+
+rule: "[lib/healingPerSecond.ostw] When the head of the healing dealt array has expired, remove all expired events"
+Event.OngoingPlayer
+if (healingDealtEvents.Length > 0)
+if (UpdateEveryFrame(TotalTimeElapsed()) >= healingDealtEvents.First.timestamp + durationToAverageOver + perSecondBufferRetentionSeconds)
+{
+  oldTimeAcceptanceThreshold = healingDealtEvents.First.timestamp + durationToAverageOver;
+  structArraysStartIndex = 0;
+  structArraysCount = healingDealtEvents.Length;
+
+  # Remove expired events
+  while (healingDealtEvents[structArraysStartIndex].timestamp + durationToAverageOver + perSecondBufferRetentionSeconds < TotalTimeElapsed() && structArraysStartIndex < healingDealtEvents.Length) {
+    healDealtInPeriod = Max(0, healDealtInPeriod - healingDealtEvents[structArraysStartIndex].amount);
+    if (healingDealtEvents[structArraysStartIndex].healee != healingDealtEvents[structArraysStartIndex].healer)
+      healDealtInPeriodNonSelf = Max(0, healDealtInPeriodNonSelf - healingDealtEvents[structArraysStartIndex].amount);
+    structArraysStartIndex++;
+    structArraysCount--;
+  }
+  # Early termination optimization/safety clause
+  if (healingReceivedEvents.Length == 0) {
+    healReceivedInPeriod = 0; healReceivedInPeriodNonSelf = 0;
+    MinWait();
+    LoopIfConditionIsTrue();
+    return;
+  }
+  sweepNewlyValidEventsIndex = structArraysStartIndex;
+  # Add newly valid events
+  while (healingDealtEvents[sweepNewlyValidEventsIndex].timestamp < healingDealtEvents[structArraysStartIndex].timestamp + durationToAverageOver && sweepNewlyValidEventsIndex < healingDealtEvents.Length) {
+    # Make sure to only include NEWLY valid events
+    if (healingDealtEvents[sweepNewlyValidEventsIndex].timestamp >= oldTimeAcceptanceThreshold) {
+      healDealtInPeriod += healingDealtEvents[sweepNewlyValidEventsIndex].amount;
+      if (healingDealtEvents[sweepNewlyValidEventsIndex].healer != healingDealtEvents[sweepNewlyValidEventsIndex].healee) {
+        healDealtInPeriodNonSelf += healingDealtEvents[sweepNewlyValidEventsIndex].amount;
+      }
+    }
+    sweepNewlyValidEventsIndex++;
+  }
+  # Slice arrays instead of doing incremental updates for perf
+  healingDealtEvents = healingDealtEvents.Slice(structArraysStartIndex, structArraysCount);
+  MinWait();
+  LoopIfConditionIsTrue();
+}
