@@ -57,12 +57,12 @@ if (IsButtonHeld(Button: Button.PrimaryFire))
 void HandleConfirmEndGameClick() "Handle confirm/cancel for ending game"
 {
   if (cursorOnCancelBtn()) {
-    currentMenuState = MenuState.TOOLS;
+    OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
   } else if (cursorOnConfirmBtn()) {
     DeclareMatchDraw();
     Wait(0.25);
     if (IsMatchComplete()) {
-      currentMenuState = MenuState.CLOSED;
+      CloseMenu(EventPlayer());
       return;
     }
     SmallMessage(EventPlayer(), "Can't seem to end the game right now. Try again in a bit!");

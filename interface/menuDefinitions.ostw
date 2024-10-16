@@ -55,7 +55,12 @@ void printMenuValues() {
   LogToInspector(<"numRows calc | numerator: <0>, denominator: <1>, raw result: <2>, final result: <3>", firstRowY + yLim, rowSeparation, (firstRowY + yLim) / rowSeparation + 1, numRows>);
 }
 
-void CloseMenu(in Player player) {
+void OpenMenuToPage(in Player player = EventPlayer(), in MenuState menuState = MenuState.MAIN_MENU) {
+  player.currentMenuState = menuState;
+}
+
+void CloseMenu(in Player player = EventPlayer()) {
+  # Avoid having input count for something else by allowing other modules to read that an input was processed in the menu.
   MinWait();
   player.currentMenuState = MenuState.CLOSED;
 }

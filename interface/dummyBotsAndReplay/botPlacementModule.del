@@ -72,6 +72,13 @@ SelectionEntity[] getAllMovableTargetsAsSelectionEntities(): getAllMovableTarget
 SelectionEntity[] getFacingControlTargets(): getAllMovableTargets().Map((p) => p.facingControl);
 SelectionEntity[] getAllSelectionEntities(): getAllMovableTargetsAsSelectionEntities().Append(getFacingControlTargets());
 SelectionEntity getClosestSelectionEntity(Player player): Selection.GetSelection(player, getAllSelectionEntities());
+Vector desiredFacingControlPosition(Player controlOwner = EventPlayer()): RayCastHitPosition(
+  StartPOS: controlOwner.EyePosition(),
+  EndPOS: controlOwner.EyePosition()
+    + FacingDirectionOf(controlOwner) * 5,
+  PlayersToInclude: null,
+  PlayersToExclude: null,
+  IncludePlayerOwnedObjects: false);
 
 Boolean IsControllable(Player player = EventPlayer()): IsDummyBot(player);
 Player | Player[] playersWhoShouldSeeControls(SelectionEntity entity):
@@ -104,7 +111,7 @@ if (HasSpawned())
     VisibleTo: playersWhoShouldSeeControls(positionControl),
     Type: Effect.Sphere,
     Color: getClosestSelectionEntity(LocalPlayer()).Id == EvaluateOnce(nextSelectionEntityId + 1) ? Color.Orange : Color.Yellow,
-    Position: facingControl.Position,
+    Position: UpdateEveryFrame(desiredFacingControlPosition(EventPlayer())),
     Radius: 0.25,
     Reevaluation: EffectRev.VisibleToPositionAndRadius
   );
@@ -112,39 +119,58 @@ if (HasSpawned())
     VisibleTo: playersWhoShouldSeeControls(facingControl),
     BeamType: BeamType.GrappleBeam,
     StartPosition: EventPlayer().EyePosition(),
-    EndPosition: facingControl.Position,
+    EndPosition: UpdateEveryFrame(desiredFacingControlPosition(EventPlayer())),
     Color: null,
     EffectRev.VisibleToPositionAndRadius
   );
   nextSelectionEntityId += 2;
 }
 
-rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effect on closest selection entity"
-Event.OngoingPlayer
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on closest selection entity"
 {
   CreateEffect(
-    VisibleTo: EventPlayer(),
+    VisibleTo: AllPlayers().Contains(LocalPlayer())
+      && LocalPlayer().botControlMode == BotControlMode.Edit
+      && !(IsButtonHeld(LocalPlayer(), Button.PrimaryFire)
+        && getClosestSelectionEntity(LocalPlayer()).Id != 0)
+        ? LocalPlayer() : null,
     Type: Effect.Sphere,
     Color: Color.Blue,
-    Position: getClosestSelectionEntity(EventPlayer()).Position,
+    Position: getClosestSelectionEntity(LocalPlayer()).Position,
     Radius: 0.25,
     Reevaluation: EffectRev.VisibleToPositionAndRadius
   );
   CreateHudText(
-    VisibleTo: EventPlayer(),
-    Text: getClosestSelectionEntity(EventPlayer()).toString(),
+    VisibleTo: AllPlayers().Contains(LocalPlayer()) && LocalPlayer().botControlMode == BotControlMode.Edit ? LocalPlayer() : null,
+    Text: getClosestSelectionEntity(LocalPlayer()).toString(),
     Location: Location.Left,
     Reevaluation: HudTextRev.VisibleToAndString
+  );
+  CreateInWorldText(
+    VisibleTo: AllPlayers().Contains(LocalPlayer())
+      && LocalPlayer().botControlMode == BotControlMode.Edit
+      && LocalPlayer().currentMenuState == MenuState.CLOSED
+      && getClosestSelectionEntity(LocalPlayer()).Id != 0
+        ? LocalPlayer() : null,
+    Header: <"<0> | Drag<1>",
+      InputBindingString(Button.PrimaryFire),
+      getClosestSelectionEntity(LocalPlayer()).ControlType == BotControlType.DummyBot
+        ? <"\n<0> | Edit Bot", InputBindingString(Button.SecondaryFire)>
+        : "">,
+    Position: getClosestSelectionEntity(LocalPlayer()).Position + Up(),
+    Scale: 1.5,
+    Clipping: Clipping.DoNotClip,
+    Reevaluation: InworldTextRev.VisibleToPositionAndString
   );
 }
 
 rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Update position control orb"
 Event.OngoingPlayer
 if (IsDummyBot())
-if (DistanceBetween(EventPlayer().Position() + Up(), positionControl.Position) > 0.25)
+if (DistanceBetween(EventPlayer().Position() + Up(), positionControl.Position) > 0.01)
 {
   positionControl.Position = EventPlayer().Position() + Up();
-  Wait(0.064, WaitBehavior.IgnoreCondition);
+  MinWait();
   LoopIfConditionIsTrue();
 }
 
@@ -152,24 +178,12 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Update facing cont
 Event.OngoingPlayer
 if (IsDummyBot())
 if (DistanceBetween(
-  RayCastHitPosition(
-    StartPOS: EventPlayer().EyePosition(),
-    EndPOS: EventPlayer().EyePosition()
-      + FacingDirectionOf() * 5,
-    PlayersToInclude: null,
-    PlayersToExclude: null,
-    IncludePlayerOwnedObjects: false),
+  desiredFacingControlPosition(),
   facingControl.Position)
-> 0.25)
+> 0.01)
 {
-  facingControl.Position = RayCastHitPosition(
-    StartPOS: EventPlayer().EyePosition(),
-    EndPOS: EventPlayer().EyePosition()
-      + FacingDirectionOf() * 5,
-    PlayersToInclude: null,
-    PlayersToExclude: null,
-    IncludePlayerOwnedObjects: false);
-  Wait(0.064, WaitBehavior.IgnoreCondition);
+  facingControl.Position = desiredFacingControlPosition();
+  MinWait();
   LoopIfConditionIsTrue();
 }
 

@@ -185,9 +185,9 @@ if (IsButtonHeld(EventPlayer(), Button.Interact))
 {
   Wait(0.5, WaitBehavior.AbortWhenFalse);
   if (currentMenuState == MenuState.CLOSED) {
-    currentMenuState = MenuState.MAIN_MENU;
+    OpenMenuToPage();
   } else {
-    currentMenuState = MenuState.CLOSED;
+    CloseMenu();
   }
 }
 
@@ -228,16 +228,15 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
 {
   AbortIf(currentMenuState == MenuState.CLOSED);
   if (currentMenuState == MenuState.MAIN_MENU) {
-    # Avoid having input count for something else by allowing other modules to read that an input was processed in the menu.
     CloseMenu(EventPlayer());
     return;
   }
   if (ArrayContains([MenuState.INFORMATION, MenuState.MODIFICATIONS, MenuState.TOOLS,
       MenuState.DUMMY_BOTS_AND_REPLAY], currentMenuState)) {
-    currentMenuState = MenuState.MAIN_MENU;
+    OpenMenuToPage();
   }
   if (currentMenuState == MenuState.CONFIRMING_END_GAME) {
-    currentMenuState = MenuState.TOOLS;
+    OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
   }
   if (currentMenuState == MenuState.EDITING_DUMMY_BOT) {
     CloseMenu(EventPlayer());

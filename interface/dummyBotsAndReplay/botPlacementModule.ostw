@@ -50,30 +50,38 @@ if (EventPlayer().IsButtonHeld(Button.PrimaryFire))
     selectionSetDistance = DistanceBetween(EventPlayer().EyePosition(), selectedControl.Owner);
     StartForcingPlayerPosition(
       Player: selectedControl.Owner,
-      Position: RayCastHitPosition(
+      Position: UpdateEveryFrame(RayCastHitPosition(
         StartPOS: EventPlayer().EyePosition(),
         EndPOS: EventPlayer().EyePosition()
           + FacingDirectionOf() * selectionSetDistance,
         PlayersToInclude: null,
         PlayersToExclude: null,
-        IncludePlayerOwnedObjects: false) + Down(),
+        IncludePlayerOwnedObjects: false) + Down()),
       Reevaluation: true);
     WaitUntil(!(EventPlayer().IsButtonHeld(Button.PrimaryFire) && botControlMode == BotControlMode.Edit), 1000000);
+    selectedControl.Position = RayCastHitPosition(
+      StartPOS: EventPlayer().EyePosition(),
+      EndPOS: EventPlayer().EyePosition()
+        + FacingDirectionOf() * selectionSetDistance,
+      PlayersToInclude: null,
+      PlayersToExclude: null,
+      IncludePlayerOwnedObjects: false) + Down();
     StopForcingPlayerPosition(selectedControl.Owner);
   } else if (getFacingControlTargets().Map((e) => e.Id).Contains(selectedControl.Id)) {
     # If a bot's facing got selected, rotate it
     StartFacing(
       Player: selectedControl.Owner,
-      Direction: DirectionTowards(selectedControl.Owner.EyePosition(), RayCastHitPosition(
+      Direction: UpdateEveryFrame(DirectionTowards(selectedControl.Owner.EyePosition(), RayCastHitPosition(
         StartPOS: EventPlayer().EyePosition(),
         EndPOS: EventPlayer().EyePosition()
           + FacingDirectionOf() * EvaluateOnce(DistanceBetween(EventPlayer().EyePosition(), selectedControl.Position)),
         PlayersToInclude: null,
         PlayersToExclude: null,
-        IncludePlayerOwnedObjects: false)),
+        IncludePlayerOwnedObjects: false))),
       TurnRate: 999999,
       Reevaluation: FacingRev.DirectionAndTurnRate);
     WaitUntil(!(EventPlayer().IsButtonHeld(Button.PrimaryFire) && botControlMode == BotControlMode.Edit), 1000000);
+    selectedControl.Position = desiredFacingControlPosition(selectedControl.Owner);
     StopFacing(selectedControl.Owner);
   }
   selectedControl = null;
@@ -86,11 +94,10 @@ if (IsDummyBot() == false)
 if (botControlMode == BotControlMode.Edit)
 if (EventPlayer().IsButtonHeld(Button.SecondaryFire))
 {
-  // TODO: Open menu to EDITING_DUMMY_BOT page
   AbortIf(!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED));
   selectedControl = getClosestSelectionEntity(EventPlayer());
   AbortIf(selectedControl.Id == 0 || selectedControl.ControlType != BotControlType.DummyBot);
   selectedBot = selectedControl.Owner;
-  currentMenuState = MenuState.EDITING_DUMMY_BOT;
+  OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
 }
 

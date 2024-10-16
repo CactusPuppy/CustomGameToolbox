@@ -105,7 +105,7 @@ rule: "[main.ostw] Avoid getting people stuck in menu"
 Event.OngoingPlayer
 if (IsBetweenRounds())
 {
-  currentMenuState = MenuState.CLOSED;
+  CloseMenu(EventPlayer());
 }
 
 rule: "[main.ostw] Skip setup"
