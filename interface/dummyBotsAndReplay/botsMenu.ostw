@@ -38,6 +38,11 @@ Color[] botsReplayMenuButtonColors: [
   null, null, Color.Red, null, null
 ];
 
+void MarkLastCreatedBotAsPunchingBag() {
+  LastCreatedEntity().isPunchingBag = true;
+  AddHealthPoolToPlayer(LastCreatedEntity(), HealthType.Health, 1250, true, false);
+}
+
 void HandleBotsMenuClick() {
   AbortIf(BotsReplayActionGrid[currentGridIndex()] == BotsReplayAction.NONE);
   selectedBotsReplayAction = BotsReplayActionGrid[currentGridIndex()];
@@ -71,8 +76,7 @@ Event.OngoingPlayer
 if (selectedBotsReplayAction == BotsReplayAction.CREATE_PUNCHING_BAG)
 {
   Menu_CreateBot();
-  LastCreatedEntity().isPunchingBag = true;
-  AddHealthPoolToPlayer(LastCreatedEntity(), HealthType.Health, 1250, true, false);
+  MarkLastCreatedBotAsPunchingBag();
 }
 
 rule: "[interface/dummyBots/botsMenu.ostw] Destroy all bots"
