@@ -64,8 +64,8 @@ if (activeInfoDisplays.Contains(InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY))
     Text: <"Other: <0><1>", UpdateEveryFrame((damageReceivedInPeriodNonSelf) / durationToAverageOver), MANY_SPACES>,
     SortOrder: activeInfoDisplays.IndexOf(InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY)
   );
-  UpdateButtonAppearance(MenuState.INFORMATION, 3, 3, "Hide DPS Received", Color.Gray);
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 4, "Hide DPS Received", Color.Gray);
   WaitUntil(!activeInfoDisplays.Contains(InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY), 99999);
   DestroyHudText(infoDisplayEntities[InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY]);
-  UpdateButtonAppearance(MenuState.INFORMATION, 3, 3, "Show DPS Received", CustomColor(218, 76, 10, 255));
+  UpdateButtonAppearance(MenuState.INFORMATION, 3, 4, "Show DPS Received", CustomColor(218, 76, 10, 255));
 }

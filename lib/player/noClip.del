@@ -8,10 +8,10 @@ rule: "[lib/player/noClip.del] Global noclip setup"
     VisibleTo: LocalPlayer().isNoClipActive && LocalPlayer().currentMenuState == MenuState.CLOSED ? LocalPlayer() : null,
     Subheader: "NoClip Active",
     Text: <"Hold [<0>] - Move Faster", InputBindingString(Button.Reload)>,
-    Location: Location.Left,
+    Location: Location.Right,
     SortOrder: 1,
-    SubheaderColor: Color.Yellow,
-    TextColor: LocalPlayer().IsButtonHeld(Button.Reload) ? Color.Yellow : Color.White,
+    SubheaderColor: Color.Orange,
+    TextColor: LocalPlayer().IsButtonHeld(Button.Reload) ? Color.Orange : Color.Blue,
     Reevaluation: HudTextRev.VisibleToStringAndColor,
     Spectators: Spectators.VisibleNever);
 }

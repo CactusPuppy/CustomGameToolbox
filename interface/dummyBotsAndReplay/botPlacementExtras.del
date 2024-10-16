@@ -1,0 +1,88 @@
+// DEBUG
+// rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] DEBUG - Show skin combo slots remaining"
+// {
+//   CreateHudText(AllPlayers(), <"Hero-Skin Combo Slots: <0>", uniqueHeroSkinCombosRemaining>, Location: Location.Right, Reevaluation: HudTextRev.VisibleToAndString);
+// }
+
+// DEBUG
+// rule: "[DEBUG] Create dummy bot (crouch = enemy)"
+// Event.OngoingPlayer
+// // if (EventPlayer() == HostPlayer())
+// if (IsCommunicating(EventPlayer(), Communication.Hello))
+// {
+//   if (IsButtonHeld(Button: Button.Crouch)) {
+//     DestroyDummyBot(OppositeTeamOf(TeamOf()), 5);
+//     Wait(0.1);
+//     CreateDummyBot(
+//       Hero.Soldier76,
+//       OppositeTeamOf(TeamOf()),
+//       5,
+//       PositionOf(),
+//       FacingDirectionOf()
+//     );
+//   } else {
+//     DestroyDummyBot((TeamOf()), 5);
+//     Wait(0.1);
+//     CreateDummyBot(
+//       Hero.Soldier76,
+//       TeamOf(),
+//       5,
+//       PositionOf(),
+//       FacingDirectionOf()
+//     );
+//   }
+//   MinWait();
+//   // SetMaxHealth(LastCreatedEntity(), 500);
+//   AddHealthPoolToPlayer(LastCreatedEntity(), HealthType.Health, 5000, true, false);
+// }
+
+// rule: "[DEBUG] Brig uses ult when host taps interact"
+// Event.OngoingPlayer
+// if (IsDummyBot())
+// if (IsButtonHeld(HostPlayer(), Button.Interact))
+// {
+//   SetUltimateCharge(EventPlayer(), 100);
+//   Wait(0.25);
+//   PressButton(EventPlayer(), Button.Ultimate);
+// }
+
+
+// TEMP
+// rule: "[DEBUG] Show damage ability"
+// Event.OnDamageTaken
+// {
+//   SmallMessage(AllPlayers(), <"<0> used <1> to damage <2>", Attacker(), EventAbility(), Victim()>);
+// }
+
+// rule: "[DEBUG] Show healing ability"
+// Event.OnHealingDealt
+// {
+//   SmallMessage(AllPlayers(), <"<0> used <1> to heal <2>", Healer(), EventAbility(), Healee()>);
+// }
+
+// rule: "[DEBUG] limit health of dummies"
+// Event.OngoingPlayer
+// if (IsDummyBot())
+// if (AbsoluteValue(NormalizedHealth() - 0.6) > 0.075)
+// {
+//   SetPlayerHealth(EventPlayer(), 0.6 * MaxHealth());
+//   Wait(1, WaitBehavior.AbortWhenFalse);
+//   LoopIfConditionIsTrue();
+// }
+
+// // DEBUG
+// rule: '[DEBUG] mark dummy bots'
+// Event.OngoingPlayer
+// if (IsDummyBot())
+// {
+//   CreateIcon(AllPlayers(), PositionOf(), Icon.Diamond, IconRev.VisibleToAndPosition, Color.Red, true);
+// }
+
+// // DEBUG
+// rule: '[DEBUG] destroy bot when it dies'
+// Event.OnDeath
+// if (IsDummyBot())
+// {
+//   Wait(3);
+//   DestroyDummyBot(TeamOf(), SlotOf());
+// }

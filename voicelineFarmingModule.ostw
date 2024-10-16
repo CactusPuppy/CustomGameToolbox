@@ -1,0 +1,20 @@
+rule: "Create companion bot to say things"
+if (HasSpawned(HostPlayer()))
+{
+  Player spawnPoint = RandomValueInArray(SpawnPoints(TeamOf(HostPlayer())));
+  CreateDummyBot(
+    WorkshopSettingHero("Voiceline Hunting Settings", "Companion Hero", Hero.Lifeweaver, -10),
+    TeamOf(HostPlayer()),
+    5,
+    PositionOf(spawnPoint),
+    FacingDirectionOf(spawnPoint)
+  );
+}
+
+rule: "When there's only 6 seconds left in setup, loop it"
+if (WorkshopSettingToggle("Voiceline Hunting Settings", "Indefinitely Stay In Setup Phase", true))
+if (IsInSetup())
+if (MatchTime() < 6)
+{
+  SetMatchTime(45);
+}

@@ -19,6 +19,36 @@ Event.OngoingPlayer
   buttonLocks[CountOf(AllButtons)] = 0;
 }
 
+rule: "[lib/player/buttonControl.del] MONKEY PATCH - For Winston, disable secondary fire instead of just disallowing button (because disallow doesn't work on Winston)"
+Event.OngoingPlayer
+if (buttonLocks[AllButtons.IndexOf(Button.SecondaryFire)] > 0)
+if (HeroOf() == Hero.Winston)
+{
+  SetSecondaryFireEnabled(EventPlayer(), false);
+  WaitUntil(buttonLocks[AllButtons.IndexOf(Button.SecondaryFire)] == 0 || HeroOf() != Hero.Winston, 99999);
+  SetSecondaryFireEnabled(EventPlayer(), true);
+}
+
+rule: "[lib/player/buttonControl.del] MONKEY PATCH - For Mauga, disable primary fire instead of just disallowing button (because disallow doesn't work on Winston)"
+Event.OngoingPlayer
+if (buttonLocks[AllButtons.IndexOf(Button.PrimaryFire)] > 0)
+if (HeroOf() == Hero.Mauga)
+{
+  SetPrimaryFireEnabled(EventPlayer(), false);
+  WaitUntil(buttonLocks[AllButtons.IndexOf(Button.PrimaryFire)] == 0 || HeroOf() != Hero.Mauga, 99999);
+  SetPrimaryFireEnabled(EventPlayer(), true);
+}
+
+rule: "[lib/player/buttonControl.del] MONKEY PATCH - For Mauga, disable secondary fire instead of just disallowing button (because disallow doesn't work on Mauga)"
+Event.OngoingPlayer
+if (buttonLocks[AllButtons.IndexOf(Button.SecondaryFire)] > 0)
+if (HeroOf() == Hero.Mauga)
+{
+  SetSecondaryFireEnabled(EventPlayer(), false);
+  WaitUntil(buttonLocks[AllButtons.IndexOf(Button.SecondaryFire)] == 0 || HeroOf() != Hero.Mauga, 99999);
+  SetSecondaryFireEnabled(EventPlayer(), true);
+}
+
 void AddOneLockToAllButtons(in Player player = EventPlayer())
 {
   player.buttonLocks = player.buttonLocks.Map((lockCount) => lockCount + 1);

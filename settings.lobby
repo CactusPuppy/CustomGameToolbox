@@ -1,29 +1,36 @@
 {
   "Mode Name": "Overwatch Content Creation Toolbox",
-  "Description": "v0.1-ALPHA\nCreated by CactusPuppy",
+  "Description": "v0.2-ALPHA\nCreated by CactusPuppy",
   "Modes": {
     "All": {
       "Hero Limit": "Off",
-      "Game Mode Start": "Immediately"
-    },
-    "Assault": {
-      "Competitive Rules": true
+      "Game Mode Start": "Immediately",
+      "Tank Role Passive Health Bonus": "Disabled"
     },
     "Control": {
-      "Competitive Rules": true
+      "Competitive Rules": true,
+      "Score To Win": 3,
+      "Enabled Maps": []
     },
     "Escort": {
-      "Competitive Rules": true
+      "Competitive Rules": true,
+      "Enabled Maps": []
     },
     "Push": {
-      "Competitive Rules": true
+      "Competitive Rules": true,
+      "Enabled Maps": []
     },
     "Hybrid": {
-      "Competitive Rules": true
+      "Competitive Rules": true,
+      "Enabled Maps": []
+    },
+    "Flashpoint": {
+      "Competitive Rules": true,
+      "Enabled Maps": []
     },
     "Skirmish": {
       "Enabled Maps": [
-        "Shambali Monastery"
+        "Samoa"
       ]
     }
   },

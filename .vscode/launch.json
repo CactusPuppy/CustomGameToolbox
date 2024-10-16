@@ -1,0 +1,50 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "ostw",
+      "label": "Overwatch Script To Workshop",
+      "languages": [
+        "ostw"
+      ],
+      "name": "OSTW Debug",
+      "request": "launch",
+      "configurationSnippets": [
+        {
+          "label": "Overwatch Script To Workshop: Debug Current File",
+          "name": "Overwatch Script To Workshop Configuration",
+          "description": "A new configuration for debugging an OSTW script.",
+          "body": {
+            "type": "ostw",
+            "program": "${workspaceFolder}/${file}"
+          }
+        }
+      ],
+      "initialConfigurations": [
+        {
+          "type": "ostw",
+          "name": "OSTW",
+          "program": "${workspaceFolder}/${file}",
+          "request": "launch"
+        }
+      ],
+      "configurationAttributes": {
+        "launch": {
+          "required": [
+            "program"
+          ],
+          "properties": {
+            "program": {
+              "type": "string",
+              "description": "The script to debug.",
+              "default": "${workspaceFolder}/${file}"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

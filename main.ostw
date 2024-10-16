@@ -1,21 +1,81 @@
-import "settings.lobby";
+// import "settings.lobby";
+settings
+{
+    main
+    {
+        Mode Name: "Overwatch Content Creation Toolbox"
+        Description: "v0.2-ALPHA
+Created by CactusPuppy"
+    }
+    modes
+    {
+        General
+        {
+            Hero Limit: 1 Per Team
+            Game Mode Start: Immediately
+            Tank Role Passive Health Bonus: Disabled
+        }
+
+        Escort {
+            Limit Roles: 1 Tank 2 Offense 2 Support
+            Competitive Rules: On
+        }
+
+        Hybrid {
+
+            Limit Roles: 1 Tank 2 Offense 2 Support
+            Competitive Rules: On
+        }
+
+        Clash {
+            Limit Roles: 1 Tank 2 Offense 2 Support
+            Competitive Rules: On
+        }
+
+        Control {
+
+            Limit Roles: 1 Tank 2 Offense 2 Support
+            Competitive Rules: On
+        }
+
+        Flashpoint {
+            Limit Roles: 1 Tank 2 Offense 2 Support
+            Competitive Rules: On
+        }
+
+        Push {
+            Limit Roles: 1 Tank 2 Offense 2 Support
+            Competitive Rules: On
+        }
+    }
+    lobby
+    {
+        Match Voice Chat: Enabled
+    }
+}
 
 import "UndoTankHealthReduction.ostw";
 import "interface/menu.ostw";
 import "lib/logs/logs.del";
 
+String GeneralSettingsCategory: "1. Settings";
+String HeroSettingsCategory: "2. Hero Settings";
+String MenuSettingsCategory: "3. Menu Settings";
+String ModSettingsCategory: "4. Mod Settings";
+String InformationCategory: "5. Information";
+
 // DEBUG: Diagnostics
-import "OSTWUtils/Diagnostics.del";
-disabled rule: "[DEBUG | main.ostw] Show diagnostics"
-{
-  new Diagnostics(ShowEntityCount: true, ShowTextCount: true, ShowServerLoad: true, ShowServerLoadAverage: true, ShowServerLoadPeak: true);
-  printMenuValues();
-}
+// import "OSTWUtils/Diagnostics.del";
+// disabled rule: "[DEBUG | main.ostw] Show diagnostics"
+// {
+//   new Diagnostics(ShowEntityCount: true, ShowTextCount: true, ShowServerLoad: true, ShowServerLoadAverage: true, ShowServerLoadPeak: true);
+//   printMenuValues();
+// }
 
 rule: "[main.ostw] Skip assembling heroes"
 if (IsAssemblingHeroes())
 {
-  SetMatchTime(5);
+  SetMatchTime(WorkshopSettingInteger(GeneralSettingsCategory, "Assembling Heroes Length", 5, 0, 30));
   if (isTimePaused) {
     UnpauseMatchTime();
     isTimePaused = false;
@@ -25,7 +85,8 @@ if (IsAssemblingHeroes())
   }
 }
 
-rule: "[main.ostw] pause match time on start"
+rule: "[main.ostw] pause match time on start of round"
+if (WorkshopSettingToggle(GeneralSettingsCategory, "Automatically Pause Match Time At Round Start", true))
 if (!IsAssemblingHeroes())
 {
   PauseMatchTime();
@@ -33,7 +94,7 @@ if (!IsAssemblingHeroes())
 }
 
 rule: "[main.ostw] Go back to lobby early, skipping victory poses and POTG"
-if (WorkshopSettingToggle("Settings", "Skip Post-Match Flow", true))
+if (WorkshopSettingToggle(GeneralSettingsCategory, "Skip Post-Match Flow", true))
 if (IsMatchComplete())
 {
   Wait(3);
@@ -46,3 +107,28 @@ if (IsBetweenRounds())
 {
   currentMenuState = MenuState.CLOSED;
 }
+
+rule: "[main.ostw] Skip setup"
+if (WorkshopSettingToggle(GeneralSettingsCategory, "Automatically Skip Setup", true))
+if (IsInSetup())
+{
+  SetMatchTime(0);
+  if (isTimePaused) {
+    UnpauseMatchTime();
+    isTimePaused = false;
+    WaitUntil(!IsInSetup(), 9999);
+    PauseMatchTime();
+    isTimePaused = true;
+  }
+}
+
+// DEBUG
+rule: "[main.ostw] self-damage on melee"
+Event.OngoingPlayer
+if (WorkshopSettingToggle(GeneralSettingsCategory, "Self-Damage On Melee", false))
+if (IsMeleeing())
+{
+  Damage(EventPlayer(), null, 75);
+}
+
+// import "voicelineFarmingModule.ostw";

@@ -31,7 +31,7 @@ InfoAction[] informationMenuButtonActions: [
   InfoAction.NONE,  InfoAction.POSITION_DISPLAY,                         InfoAction.FACING_DISPLAY,                 InfoAction.MOVE_SPEED_DISPLAY,                 InfoAction.NONE,
   InfoAction.NONE,  InfoAction.ALTITUDE_DISPLAY,                         InfoAction.ON_GROUND_DISPLAY,              InfoAction.ON_WALL_DISPLAY,                    InfoAction.NONE,
   InfoAction.NONE,  InfoAction.HEALING_DEALT_PER_SECOND_DISPLAY,         InfoAction.STATUS_EFFECT_READOUT,          InfoAction.DAMAGE_DEALT_PER_SECOND_DISPLAY,    InfoAction.NONE,
-  InfoAction.NONE,  InfoAction.HEALING_RECEIVED_PER_SECOND_DISPLAY,      InfoAction.NONE,                           InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY, InfoAction.NONE
+  InfoAction.NONE,  InfoAction.HEALING_RECEIVED_PER_SECOND_DISPLAY,      InfoAction.DAMAGE_HEAL_NUMBERS,            InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY, InfoAction.NONE
 ];
 
 String[] informationMenuButtonLabels: [
@@ -39,7 +39,7 @@ String[] informationMenuButtonLabels: [
   "",  "Show Position",          "Show Facing Direction",       "Show Move Speed",         "",
   "",  "Show Altitude",          "Show If On Ground",           "Show If On Wall",         "",
   "",  "Show HPS Dealt",         "Show Status Effects",         "Show DPS Dealt",          "",
-  "",  "Show HPS Received",      "",                            "Show DPS Received",       ""
+  "",  "Show HPS Received",      "Show Damage/Heal Numbers",    "Show DPS Received",       ""
 ];
 
 Color[] informationMenuButtonColors: [
@@ -47,7 +47,7 @@ Color[] informationMenuButtonColors: [
   null, Color.Green, Color.Rose, Color.Orange, null,
   null, Color.SkyBlue, Color.Purple, Color.Violet, null,
   null, Color.Yellow, Color.LimeGreen, Color.Red, null,
-  null, CustomColor(245, 200, 0, 255), null, CustomColor(218, 76, 10, 255), null
+  null, CustomColor(245, 200, 0, 255), Color.Blue, CustomColor(218, 76, 10, 255), null
 ];
 
 void HandleInformationMenuClick() {
@@ -59,6 +59,7 @@ void HandleInformationMenuClick() {
     SmallMessage(EventPlayer(), <"<0> Remove some readouts and try again", IconString(Icon.Warning)>);
     return;
   }
+  LogToInspector(<"Grid Index: <0> | InfoActionGrid[<0>]: <1>", currentGridIndex(), InfoActionGrid[currentGridIndex()]>);
   if (activeInfoDisplays.Contains((InfoActionGrid[currentGridIndex()]))) {
     activeInfoDisplays.ModRemoveByValue(InfoActionGrid[currentGridIndex()]);
   } else {
@@ -69,3 +70,4 @@ void HandleInformationMenuClick() {
 import "simpleInfoReadouts.ostw";
 import "metricsReadouts.ostw";
 import "statusEffects.ostw";
+import "damageNumbers.ostw";

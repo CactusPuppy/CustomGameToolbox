@@ -1,22 +1,26 @@
 import "../main.ostw";
 import "./menuDefinitions.ostw";
-import "../lib/utils/2DArray.del";
 import "../lib/utils/Colors.del";
 import "../lib/player/buttonControl.del";
 
-import "cheats/cheatsMenu.ostw";
 import "tools/toolsMenu.ostw";
 import "information/informationMenu.ostw";
+import "modifications/modsMenu.ostw";
+import "dummyBotsAndReplay/botsMenu.ostw";
+import "dummyBotsAndReplay/botEditPage.del";
 
 playervar ResetPoint menuActivationPoint;
 
-rule: "[Menu] Set up action grid" -100
+rule: "[interface/menu.ostw] Set up action grid" -100
 {
   ButtonActionGrid = [];
   ButtonActionGrid[MenuState.MAIN_MENU] = mainMenuButtonActions;
   ButtonActionGrid[MenuState.CONFIRMING_END_GAME] = [true, true];
   ButtonActionGrid[MenuState.TOOLS] = toolsMenuButtonActions;
   ButtonActionGrid[MenuState.INFORMATION] = informationMenuButtonActions;
+  ButtonActionGrid[MenuState.MODIFICATIONS] = modificationMenuButtonActions;
+  ButtonActionGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonActions;
+  ButtonActionGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonActions;
 }
 rule: "[interface/menu.ostw] Set up button label grid" -100
 Event.OngoingPlayer
@@ -25,6 +29,9 @@ Event.OngoingPlayer
   ButtonLabelGrid[MenuState.MAIN_MENU] = mainMenuButtonLabels;
   ButtonLabelGrid[MenuState.TOOLS] = toolsMenuButtonLabels;
   ButtonLabelGrid[MenuState.INFORMATION] = informationMenuButtonLabels;
+  ButtonLabelGrid[MenuState.MODIFICATIONS] = modificationMenuButtonLabels;
+  ButtonLabelGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonLabels;
+  ButtonLabelGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonLabels;
 }
 rule: "[interface/menu.ostw] Set up color grid" -100
 Event.OngoingPlayer
@@ -33,6 +40,9 @@ Event.OngoingPlayer
   ButtonColorGrid[MenuState.MAIN_MENU] = mainMenuButtonColors;
   ButtonColorGrid[MenuState.TOOLS] = toolsMenuButtonColors;
   ButtonColorGrid[MenuState.INFORMATION] = informationMenuButtonColors;
+  ButtonColorGrid[MenuState.MODIFICATIONS] = modificationMenuButtonColors;
+  ButtonColorGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonColors;
+  ButtonColorGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonColors;
 }
 
 MenuState[] mainMenuButtonActions: [
@@ -61,7 +71,7 @@ rule: "[interface/menu.ostw] Global menu setup"
 {
   # Create prompt to open mneu
   CreateHudText(
-    VisibleTo:     (!LocalPlayer().hideMenuOpenTooltip || (LocalPlayer().currentMenuState != MenuState.CLOSED)) ? LocalPlayer() : null,
+    VisibleTo:     AllPlayers().Contains(LocalPlayer()) && (!LocalPlayer().hideMenuOpenTooltip || (LocalPlayer().currentMenuState != MenuState.CLOSED)) ? LocalPlayer() : null,
     Text:          <"Hold [<0>] to <1> menu",
                       InputBindingString(Button.Interact),
                       LocalPlayer().currentMenuState == MenuState.CLOSED ? "open" : "close">,
@@ -108,6 +118,16 @@ rule: "[interface/menu.ostw] Global menu setup"
   // );
 }
 
+rule: "[interface/menu.ostw] Initialize player (one-time activation)"
+Event.OngoingPlayer
+{
+  if (hideMenuOpenTooltip) {
+    WaitUntil(HasSpawned(), 1000000);
+    Wait(1);
+    SmallMessage(EventPlayer(), <"   Hold <0> to open menu", InputBindingString(Button.Interact)>);
+  }
+}
+
 rule: "[interface/menu.ostw] When player first opens menu, hide tooltip when menu is closed"
 Event.OngoingPlayer
 if (!hideMenuOpenTooltip)
@@ -129,6 +149,7 @@ if (currentMenuState != MenuState.CLOSED)
   SetGravity(EventPlayer(), 0);
   AddOneLockToAllButtons();
   SetInvisible(EventPlayer(), InvisibleTo.All);
+  // SetStatus(EventPlayer(), null, Status.Asleep, 100000);
   SetStatus(EventPlayer(), null, Status.PhasedOut, 1000000);
   DisableKillFeed();
   DisableGameModeInworldUI();
@@ -154,6 +175,7 @@ if (currentMenuState != MenuState.CLOSED)
   RemoveOneLockFromAllButtons();
   SetInvisible(EventPlayer(), InvisibleTo.None);
   ClearStatus(EventPlayer(), Status.PhasedOut);
+  // ClearStatus(EventPlayer(), Status.Asleep);
 }
 
 rule: "[interface/menu.ostw] When player holds Interact long enough, toggle menu"
@@ -191,6 +213,12 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     case MenuState.MODIFICATIONS:
       HandleModificationClick();
       break;
+    case MenuState.DUMMY_BOTS_AND_REPLAY:
+      HandleBotsMenuClick();
+      break;
+    case MenuState.EDITING_DUMMY_BOT:
+      HandleBotEditPageClick();
+      break;
   }
 }
 
@@ -211,6 +239,10 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
   if (currentMenuState == MenuState.CONFIRMING_END_GAME) {
     currentMenuState = MenuState.TOOLS;
   }
+  if (currentMenuState == MenuState.EDITING_DUMMY_BOT) {
+    CloseMenu(EventPlayer());
+    return;
+  }
 }
 
 rule: "[interface/menu.ostw] Menu left-right"
@@ -218,7 +250,6 @@ Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 if (AbsoluteValue(XOf(ThrottleOf(EventPlayer()))) > 0.5)
 {
-  cache_startIndex1 = menuXIndex;
   if (XOf(ThrottleOf(EventPlayer())) > 0) {
     findLeft();
   } else {
@@ -230,7 +261,6 @@ rule: "[interface/menu.ostw] Menu up-down"
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
-  cache_startIndex1 = menuYIndex;
   if (ZOf(ThrottleOf()) > 0) {
     findUp();
   } else {

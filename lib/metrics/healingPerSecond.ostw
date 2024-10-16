@@ -19,9 +19,9 @@ rule: "[lib/healingPerSecond.ostw] Track when a player receives healing"
 Event.OnHealingTaken
 if (EventHealing() > 0)
 {
-  Number eventTimestamp! = TotalTimeElapsed();
-  Healee().healingReceivedEvents.ModAppend({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
-  Healer().healingDealtEvents.ModAppend({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
+  eventTimestamp = TotalTimeElapsed();
+  Healee().healingReceivedEvents = Healee().healingReceivedEvents.Append({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
+  Healer().healingDealtEvents = Healer().healingDealtEvents.Append({ timestamp: eventTimestamp, amount: EventHealing(), healer: Healer(), healee: Healee() });
 
   if (eventTimestamp < Healee().healingReceivedEvents.First.timestamp + durationToAverageOver) {
     Healee().healReceivedInPeriod += EventHealing();
@@ -93,8 +93,8 @@ if (UpdateEveryFrame(TotalTimeElapsed()) >= healingDealtEvents.First.timestamp +
     structArraysCount--;
   }
   # Early termination optimization/safety clause
-  if (healingReceivedEvents.Length == 0) {
-    healReceivedInPeriod = 0; healReceivedInPeriodNonSelf = 0;
+  if (healingDealtEvents.Length == 0) {
+    healDealtInPeriod = 0; healDealtInPeriodNonSelf = 0;
     MinWait();
     LoopIfConditionIsTrue();
     return;

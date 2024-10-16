@@ -19,9 +19,9 @@ rule: "[lib/damagePerSecond.ostw] Track when a player receives damage"
 Event.OnDamageTaken
 if (EventDamage() > 0)
 {
-  Number eventTimestamp! = TotalTimeElapsed();
-  Victim().damageReceivedEvents.ModAppend({ timestamp: eventTimestamp, amount: EventDamage(), attacker: Attacker(), victim: Victim() });
-  Attacker().damageDealtEvents.ModAppend({ timestamp: eventTimestamp, amount: EventDamage(), attacker: Attacker(), victim: Victim() });
+  eventTimestamp = TotalTimeElapsed();
+  Victim().damageReceivedEvents = Victim().damageReceivedEvents.Append({ timestamp: eventTimestamp, amount: EventDamage(), attacker: Attacker(), victim: Victim() });
+  Attacker().damageDealtEvents = Attacker().damageDealtEvents.Append({ timestamp: eventTimestamp, amount: EventDamage(), attacker: Attacker(), victim: Victim() });
 
   if (eventTimestamp < Victim().damageReceivedEvents.First.timestamp + durationToAverageOver) {
     Victim().damageReceivedInPeriod += EventDamage();

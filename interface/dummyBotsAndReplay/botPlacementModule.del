@@ -1,0 +1,176 @@
+import "../../lib/player/resetPoint.del";
+import "../../interface/menuDefinitions.ostw";
+
+enum BotControlType {
+  None,
+  DummyBot,
+  LookOrb
+}
+
+enum BotControlMode {
+  Normal,
+  Edit
+}
+
+globalvar Number nextSelectionEntityId = 1;
+single struct SelectionEntity {
+  public Player Owner;
+  public Number Id;
+  public Vector Position;
+  public BotControlType ControlType;
+
+  public Number dotProduct(Vector startPosition, Vector facingDirection):
+    DotProduct(
+      facingDirection,
+      DirectionTowards(startPosition, this.Position)
+    );
+
+  public String toString():
+    "ID: " + this.Id + ", Position: " + this.Position + ", ControlType: " + this.ControlType;
+}
+
+class Selection {
+  public static SelectionEntity[] Filter(Player selectingPlayer, SelectionEntity[] selectables, Number sensitivity = 1.25):
+    selectables.FilteredArray((selectable) =>
+      DistanceBetween(
+        selectingPlayer.EyePosition() + selectingPlayer.FacingDirection() * DistanceBetween(selectingPlayer.EyePosition(), selectable.Position),
+        selectable.Position
+      ) <= sensitivity
+    );
+
+  public static SelectionEntity[] Sort(Player selectingPlayer, SelectionEntity[] selectables):
+    selectables.SortedArray((selectable) =>
+      -1 * selectable.dotProduct(selectingPlayer.EyePosition(), selectingPlayer.FacingDirection())
+    );
+
+  public static SelectionEntity GetSelection(Player selectingPlayer, SelectionEntity[] selectables): Sort(selectingPlayer, Filter(selectingPlayer, selectables)).First;
+}
+
+globalvar Number uniqueHeroSkinCombosRemaining = 12; // Note this is a pessimistic estimation
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] When a player joins, update the number of hero-skin combos remaining"
+Event.OnPlayerJoin
+{
+  uniqueHeroSkinCombosRemaining = 12 - CountOf(AllPlayers(Team.All));
+}
+
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] When a player leaves, update the number of hero-skin combos remaining"
+Event.OnPlayerLeave
+{
+  uniqueHeroSkinCombosRemaining = 12 - CountOf(AllPlayers(Team.All));
+}
+
+
+playervar Player[] selectedBots = [];
+playervar ResetPoint replayResetPoint;
+playervar SelectionEntity positionControl;
+playervar SelectionEntity facingControl;
+playervar BotControlMode botControlMode;
+playervar Boolean isPunchingBag;
+
+Player[] getAllMovableTargets(): AllPlayers(Team.All).FilteredArray((player) => IsControllable(player));
+SelectionEntity[] getAllMovableTargetsAsSelectionEntities(): getAllMovableTargets().Map((p) => p.positionControl);
+SelectionEntity[] getFacingControlTargets(): getAllMovableTargets().Map((p) => p.facingControl);
+SelectionEntity[] getAllSelectionEntities(): getAllMovableTargetsAsSelectionEntities().Append(getFacingControlTargets());
+SelectionEntity getClosestSelectionEntity(Player player): Selection.GetSelection(player, getAllSelectionEntities());
+
+Boolean IsControllable(Player player = EventPlayer()): IsDummyBot(player);
+Player | Player[] playersWhoShouldSeeControls(SelectionEntity entity):
+  AllPlayers().Contains(LocalPlayer())
+  && IsControllable(entity.Owner)
+  && LocalPlayer().botControlMode == BotControlMode.Edit
+    ? LocalPlayer()
+    : null;
+// Player[] playersWhoShouldSeeControls: AllPlayers().FilteredArray((player) => player.botControlMode == BotControlMode.Edit);
+
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Initialize selection entities for dummy bots"
+Event.OngoingPlayer
+if (IsControllable())
+if (HasSpawned())
+{
+  positionControl = {
+    Id: nextSelectionEntityId,
+    Owner: EventPlayer(),
+    Position: EventPlayer().Position() + Up(),
+    ControlType: BotControlType.DummyBot
+  };
+  facingControl = {
+    Id: nextSelectionEntityId + 1,
+    Owner: EventPlayer(),
+    Position: EventPlayer().EyePosition() + FacingDirectionOf(EventPlayer()) * 5,
+    ControlType: BotControlType.LookOrb
+  };
+  # Create the facing location control orb
+  CreateEffect(
+    VisibleTo: playersWhoShouldSeeControls(positionControl),
+    Type: Effect.Sphere,
+    Color: getClosestSelectionEntity(LocalPlayer()).Id == EvaluateOnce(nextSelectionEntityId + 1) ? Color.Orange : Color.Yellow,
+    Position: facingControl.Position,
+    Radius: 0.25,
+    Reevaluation: EffectRev.VisibleToPositionAndRadius
+  );
+  CreateBeamEffect(
+    VisibleTo: playersWhoShouldSeeControls(facingControl),
+    BeamType: BeamType.GrappleBeam,
+    StartPosition: EventPlayer().EyePosition(),
+    EndPosition: facingControl.Position,
+    Color: null,
+    EffectRev.VisibleToPositionAndRadius
+  );
+  nextSelectionEntityId += 2;
+}
+
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effect on closest selection entity"
+Event.OngoingPlayer
+{
+  CreateEffect(
+    VisibleTo: EventPlayer(),
+    Type: Effect.Sphere,
+    Color: Color.Blue,
+    Position: getClosestSelectionEntity(EventPlayer()).Position,
+    Radius: 0.25,
+    Reevaluation: EffectRev.VisibleToPositionAndRadius
+  );
+  CreateHudText(
+    VisibleTo: EventPlayer(),
+    Text: getClosestSelectionEntity(EventPlayer()).toString(),
+    Location: Location.Left,
+    Reevaluation: HudTextRev.VisibleToAndString
+  );
+}
+
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Update position control orb"
+Event.OngoingPlayer
+if (IsDummyBot())
+if (DistanceBetween(EventPlayer().Position() + Up(), positionControl.Position) > 0.25)
+{
+  positionControl.Position = EventPlayer().Position() + Up();
+  Wait(0.064, WaitBehavior.IgnoreCondition);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Update facing control orb"
+Event.OngoingPlayer
+if (IsDummyBot())
+if (DistanceBetween(
+  RayCastHitPosition(
+    StartPOS: EventPlayer().EyePosition(),
+    EndPOS: EventPlayer().EyePosition()
+      + FacingDirectionOf() * 5,
+    PlayersToInclude: null,
+    PlayersToExclude: null,
+    IncludePlayerOwnedObjects: false),
+  facingControl.Position)
+> 0.25)
+{
+  facingControl.Position = RayCastHitPosition(
+    StartPOS: EventPlayer().EyePosition(),
+    EndPOS: EventPlayer().EyePosition()
+      + FacingDirectionOf() * 5,
+    PlayersToInclude: null,
+    PlayersToExclude: null,
+    IncludePlayerOwnedObjects: false);
+  Wait(0.064, WaitBehavior.IgnoreCondition);
+  LoopIfConditionIsTrue();
+}
+
+

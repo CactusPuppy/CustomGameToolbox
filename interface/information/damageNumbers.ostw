@@ -1,0 +1,103 @@
+import "informationMenu.ostw";
+import "../../lib/utils/Colors.del";
+
+Number LINGER_TIME_IN_SECONDS: 3;
+
+playervar Any cumulativeDamageDisplayTextID! = -1;
+playervar Any lastDamageDisplayTextID! = -1;
+playervar Number cumulativeDamage!;
+playervar Number lastDamageInstanceAmount!;
+playervar Vector lastDamageInstancePosition!;
+
+playervar Any cumulativeHealingDisplayTextID! = -1;
+playervar Any lastHealingDisplayTextID! = -1;
+playervar Number cumulativeHealing!;
+playervar Number lastHealInstanceAmount!;
+playervar Vector lastHealInstancePosition!;
+
+String OFFSET: "    ";
+
+rule: "[interface/information/damageNumbers.ostw] Update Information Menu button appearance for damage/heal numbers"
+Event.OngoingPlayer
+if (activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS))
+{
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 4, "Hide Damage/Heal Numbers", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS), 99999);
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 4, "Show Damage/Heal Numbers", Color.Blue);
+}
+
+rule: "[interface/information/damageNumbers.ostw] When player takes damage, create the text if necessary and update values"
+Event.OnDamageTaken
+if (EventDamage() > 0)
+{
+  lastDamageInstanceAmount = EventDamage();
+  lastDamageInstancePosition = PositionOf();
+  # If we don't have any active cumulative damage number, reset and create it
+  if (cumulativeDamageDisplayTextID == -1) {
+    cumulativeDamage = EventDamage();
+
+    cumulativeDamageDisplayTextID = CreateInWorldText(
+      VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
+      Header: <"-<0><1>", cumulativeDamage, (cumulativeHealingDisplayTextID != -1 ? OFFSET : "")>,
+      Position: UpdateEveryFrame(PositionOf()) + Up() * 2.5,
+      Scale: 4,
+      Clipping: Clipping.DoNotClip,
+      Reevaluation: InworldTextRev.VisibleToPositionAndString,
+      TextColor: LighterRed
+    );
+    lastDamageDisplayTextID = CreateInWorldText(
+      VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
+      Header: <"-<0><1>", lastDamageInstanceAmount, (cumulativeHealingDisplayTextID != -1 ? OFFSET : "")>,
+      Position: lastDamageInstancePosition + Up() * 2,
+      Scale: 1.5,
+      Clipping: Clipping.DoNotClip,
+      Reevaluation: InworldTextRev.VisibleToPositionAndString,
+      TextColor: LighterRed
+    );
+  } else {
+    cumulativeDamage += EventDamage();
+  }
+  Wait(LINGER_TIME_IN_SECONDS, WaitBehavior.RestartWhenTrue);
+  DestroyInWorldText(cumulativeDamageDisplayTextID);
+  DestroyInWorldText(lastDamageDisplayTextID);
+  cumulativeDamageDisplayTextID = -1;
+  lastDamageDisplayTextID = -1;
+}
+
+rule: "[interface/information/damageNumbers.ostw] When player received healing, create the text if necessary and update values"
+Event.OnHealingTaken
+if (EventHealing() > 0)
+{
+  lastHealInstanceAmount = EventHealing();
+  lastHealInstancePosition = PositionOf();
+  # If we don't have any active damage number, reset and create it
+  if (cumulativeHealingDisplayTextID == -1) {
+    cumulativeHealing = EventHealing();
+
+    cumulativeHealingDisplayTextID = CreateInWorldText(
+      VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
+      Header: <"<1>+<0>", cumulativeHealing, (cumulativeDamageDisplayTextID != -1 ? OFFSET : "")>,
+      Position: UpdateEveryFrame(PositionOf()) + Up() * 2.5,
+      Scale: 4,
+      Clipping: Clipping.DoNotClip,
+      Reevaluation: InworldTextRev.VisibleToPositionAndString,
+      TextColor: Color.Yellow
+    );
+    lastHealingDisplayTextID = CreateInWorldText(
+      VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
+      Header: <"<1>+<0>", lastHealInstanceAmount, (cumulativeDamageDisplayTextID != -1 ? OFFSET : "")>,
+      Position: lastHealInstancePosition + Up() * 2,
+      Scale: 1.5,
+      Clipping: Clipping.DoNotClip,
+      Reevaluation: InworldTextRev.VisibleToPositionAndString,
+      TextColor: Color.Yellow
+    );
+  } else {
+    cumulativeHealing += EventHealing();
+  }
+  Wait(LINGER_TIME_IN_SECONDS, WaitBehavior.RestartWhenTrue);
+  DestroyInWorldText(cumulativeHealingDisplayTextID);
+  DestroyInWorldText(lastHealingDisplayTextID);
+  cumulativeHealingDisplayTextID = -1;
+  lastHealingDisplayTextID = -1;
+}

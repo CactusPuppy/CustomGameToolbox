@@ -24,13 +24,14 @@ Vector visiblePosition2: MovablePosition(isMovingPosition2, position2);
 rule: "[interface/tools/ruler.ostw] Create help text for ruler"
 {
   CreateHudText(
-    VisibleTo: LocalPlayer().currentMenuState == MenuState.CLOSED && LocalPlayer().playerRulerState == RulerState.PLACING ? LocalPlayer() : null,
+    VisibleTo: AllPlayers().Contains(LocalPlayer()) && LocalPlayer().currentMenuState == MenuState.CLOSED && LocalPlayer().playerRulerState == RulerState.PLACING ? LocalPlayer() : null,
     Subheader: "Placing Ruler Endpoints",
     Text: <"[<0>] Move Blue Point\n[<1>] Move Orange Point", InputBindingString(Button.PrimaryFire), InputBindingString(Button.SecondaryFire)>,
-    Location: Location.Left,
+    Location: Location.Right,
     SubheaderColor: Color.Yellow,
     TextColor: Color.White,
-    Reevaluation: HudTextRev.VisibleToAndString
+    Reevaluation: HudTextRev.VisibleToAndString,
+    Spectators: Spectators.VisibleNever
   );
 }
 

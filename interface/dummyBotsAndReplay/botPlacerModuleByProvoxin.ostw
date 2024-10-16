@@ -1,0 +1,338 @@
+import "../menu.ostw";
+import "../../lib/player/buttonControl.del";
+
+globalvar define botHeroes;
+globalvar define heroQueue;
+globalvar define i;
+playervar define isEditing;
+playervar define noclipPosition;
+playervar define grabbedBot;
+playervar define targetedDummy;
+playervar define placementDistance;
+playervar define isChangingBot;
+playervar define prevFacings;
+playervar define originalHero;
+playervar define hasEdited;
+
+rule: "Set up bot heroes here (duplicates may bug bot creation)"
+{
+    botHeroes = [];
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Ana);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Ashe);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Baptiste);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Echo);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Genji);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Hanzo);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Junkrat);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Mercy);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Soldier76);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Zenyatta);
+    ModifyVariable(botHeroes, Operation.AppendToArray, Hero.Moira);
+}
+
+rule: "Player setup"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == false)
+{
+    placementDistance = 12;
+    # show position bots are created and held at
+    CreateEffect(isEditing ? EventPlayer() : [], Effect.Sphere, Color.Green, UpdateEveryFrame(RayCastHitPosition(noclipPosition, noclipPosition + FacingDirectionOf(EventPlayer()) * placementDistance, AllPlayers(Team.All), EventPlayer(), true)), 0.1, EffectRev.VisibleToPositionAndRadius);
+    # show binds to pick up and remove a bot when aiming at them
+    CreateInWorldText(isEditing && grabbedBot == null && !IsButtonHeld(EventPlayer(), Button.Ability1) && FirstOf(SortedArray(FilteredArray(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)), AngleBetweenVectors(FacingDirectionOf(EventPlayer()), DirectionTowards(noclipPosition, EyePosition(ArrayElement()))))) != null ? EventPlayer() : [], <"<0> PICK UP\n[<1>] CHANGE HERO\n     [<2>] REMOVE", InputBindingString(Button.SecondaryFire), InputBindingString(Button.Ability2), InputBindingString(Button.Ultimate)>, FirstOf(SortedArray(FilteredArray(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)), AngleBetweenVectors(FacingDirectionOf(EventPlayer()), DirectionTowards(noclipPosition, EyePosition(ArrayElement()))))), 1, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    # show keybind to stop holding a bot
+    CreateInWorldText(isEditing && grabbedBot != null && !IsButtonHeld(EventPlayer(), Button.Ability1) ? EventPlayer() : [], <"<0> DROP", InputBindingString(Button.PrimaryFire)>, grabbedBot, 1, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    # show how to create a bot if none exist yet
+    CreateHudText(isEditing && !NumberOfPlayers(OppositeTeamOf(TeamOf(EventPlayer()))) ? EventPlayer() : [], null, null, <"\n\n\n\n\n\n\n\n\n\n\n\n<0> CREATE BOT", InputBindingString(Button.PrimaryFire)>, Location.Top, 10, null, null, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+// rule: "Toggle edit mode"
+// Event.OngoingPlayer
+// if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+// {
+//     isEditing = !isEditing;
+//     Wait(0.25, WaitBehavior.IgnoreCondition);
+// }
+
+rule: "Enable edit mode"
+Event.OngoingPlayer
+if (isEditing == true)
+{
+    hasEdited = true;
+    # start noclipping from current position
+    noclipPosition = EyePosition(EventPlayer());
+    # store the player's hero so they can go back to it when they change a bot's hero
+    originalHero = HeroOf(EventPlayer());
+    # disable controls
+    SetAbility1Enabled(EventPlayer(), false);
+    SetAbility2Enabled(EventPlayer(), false);
+    SetPrimaryFireEnabled(EventPlayer(), false);
+    SetSecondaryFireEnabled(EventPlayer(), false);
+    SetUltimateAbilityEnabled(EventPlayer(), false);
+    SetMeleeEnabled(EventPlayer(), false);
+    SetJumpEnabled(EventPlayer(), false);
+    SetCrouchEnabled(EventPlayer(), false);
+    # for some reason disabling crouch still lets wrecking ball use piledriver
+    AddOneLockToButton(EventPlayer(), Button.Crouch);
+    # Don't conflict with menu cleanup
+    WaitUntil(currentMenuState == MenuState.CLOSED, 1);
+    MinWait();
+    # don't physically move
+    SetMoveSpeed(EventPlayer(), 0);
+    # don't fall
+    SetGravity(EventPlayer(), 0);
+    # resurrect and heal any bots that are dead so they can be edited
+    Resurrect(AllPlayers(Team.All));
+    # make a camera from the noclip position and copy the player's facing direction
+    StartCamera(EventPlayer(), noclipPosition, noclipPosition + FacingDirectionOf(EventPlayer()), 128);
+    # take into account throttle, facing direction, jump, and crouch inputs to make a decent noclip
+    ChaseVariableAtRate(noclipPosition, noclipPosition + (FacingDirectionOf(EventPlayer()) * ZOf(ThrottleOf(EventPlayer())) + WorldVectorOf(ThrottleOf(EventPlayer()) * Vector(1, 0, 0), EventPlayer(), LocalVector.Rotation) + Up() * (IsButtonHeld(EventPlayer(), Button.Jump) - IsButtonHeld(EventPlayer(), Button.Crouch))) * 100, 12, RateChaseReevaluation.DestinationAndRate);
+    # wait for a bit so the player doesn't see where they are teleported to
+    Wait(0.032, WaitBehavior.IgnoreCondition);
+    Teleport(EventPlayer(), Up() * 10000);
+}
+
+rule: "Disable edit mode"
+Event.OngoingPlayer
+Team.Team1
+if (IsDummyBot(EventPlayer()) == false)
+if (isEditing == false)
+{
+    # save some server load
+    StopChasingVariable(noclipPosition);
+    # subtract player's height from noclipPosition so that the camera is teleported to where the noclip camera was
+    Teleport(EventPlayer(), noclipPosition - (EyePosition(EventPlayer()) - PositionOf(EventPlayer())));
+    # return values to normal
+    SetGravity(EventPlayer(), 100);
+    SetMoveSpeed(EventPlayer(), 100);
+    SetAbility1Enabled(EventPlayer(), true);
+    SetAbility2Enabled(EventPlayer(), true);
+    SetPrimaryFireEnabled(EventPlayer(), true);
+    SetSecondaryFireEnabled(EventPlayer(), true);
+    SetUltimateAbilityEnabled(EventPlayer(), true);
+    SetMeleeEnabled(EventPlayer(), true);
+    SetJumpEnabled(EventPlayer(), true);
+    SetCrouchEnabled(EventPlayer(), true);
+    // AllowButton(EventPlayer(), Button.Crouch);
+    RemoveOneLockFromButton(EventPlayer(), Button.Crouch);
+    StopCamera(EventPlayer());
+    # cancel momentum
+    ApplyImpulse(EventPlayer(), VelocityOf(EventPlayer()) * -1, SpeedOf(EventPlayer()), Relative.ToWorld, ContraryMotion.Incorporate);
+    # if player was moving a bot
+    if (grabbedBot != null)
+    {
+        # stop grabbing bot
+        grabbedBot = null;
+    }
+}
+
+// rule: "Interact to edit message"
+// Event.OngoingPlayer
+// if (hasEdited == false)
+// if (HasSpawned(EventPlayer()) == true)
+// {
+//     SmallMessage(EventPlayer(), <"Press <0> to enter Editing Mode", InputBindingString(Button.Interact)>);
+//     Wait(3, WaitBehavior.IgnoreCondition);
+//     LoopIfConditionIsTrue();
+// }
+
+rule: "Create bot or drop if currently holding one"
+Event.OngoingPlayer
+if (isEditing == true)
+if (currentMenuState == MenuState.CLOSED)
+if (IsButtonHeld(EventPlayer(), Button.PrimaryFire) == true)
+{
+    # already have a bot grabbed
+    if (grabbedBot != null)
+    {
+        SetFacing(grabbedBot, DirectionTowards(PositionOf(grabbedBot), noclipPosition) * Vector(1, 0, 1), Relative.ToWorld);
+        # stop grabbing bot
+        grabbedBot = null;
+    }
+    else if (NumberOfPlayers(Team.Team2) < CountOf(botHeroes))
+    {
+        # set the temp variable to be the same as all available bot heroes
+        heroQueue = botHeroes;
+        # foreach enemy
+        for (i = 0; NumberOfPlayers(OppositeTeamOf(TeamOf(EventPlayer()))); 1)
+        {
+            ModifyVariable(heroQueue, Operation.RemoveFromArrayByIndex, IndexOfArrayValue(heroQueue, HeroOf(AllPlayers(OppositeTeamOf(TeamOf(EventPlayer())))[i])));
+        }
+        # create the first bot in the queue
+        CreateDummyBot(FirstOf(heroQueue), Team.Team2, -1, RayCastHitPosition(noclipPosition, noclipPosition + FacingDirectionOf(EventPlayer()) * placementDistance, AllPlayers(Team.All), EventPlayer(), true), null);
+        # grab the newly created bot
+        grabbedBot = LastCreatedEntity();
+    }
+    else
+    {
+        SmallMessage(EventPlayer(), "NO MORE BOTS LEFT TO CREATE");
+    }
+}
+
+rule: "Set high gravity if near floor"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (AltitudeOf(EventPlayer()) < 0.05)
+if (IsTrueForAny(AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), ArrayElement().grabbedBot == EventPlayer()) == false)
+{
+    # this makes the playermodel properly stand on the ground
+    SetGravity(EventPlayer(), 10000);
+}
+
+rule: "Set low gravity if not near floor"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (AltitudeOf(EventPlayer()) >= 0.05)
+if (IsTrueForAny(AllPlayers(OppositeTeamOf(TeamOf(EventPlayer()))), ArrayElement().grabbedBot == EventPlayer()) == false)
+{
+    SetGravity(EventPlayer(), 0);
+}
+
+rule: "Detect grab"
+Event.OngoingPlayer
+if (isEditing == true)
+if (currentMenuState == MenuState.CLOSED)
+if (IsButtonHeld(EventPlayer(), Button.Ability1) == false)
+if (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == true)
+if (grabbedBot == null)
+{
+    if (IsTrueForAny(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)))
+    {
+        grabbedBot = FirstOf(SortedArray(FilteredArray(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)), AngleBetweenVectors(FacingDirectionOf(EventPlayer()), DirectionTowards(noclipPosition, EyePosition(ArrayElement())))));
+    }
+    else
+    {
+        SmallMessage(EventPlayer(), "NO BOT IN LOS");
+    }
+}
+
+rule: "Grab"
+Event.OngoingPlayer
+if (isEditing == true)
+if (grabbedBot != null)
+{
+    SetGravity(grabbedBot, 10000);
+    # force the bot to where the player is aiming
+    StartForcingPlayerPosition(grabbedBot, RayCastHitPosition(noclipPosition, noclipPosition + FacingDirectionOf(EventPlayer()) * placementDistance, [], [], true), true);
+}
+
+rule: "Delete bot"
+Event.OngoingPlayer
+if (isEditing == true)
+if (currentMenuState == MenuState.CLOSED)
+if (IsButtonHeld(EventPlayer(), Button.Ability1) == false)
+if (IsButtonHeld(EventPlayer(), Button.Ultimate) == true)
+if (grabbedBot == null)
+{
+    if (IsTrueForAny(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)))
+    {
+        targetedDummy = FirstOf(SortedArray(FilteredArray(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)), AngleBetweenVectors(FacingDirectionOf(EventPlayer()), DirectionTowards(noclipPosition, EyePosition(ArrayElement())))));
+        # show the player which bot they removed
+        SmallMessage(EventPlayer(), <"REMOVED <0>", HeroIconString(HeroOf(targetedDummy))>);
+        # destroy the bot
+        DestroyDummyBot(Team.Team2, SlotOf(targetedDummy));
+    }
+    else
+    {
+        SmallMessage(EventPlayer(), "NO BOT IN LOS");
+    }
+}
+
+rule: "Delete all bots"
+Event.OngoingPlayer
+if (isEditing == true)
+if (currentMenuState == MenuState.CLOSED)
+if (NumberOfPlayers(Team.Team2) > 0)
+if (IsButtonHeld(EventPlayer(), Button.Ability1) == true)
+if (IsButtonHeld(EventPlayer(), Button.Ultimate) == true)
+{
+    for (i = 0; NumberOfPlayers(Team.Team2); 1)
+    {
+        DestroyDummyBot(Team.Team2, MappedArray(AllPlayers(Team.Team2), SlotOf(ArrayElement()))[i]);
+    }
+    SmallMessage(EventPlayer(), "REMOVED ALL BOTS");
+}
+
+rule: "Change bot hero"
+Event.OngoingPlayer
+if (isEditing == true)
+if (currentMenuState == MenuState.CLOSED)
+if (IsButtonHeld(EventPlayer(), Button.Ability1) == false)
+if (IsButtonHeld(EventPlayer(), Button.Ability2) == true)
+if (grabbedBot == null)
+if (isChangingBot == false)
+{
+    # any bot is in LoS
+    if (IsTrueForAny(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)))
+    {
+        # set a flag to disable some other rules which interfere otherwise
+        isChangingBot = true;
+        # for some reason the game thinks the player should be moving when they're not spawned in
+        StopChasingVariable(noclipPosition);
+        # target the bot closest to the reticle in LoS
+        targetedDummy = FirstOf(SortedArray(FilteredArray(AllPlayers(Team.Team2), IsInLineOfSight(noclipPosition, EyePosition(ArrayElement()), BarrierLOS.NoBarriersBlock)), AngleBetweenVectors(FacingDirectionOf(EventPlayer()), DirectionTowards(noclipPosition, EyePosition(ArrayElement())))));
+        # store the facing direction for a seamless transition back
+        prevFacings = [FacingDirectionOf(EventPlayer()), FacingDirectionOf(targetedDummy)];
+        # force player into hero select
+        SetAllowedHeroes(EventPlayer(), HeroOf(targetedDummy) != HeroOf(EventPlayer()) ? HeroOf(targetedDummy) : RandomValueInArray(RemoveFromArray(AllHeroes(), HeroOf(EventPlayer()))));
+        # get kicked out of hero select immediately if this is too short
+        Wait(0.25, WaitBehavior.IgnoreCondition);
+        # re-allow all heroes
+        SetAllowedHeroes(EventPlayer(), Append(AllHeroes(), HeroOf(targetedDummy)));
+        WaitUntil(HasSpawned(EventPlayer()), 99999);
+        # update botHeroes to contain the newly chosen hero
+        botHeroes[SlotOf(targetedDummy)] = HeroOf(EventPlayer());
+        # create a new dummy to replace the old one so that they run bot setup again
+        CreateDummyBot(HeroOf(EventPlayer()), Team.Team2, SlotOf(targetedDummy), PositionOf(targetedDummy), null);
+        SetFacing(LastCreatedEntity(), LastOf(prevFacings), Relative.ToWorld);
+        # force back onto hero the player entered edit mode as
+        ForcePlayerHero(EventPlayer(), originalHero);
+        # must stop forcing to let the player get kicked back to hero select in the future
+        StopForcingHero(EventPlayer());
+        # set facing to the direction they were facing when triggering rule
+        SetFacing(EventPlayer(), FirstOf(prevFacings), Relative.ToWorld);
+        # clear flag
+        isChangingBot = false;
+        # take into account throttle, facing direction, jump, and crouch inputs to make a decent noclip  # start running noclip movement logic again
+        ChaseVariableAtRate(noclipPosition, noclipPosition + (FacingDirectionOf(EventPlayer()) * ZOf(ThrottleOf(EventPlayer())) + WorldVectorOf(ThrottleOf(EventPlayer()) * Vector(1, 0, 0), EventPlayer(), LocalVector.Rotation) + Up() * (IsButtonHeld(EventPlayer(), Button.Jump) - IsButtonHeld(EventPlayer(), Button.Crouch))) * 100, 12, RateChaseReevaluation.DestinationAndRate);
+    }
+    else
+    {
+        SmallMessage(EventPlayer(), "NO BOT IN LOS");
+    }
+}
+
+rule: "All bots dead - global"
+if (NumberOfPlayers(Team.Team2) > 0)
+if (NumberOfLivingPlayers(Team.Team2) == 0)
+{
+    Wait(0.5, WaitBehavior.IgnoreCondition);
+    Resurrect(AllPlayers(Team.Team2));
+}
+
+rule: "Stop bots floating"
+Event.OngoingPlayer
+Team.Team2
+if (SpeedOf(EventPlayer()) > 0.01)
+if (IsInAir(EventPlayer()) == true)
+if (IsTrueForAny(AllPlayers(Team.Team1), ArrayElement().grabbedBot == EventPlayer()) == false)
+{
+    # stop all momentum (works better than what is used to cancel momentum upon exiting noclip)
+    ApplyImpulse(EventPlayer(), Up(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Down(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Backward(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Forward(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Right(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+    ApplyImpulse(EventPlayer(), Left(), 0.001, Relative.ToWorld, ContraryMotion.Cancel);
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "Stop forcing bot position"
+Event.OngoingPlayer
+Team.Team2
+if (IsTrueForAny(AllPlayers(Team.Team1), ArrayElement().grabbedBot == EventPlayer()) == false)
+{
+    StartForcingPlayerPosition(EventPlayer(), PositionOf(EventPlayer()), false);
+    Wait(0.032, WaitBehavior.IgnoreCondition);
+    StopForcingPlayerPosition(EventPlayer());
+}

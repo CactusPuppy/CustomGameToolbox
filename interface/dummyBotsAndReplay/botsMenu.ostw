@@ -1,0 +1,85 @@
+import "../menu.ostw";
+import "botPlacementModule.ostw";
+
+enum BotsReplayAction {
+  NONE,
+  CREATE_BOT,
+  CREATE_PUNCHING_BAG,
+  EDIT_BOTS,
+  RESET_BOTS,
+  REMOVE_ALL_BOTS
+}
+
+playervar BotsReplayAction selectedBotsReplayAction;
+
+BotsReplayAction[] BotsReplayActionGrid: ButtonActionGrid[MenuState.DUMMY_BOTS_AND_REPLAY];
+
+BotsReplayAction[] botsReplayMenuButtonActions: [
+  BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.CREATE_BOT, BotsReplayAction.NONE, BotsReplayAction.NONE,
+  BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.CREATE_PUNCHING_BAG, BotsReplayAction.NONE, BotsReplayAction.NONE,
+  BotsReplayAction.RESET_BOTS, BotsReplayAction.NONE, BotsReplayAction.EDIT_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE,
+  BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.NONE,
+  BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.REMOVE_ALL_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE
+];
+
+String[] botsReplayMenuButtonLabels: [
+  "", "", "Create Dummy Bot", "", "",
+  "", "", "Create Punching Bag", "", "",
+  "Reset Bot Positions", "", "Edit Dummy Bots", "", "",
+  "", "", "", "", "",
+  "", "", "Remove All Bots", "", ""
+];
+
+Color[] botsReplayMenuButtonColors: [
+  null, null, Color.Green, null, null,
+  null, null, Color.Green, null, null,
+  Color.Purple, null, Color.Yellow, null, null,
+  null, null, null, null, null,
+  null, null, Color.Red, null, null
+];
+
+void HandleBotsMenuClick() {
+  AbortIf(BotsReplayActionGrid[currentGridIndex()] == BotsReplayAction.NONE);
+  selectedBotsReplayAction = BotsReplayActionGrid[currentGridIndex()];
+  MinWait();
+  selectedBotsReplayAction = BotsReplayAction.NONE;
+}
+
+rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Start/stop editing bots"
+Event.OngoingPlayer
+if (selectedBotsReplayAction == BotsReplayAction.EDIT_BOTS)
+{
+  if (botControlMode == BotControlMode.Normal) {
+    UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Stop Editing Bots");
+    botControlMode = BotControlMode.Edit;
+  } else {
+    UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Edit Dummy Bots");
+    botControlMode = BotControlMode.Normal;
+  }
+  CloseMenu(EventPlayer());
+}
+
+rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Create dummy bot"
+Event.OngoingPlayer
+if (selectedBotsReplayAction == BotsReplayAction.CREATE_BOT)
+{
+  Menu_CreateBot();
+}
+
+rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Create punching bag"
+Event.OngoingPlayer
+if (selectedBotsReplayAction == BotsReplayAction.CREATE_PUNCHING_BAG)
+{
+  Menu_CreateBot();
+  LastCreatedEntity().isPunchingBag = true;
+  AddHealthPoolToPlayer(LastCreatedEntity(), HealthType.Health, 1250, true, false);
+}
+
+rule: "[interface/dummyBots/botsMenu.ostw] Destroy all bots"
+Event.OngoingPlayer
+if (selectedBotsReplayAction == BotsReplayAction.REMOVE_ALL_BOTS)
+{
+  DestroyAllDummyBots();
+  CloseMenu(EventPlayer());
+  BigMessage(AllPlayers(), "All Dummy Bots Destroyed");
+}

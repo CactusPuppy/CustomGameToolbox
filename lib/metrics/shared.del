@@ -2,3 +2,4 @@ playervar Number structArraysStartIndex!;
 playervar Number structArraysCount!;
 playervar Number sweepNewlyValidEventsIndex!;
 playervar Number oldTimeAcceptanceThreshold!;
+playervar Number eventTimestamp!;

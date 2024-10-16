@@ -1,0 +1,183 @@
+import "modsMenu.ostw";
+Boolean isFasterAbilitiesActive: activeModifications[Modification.FASTER_ABILITIES];
+// Boolean isFasterAbilitiesActive: true;
+Hero EffectiveHero(Player p = EventPlayer()): IsDuplicating(p) ? HeroBeingDuplicated(p) : HeroOf(p);
+Number fasterCooldownDuration: 1;
+
+// // DEBUG RULE
+// rule: "[interface/modifications/fasterAbilities.ostw] DEBUG: show ability cooldowns"
+// Event.OngoingPlayer
+// {
+//   foreach(Button b in AllButtons.Remove([Button.Melee, Button.Jump, Button.Reload, Button.Interact, Button.Ultimate])) {
+//     CreateHudText(
+//       VisibleTo: EventPlayer(),
+//       Header: <"<0> CD: <1>", EvaluateOnce(b), UpdateEveryFrame(AbilityCooldown(EventPlayer(), EvaluateOnce(b)))>,
+//       Subheader: <"Charges: <0>", AbilityCharge(EventPlayer(), EvaluateOnce(b))>,
+//       Text: <"Resource: <0><1>", UpdateEveryFrame(AbilityResource(EventPlayer(), EvaluateOnce(b))), MANY_SPACES>
+//     );
+//   }
+// }
+
+// // DEBUG RULE
+// rule: "[interface/modifications/fasterAbilities.ostw] DEBUG: melee to set cooldowns manually"
+// Event.OngoingPlayer
+// if (IsButtonHeld(EventPlayer(), Button.Melee))
+// {
+//   foreach(Button b in AllButtons) {
+//     SetAbilityCooldown(EventPlayer(), b, 0);
+//     SetAbilityResource(EventPlayer(), b, 100);
+//     SetAbilityCharge(EventPlayer(), b, 5);
+//   }
+// }
+
+/** ==== Ultimate ==== */
+
+rule: "[interface/modifications/fasterAbilities.ostw] Ultimate"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (UltimateChargePercent() < 100)
+{
+  SetUltimateCharge(EventPlayer(), 100);
+  Wait(0.5, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+/** ==== Primary fire ==== */
+
+rule: "[interface/modifications/fasterAbilities.ostw] Primary fire cooldown"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (AbilityCooldown(EventPlayer(), Button.PrimaryFire) > 0)
+{
+  SetAbilityCooldown(EventPlayer(), Button.PrimaryFire, fasterCooldownDuration);
+}
+
+rule: "[interface/modifications/fasterAbilities.ostw] Primary fire: Refill Moira Biotic Energy"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (EffectiveHero() == Hero.Moira)
+if (AbilityResource(EventPlayer(), Button.PrimaryFire) < 95)
+{
+  # Don't fill all the way because that makes the meter disappear
+  SetAbilityResource(EventPlayer(), Button.PrimaryFire, 95);
+  Wait(0.25);
+  LoopIfConditionIsTrue();
+}
+
+/** ==== Secondary fire ==== */
+
+rule: "[interface/modifications/fasterAbilities.ostw] Secondary fire cooldown"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (AbilityCooldown(EventPlayer(), Button.SecondaryFire) > 0)
+{
+  SetAbilityCooldown(EventPlayer(), Button.SecondaryFire, fasterCooldownDuration);
+}
+
+rule: "[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill D.Va defense matrix"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (EffectiveHero() == Hero.Dva)
+if (AbilityResource(EventPlayer(), Button.SecondaryFire) < 100)
+{
+  SetAbilityResource(EventPlayer(), Button.SecondaryFire, 100);
+  Wait(0.25);
+  LoopIfConditionIsTrue();
+}
+
+/** ==== Ability 1 ==== */
+
+rule: "[interface/modifications/fasterAbilities.ostw] Ability 1 cooldown"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (AbilityCooldown(EventPlayer(), Button.Ability1) > 0)
+{
+  if ([Hero.Roadhog, Hero.Ashe, Hero.Genji].Contains(EffectiveHero())) WaitUntil(!IsUsingAbility1(), AbilityCooldown(EventPlayer(), Button.Ability1));
+  MinWait();
+  SetAbilityCooldown(EventPlayer(), Button.Ability1, fasterCooldownDuration);
+}
+
+rule: "[interface/modifications/fasterAbilities.ostw] Zarya/Junkrat - 2 Ability 1 charges"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if ([Hero.Zarya, Hero.Junkrat].Contains(EffectiveHero())) // Zarya probably won't work for a long time lmao
+if (AbilityCharge(EventPlayer(), Button.Ability1) < 2)
+{
+  Wait(fasterCooldownDuration, WaitBehavior.AbortWhenFalse);
+  SetAbilityCharge(EventPlayer(), Button.Ability1, AbilityCharge(Button: Button.Ability1) + 1);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/modifications/fasterAbilities.ostw] Symmetra/Tracer - 3 Ability 1 charges"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if ([Hero.Tracer, Hero.Symmetra].Contains(EffectiveHero()))
+if (AbilityCharge(EventPlayer(), Button.Ability1) < 3)
+{
+  Wait(fasterCooldownDuration, WaitBehavior.AbortWhenFalse);
+  SetAbilityCharge(EventPlayer(), Button.Ability1, AbilityCharge(Button: Button.Ability1) + 1);
+  LoopIfConditionIsTrue();
+}
+
+/** ==== Ability 2 ==== */
+
+rule: "[interface/modifications/fasterAbilities.ostw] Ability 2 cooldown"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (AbilityCooldown(EventPlayer(), Button.Ability2) > 0)
+{
+  if ([Hero.Dva, Hero.Reaper].Contains(EffectiveHero())) WaitUntil(!IsUsingAbility2(), AbilityCooldown(EventPlayer(), Button.Ability2));
+  MinWait();
+  SetAbilityCooldown(EventPlayer(), Button.Ability2, fasterCooldownDuration);
+}
+
+rule: "[interface/modifications/fasterAbilities.ostw] Reinhardt - 2 Ability 2 charges"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (EffectiveHero() == Hero.Reinhardt)
+if (AbilityCharge(Button: Button.Ability2) < 2)
+{
+  Wait(fasterCooldownDuration, WaitBehavior.AbortWhenFalse);
+  SetAbilityCharge(EventPlayer(), Button.Ability2, AbilityCharge(Button: Button.Ability2) + 1);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/modifications/fasterAbilities.ostw] Brigitte - 3 Ability 2 charges"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (EffectiveHero() == Hero.Brigitte)
+if (AbilityCharge(Button: Button.Ability2) < 3)
+{
+  Wait(fasterCooldownDuration, WaitBehavior.AbortWhenFalse);
+  SetAbilityCharge(EventPlayer(), Button.Ability2, AbilityCharge(Button: Button.Ability2) + 1);
+  LoopIfConditionIsTrue();
+}
+
+// This probably won't work for a long time lol
+rule: "[interface/modifications/fasterAbilities.ostw] Doomfist - charge block instantly"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (EffectiveHero() == Hero.Doomfist)
+if (IsUsingAbility2())
+if (AbilityResource(EventPlayer(), Button.Ability2) < 100)
+{
+  SetAbilityResource(EventPlayer(), Button.Ability2, 100);
+}
+
+/** ==== Crouch ==== */
+rule: "[interface/modifications/fasterAbilities.ostw] Crouch cooldown"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (AbilityCooldown(EventPlayer(), Button.Crouch) > 0)
+{
+  SetAbilityCooldown(EventPlayer(), Button.Crouch, fasterCooldownDuration);
+}
+
+/** ==== Jump ==== */
+rule: "[interface/modifications/fasterAbilities.ostw] Jump cooldown"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (AbilityCooldown(EventPlayer(), Button.Jump) > 0)
+{
+  SetAbilityCooldown(EventPlayer(), Button.Jump, fasterCooldownDuration);
+}

@@ -1,0 +1,93 @@
+enum BotEditAction {
+  NONE,
+  CHANGE_TEAM,
+  CHANGE_HERO,
+  DELETE
+}
+
+playervar BotEditAction selectedBotEditAction;
+
+BotEditAction[] BotEditActionGrid: ButtonActionGrid[MenuState.EDITING_DUMMY_BOT];
+
+BotEditAction[] botEditPageButtonActions: [
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.CHANGE_HERO, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.CHANGE_TEAM, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.DELETE, BotEditAction.NONE, BotEditAction.NONE
+];
+
+String[] botEditPageButtonLabels: [
+  "", "", "", "", "",
+  "", "", "Change Hero", "", "",
+  "", "", "Change Team", "", "",
+  "", "", "", "", "",
+  "", "", "Delete", "", ""
+];
+
+Color[] botEditPageButtonColors: [
+  null, null, null, null, null,
+  null, null, Color.Green, null, null,
+  null, null, Color.Blue, null, null,
+  null, null, null, null, null,
+  null, null, Color.Red, null, null
+];
+
+void HandleBotEditPageClick() {
+  AbortIf(BotEditActionGrid[currentGridIndex()] == BotEditAction.NONE);
+  selectedBotEditAction = BotEditActionGrid[currentGridIndex()];
+  MinWait();
+  selectedBotEditAction = BotEditAction.NONE;
+}
+
+playervar Hero tempHeroStorage;
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change hero"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
+{
+  tempHeroStorage = HeroOf();
+  SetAllowedHeroes(EventPlayer(), AllHeroes().Remove(tempHeroStorage));
+  WaitUntil(!HasSpawned(), 1);
+  ResetHeroAvailability(EventPlayer());
+  WaitUntil(HasSpawned(), 1000000);
+  ForcePlayerHero(selectedBot, HeroOf());
+  MinWait();
+  StopForcingHero(selectedBot);
+  ForcePlayerHero(EventPlayer(), tempHeroStorage);
+  MinWait();
+  StopForcingHero(EventPlayer());
+  StopForcingPlayerPosition();
+  StartForcingPlayerPosition(EventPlayer(), EventPlayer().menuActivationPoint.location, true);
+  Wait(0.064);
+  WaitUntil(DistanceBetween(EventPlayer(), EventPlayer().menuActivationPoint.location) < 0.05
+    && AngleBetweenVectors(EventPlayer().FacingDirection(), menuActivationPoint.facing) < 0.1, 1);
+  CloseMenu(EventPlayer());
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change team"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
+{
+  tempHeroStorage = HeroOf(selectedBot);
+  Boolean wasPunchingBag = selectedBot.isPunchingBag;
+  Team tempTeamStorage = TeamOf(selectedBot);
+  Vector tempPositionStorage = PositionOf(selectedBot);
+  Vector tempFacingStorage = FacingDirectionOf(selectedBot);
+  DestroyDummyBot(selectedBot.Team(), SlotOf(selectedBot));
+  selectedBot = CreateDummyBot(tempHeroStorage, OppositeTeamOf(tempTeamStorage), -1, tempPositionStorage, tempFacingStorage);
+  if (wasPunchingBag) {
+    MarkLastCreatedBotAsPunchingBag();
+  }
+  Wait(0.064);
+  StartFacing(selectedBot, tempFacingStorage, 1000, Relative.ToWorld, FacingRev.None);
+  WaitUntil(AngleBetweenVectors(FacingDirectionOf(selectedBot), tempFacingStorage) < 0.1, 1);
+  StopFacing(selectedBot);
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Delete"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.DELETE)
+{
+  DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
+  CloseMenu(EventPlayer());
+}

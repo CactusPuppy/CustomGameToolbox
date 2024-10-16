@@ -1,3 +1,4 @@
+import "../lib/logs/logs.del";
 import "../OSTWUtils/OnScreenText.del";
 import "../OSTWUtils/Math.del";
 
@@ -9,7 +10,8 @@ enum MenuState
   INFORMATION,
   MODIFICATIONS,
   TOOLS,
-  DUMMY_BOTS_AND_REPLAY
+  DUMMY_BOTS_AND_REPLAY,
+  EDITING_DUMMY_BOT
 }
 
 globalvar Any[][] ButtonActionGrid;
@@ -20,7 +22,7 @@ playervar MenuState currentMenuState = MenuState.CLOSED;
 // playervar Cursor | Number cursor = -1;
 playervar Number menuXIndex; // Positive to the right
 playervar Number menuYIndex; // Positive downwards
-playervar Boolean hideMenuOpenTooltip;
+playervar Boolean hideMenuOpenTooltip = WorkshopSettingToggle(MenuSettingsCategory, "Hide Before-First-Use Menu Open/Close Tooltip", true);
 
 // Index is rowIndex * numCols + colIndex
 MenuState[] mainMenuActionGrid: ButtonActionGrid[MenuState.MAIN_MENU];
@@ -75,94 +77,117 @@ Any menuButton(in Number colIndex, in Number rowIndex):
   );
 
 /** Menu navigation definitions and helper functions */
-playervar Number cache_startIndex1!;
-playervar Number cache_startIndex2!;
+playervar Number rowOffset!;
+playervar Number colOffset!;
 
-/* NOTE: The following subroutines expect `cache_startIndex1` to be set PRIOR TO CALL.
- * These subroutines CAN infinitely loop if the menu is somehow in a bad state
- * (i.e. somehow selecting a blank button).
- */
-void findLeft() playervar "[SUB] Find first item to the left" {
-  menuXIndex--;
-  if (menuXIndex < 0) menuXIndex = numCols - 1;
-  AbortIf(currentActionItem() != 0);
-  cache_startIndex2 = menuYIndex;
-  moveSelectionDown();
-  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-
-  LoopIf(cache_startIndex1 != menuXIndex && currentActionItem() == 0);
-}
-
-void findRight() playervar "[SUB] Find first item to the right" {
-  menuXIndex++;
-  if (menuXIndex >= numCols) menuXIndex = 0;
-  AbortIf(currentActionItem() != 0);
-  cache_startIndex2 = menuYIndex;
-  moveSelectionUp();
-  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-
-  LoopIf(cache_startIndex1 != menuXIndex && currentActionItem() == 0);
-}
-
-void findUp() playervar "[SUB] Find first item upwards" {
-  menuYIndex--;
-  if (menuYIndex < 0) menuYIndex = numRows - 1;
-  AbortIf(currentActionItem() != 0);
-  cache_startIndex2 = menuXIndex;
-  moveSelectionLeft();
-  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-  LoopIf(cache_startIndex1 != menuYIndex && currentActionItem() == 0);
-}
-
-void findDown() playervar "[SUB] Find first item downwards" {
-  menuYIndex++;
-  if (menuYIndex >= numRows) menuYIndex = 0;
-  AbortIf(currentActionItem() != 0);
-  cache_startIndex2 = menuXIndex;
-  moveSelectionRight();
-  // LogToInspector($"step: post-scan: {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-  LoopIf(cache_startIndex1 != menuYIndex && currentActionItem() == 0);
-}
-
-/* NOTE: These subroutines expect `cache_startIndex2` to be set PRIOR TO CALL.
- * These subroutines CAN infinitely loop if the menu is somehow in a bad state
- * (i.e. somehow selecting a blank button).
- */
-void moveSelectionLeft() playervar "[SUB] Move selection left"
+void zeroOffsets() playervar "[interface/menuDefinitions.ostw | SUB] Zero row and column offsets"
 {
-  menuXIndex--;
-  if (menuXIndex < 0) { menuXIndex = numCols - 1; }
-  // LogToInspector($"  sub (left): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-  LoopIf(cache_startIndex2 != menuXIndex && currentActionItem() == 0);
+  rowOffset = 0; colOffset = 0;
 }
 
-void moveSelectionRight() playervar "[SUB] Move selection right"
+void applyOffsets() playervar "[interface/menuDefinitions.ostw | SUB] Apply current offsets"
 {
-  menuXIndex++;
-  if (menuXIndex >= numCols) { menuXIndex = 0; }
-  // LogToInspector($"  sub (right): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-  LoopIf(cache_startIndex2 != menuXIndex && currentActionItem() == 0);
+  menuXIndex = Math.MathModulo(menuXIndex + colOffset, numCols);
+  menuYIndex = Math.MathModulo(menuYIndex + rowOffset, numRows);
 }
 
-void moveSelectionUp() playervar "[SUB] Move selection up"
-{
-  menuYIndex--;
-  if (menuYIndex < 0) { menuYIndex = numRows - 1; }
-  // LogToInspector($"  sub (up): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-  LoopIf(cache_startIndex2 != menuYIndex && currentActionItem() == 0);
+void findLeft() playervar "[interface/menuDefinitions.ostw | SUB] Find first item to the left" {
+  zeroOffsets();
+  while (AbsoluteValue(rowOffset) < numRows / 2) {
+    colOffset = -1;
+    while (AbsoluteValue(colOffset) < numCols) {
+      # If item here, shift menu selection to the new item
+      if (currentActionGrid()[gridIndex(
+          colIndex: Math.MathModulo(menuXIndex + colOffset, numCols),
+          rowIndex: menuYIndex + rowOffset)] != 0) {
+        applyOffsets();
+        return;
+      }
+      colOffset--;
+    }
+    if (rowOffset >= 0) {
+      rowOffset++;
+    }
+    rowOffset = -rowOffset;
+  }
 }
 
-void moveSelectionDown() playervar "[SUB] Move selection down"
-{
-  menuYIndex++;
-  if (menuYIndex >= numRows) { menuYIndex = 0; }
-  // LogToInspector($"  sub (down): {menuXIndex}, {menuYIndex} | {currentActionItem()}");
-  LoopIf(cache_startIndex2 != menuYIndex && currentActionItem() == 0);
+void findRight() playervar "[interface/menuDefinitions.ostw | SUB] Find first item to the right" {
+  zeroOffsets();
+  while (AbsoluteValue(rowOffset) < numRows / 2) {
+    colOffset = 1;
+    while (colOffset < numCols) {
+      # If item here, shift menu selection to the new item
+      if (currentActionGrid()[gridIndex(
+          colIndex: Math.MathModulo(menuXIndex + colOffset, numCols),
+          rowIndex: menuYIndex + rowOffset)] != 0) {
+        applyOffsets();
+        return;
+      }
+      colOffset++;
+    }
+    if (rowOffset >= 0) {
+      rowOffset++;
+    }
+    rowOffset = -rowOffset;
+  }
+}
+
+void findUp() playervar "[interface/menuDefinitions.ostw | SUB] Find first item upwards" {
+  zeroOffsets();
+  while (AbsoluteValue(colOffset) < numCols / 2) {
+    rowOffset = -1;
+    while (AbsoluteValue(rowOffset) < numRows) {
+      # If item here, shift menu selection to the new item
+      if (currentActionGrid()[gridIndex(
+          colIndex: menuXIndex + colOffset,
+          rowIndex: Math.MathModulo(menuYIndex + rowOffset, numRows))] != 0) {
+        applyOffsets();
+        return;
+      }
+      rowOffset--;
+    }
+    if (colOffset >= 0) {
+      colOffset++;
+    }
+    colOffset = -colOffset;
+  }
+}
+
+void findDown() playervar "interface/menuDefinitions.ostw | [SUB] Find first item downwards" {
+  zeroOffsets();
+  while (AbsoluteValue(colOffset) < numCols / 2) {
+    rowOffset = 1;
+    while (rowOffset < numRows) {
+      # If item here, shift menu selection to the new item
+      if (currentActionGrid()[gridIndex(
+          colIndex: menuXIndex + colOffset,
+          rowIndex: Math.MathModulo(menuYIndex + rowOffset, numRows))] != 0) {
+        applyOffsets();
+        return;
+      }
+      rowOffset++;
+    }
+    if (colOffset >= 0) {
+      colOffset++;
+    }
+    colOffset = -colOffset;
+  }
 }
 
 # Sets the appearance of a given button
-void UpdateButtonAppearance(in MenuState menuPage, in Number colIndex, in Number rowIndex, in String newLabel = null, in Color newColor = null, in Player p = EventPlayer())
+void UpdateButtonAppearance(in MenuState menuPage, in Number colIndex, in Number rowIndex, in String newLabel, in Color newColor, in Player p = EventPlayer())
 {
-  if (newLabel != null) p.ButtonLabelGrid[menuPage][gridIndex(colIndex, rowIndex)] = newLabel;
-  if (newColor != null) p.ButtonColorGrid[menuPage][gridIndex(colIndex, rowIndex)] = newColor;
+  p.ButtonLabelGrid[menuPage][gridIndex(colIndex, rowIndex)] = newLabel;
+  p.ButtonColorGrid[menuPage][gridIndex(colIndex, rowIndex)] = newColor;
+}
+
+void UpdateButtonColor(in MenuState menuPage, in Number colIndex, in Number rowIndex, in Color newColor, in Player p = EventPlayer())
+{
+  p.ButtonColorGrid[menuPage][gridIndex(colIndex, rowIndex)] = newColor;
+}
+
+void UpdateButtonLabel(in MenuState menuPage, in Number colIndex, in Number rowIndex, in String newLabel, in Player p = EventPlayer())
+{
+  p.ButtonLabelGrid[menuPage][gridIndex(colIndex, rowIndex)] = newLabel;
 }

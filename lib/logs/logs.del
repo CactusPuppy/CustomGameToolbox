@@ -1,10 +1,12 @@
+import "../../main.ostw";
+
 enum LogLevel {
   DEBUG,
   INFO,
   WARNING,
   ERROR
 }
-globalvar Number LOG_LEVEL! = WorkshopSettingCombo("Settings", "Log Level", 0, ["Debug", "Info", "Warning", "Error"], 0);
+globalvar Number LOG_LEVEL! = WorkshopSettingCombo(GeneralSettingsCategory, "Log Level", 0, ["Debug", "Info", "Warning", "Error"], 0);
 
 void Debug(in Any message) {
   if (LOG_LEVEL <= LogLevel.DEBUG) LogToInspector(<"[DEBUG] <0>", message>);

@@ -1,0 +1,44 @@
+import "toolsMenu.ostw";
+
+enum ThirdPersonState {
+  OFF,
+  ADJUSTING,
+  ON
+}
+playervar ThirdPersonState thirdPersonState;
+playervar Number thirdPersonDirection = 1;
+playervar Number thirdPersonZoom = -2.5;
+
+rule: "[interface/tools/thirdPerson.ostw] When person is in third person and their menu state becomes closed, start third person camera"
+Event.OngoingPlayer
+if (IsAlive())
+if (([Hero.Widowmaker, Hero.Ashe, Hero.Ana].Contains(HeroOf()) && IsFiringSecondary()) == false)
+if (thirdPersonState != ThirdPersonState.OFF)
+if (currentMenuState == MenuState.CLOSED)
+{
+  MinWait();
+  # Code borrowed from workshop.codes/third-person
+  StartCamera(
+    Player: EventPlayer(),
+    EyePosition: RayCastHitPosition(
+      StartPOS: EyePosition(),
+      EndPOS: EyePosition()
+        + WorldVectorOf(Vector(thirdPersonDirection * Min(thirdPersonZoom / 2.5, -0.75), 0, 0), EventPlayer(), LocalVector.Rotation)
+        + FacingDirectionOf() * thirdPersonZoom,
+      PlayersToInclude: AllPlayers(),
+      PlayersToExclude: EventPlayer(),
+      IncludePlayerOwnedObjects: false),
+    LookAtPosition: RayCastHitPosition(EyePosition(), EyePosition() + FacingDirectionOf() * 200, AllPlayers(), EventPlayer(), false),
+    BlendSpeed: 60
+  );
+}
+
+rule: "[interface/tools/thirdPerson.ostw] Stop third person during certain conditions"
+Event.OngoingPlayer
+if ([Hero.Widowmaker, Hero.Ashe, Hero.Ana].Contains(HeroOf()))
+if (IsFiringSecondary())
+if (thirdPersonState != ThirdPersonState.OFF)
+if (currentMenuState == MenuState.CLOSED)
+{
+  StopCamera();
+}

@@ -1,4 +1,5 @@
-globalvar Boolean UseRoleQueueHealth = WorkshopSettingToggle("Hero Settings", "Use Role Queue Tank Health", true, 0);
+import "main.ostw";
+globalvar Boolean UseRoleQueueHealth = WorkshopSettingToggle(HeroSettingsCategory, "Use Role Queue Tank Health", true, 0);
 
 rule: "Create tank health pool"
 Event.OngoingPlayer
@@ -17,11 +18,11 @@ if ((HeroOf() == Hero.Dva && IsInAlternateForm()) == false)
 }
 
 // DEBUG
-disabled rule: "[DEBUG] kill then respawn"
-Event.OngoingPlayer
-if (IsButtonHeld(EventPlayer(), Button.Interact))
-{
-  Kill(EventPlayer(), null);
-  Wait(3);
-  if (IsDead()) Respawn(EventPlayer());
-}
+// disabled rule: "[DEBUG] kill then respawn"
+// Event.OngoingPlayer
+// if (IsButtonHeld(EventPlayer(), Button.Interact))
+// {
+//   Kill(EventPlayer(), null);
+//   Wait(3);
+//   if (IsDead()) Respawn(EventPlayer());
+// }

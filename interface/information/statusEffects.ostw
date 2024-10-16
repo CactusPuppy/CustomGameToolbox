@@ -16,13 +16,14 @@ enum StatusEffect {
 Player[] PlayersToInformOfStatuses: AllPlayers().FilteredArray((p) => p.activeInfoDisplays.Contains(InfoAction.STATUS_EFFECT_READOUT));
 
 playervar Number[] effectStartTimestamp;
+playervar Number[] effectEndTimestamp;
 playervar Number[] effectDuration;
 
 void ProcessStatusEffect(in StatusEffect statusEffect, Status status, in String statusName, in String statusIcon) {
   effectStartTimestamp[statusEffect] = TotalTimeElapsed();
   WaitUntil(!HasStatus(EventPlayer(), status), 99999);
   effectDuration[statusEffect] = TotalTimeElapsed() - effectStartTimestamp[statusEffect];
-  SmallMessage(PlayersToInformOfStatuses, <" <0> <1> had status <2> for <3> secs (<4> ticks)", statusIcon, EventPlayer(), statusName, effectDuration[statusEffect] + 0.016, RoundToInteger(effectDuration[statusEffect] * 62.5 + 1, Rounding.Nearest)>);
+  SmallMessage(PlayersToInformOfStatuses, <" <0> <1> had status <2> for <3> secs (<4> ticks)", statusIcon, EventPlayer(), statusName, effectDuration[statusEffect], RoundToInteger(effectDuration[statusEffect] / 0.016, Rounding.Nearest)>);
 }
 
 rule: "[interface/information/statusEffects.ostw] Keep Status Effect button appearance up to date"

@@ -1,0 +1,96 @@
+import "botsMenu.ostw";
+import "botPlacementModule.del";
+
+// import "botPlacementExtras.del";
+void Menu_CreateBot() {
+  CreateDummyBot(
+    Hero.Soldier76,
+    OppositeTeamOf(TeamOf()),
+    -1,
+    RayCastHitPosition(EyePosition(), EyePosition() + FacingDirectionOf() * 10, null, null, false),
+    -1 * FacingDirectionOf()
+  );
+}
+
+globalvar Number punchingBagTargetHealthProportion = WorkshopSettingReal(GeneralSettingsCategory, "Punching Bag Target Health Proportion", 0.8, 0, 1, 0.01);
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Maintain punching bag health"
+Event.OngoingPlayer
+if (isPunchingBag)
+if (AbsoluteValue(NormalizedHealth() - punchingBagTargetHealthProportion) > 0.075)
+{
+  SetPlayerHealth(EventPlayer(), punchingBagTargetHealthProportion * MaxHealth());
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] When entering edit mode, add locks to used buttons"
+Event.OngoingPlayer
+if (botControlMode == BotControlMode.Edit)
+{
+  AddOneLockToButton(EventPlayer(), Button.PrimaryFire);
+  AddOneLockToButton(EventPlayer(), Button.SecondaryFire);
+  WaitUntil(botControlMode != BotControlMode.Edit, 1000000);
+  RemoveOneLockFromButton(EventPlayer(), Button.PrimaryFire);
+  RemoveOneLockFromButton(EventPlayer(), Button.SecondaryFire);
+}
+
+playervar SelectionEntity selectedControl;
+playervar Number selectionSetDistance;
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Handle left-click"
+Event.OngoingPlayer
+if (IsDummyBot() == false)
+if (botControlMode == BotControlMode.Edit)
+if (EventPlayer().IsButtonHeld(Button.PrimaryFire))
+{
+  AbortIf(!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED));
+  selectedControl = getClosestSelectionEntity(EventPlayer());
+  AbortIf(selectedControl.Id == 0);
+  if (getAllMovableTargetsAsSelectionEntities().Map((e) => e.Id).Contains(selectedControl.Id)) {
+    # If a bot got selected, move it
+    selectionSetDistance = DistanceBetween(EventPlayer().EyePosition(), selectedControl.Owner);
+    StartForcingPlayerPosition(
+      Player: selectedControl.Owner,
+      Position: RayCastHitPosition(
+        StartPOS: EventPlayer().EyePosition(),
+        EndPOS: EventPlayer().EyePosition()
+          + FacingDirectionOf() * selectionSetDistance,
+        PlayersToInclude: null,
+        PlayersToExclude: null,
+        IncludePlayerOwnedObjects: false) + Down(),
+      Reevaluation: true);
+    WaitUntil(!(EventPlayer().IsButtonHeld(Button.PrimaryFire) && botControlMode == BotControlMode.Edit), 1000000);
+    StopForcingPlayerPosition(selectedControl.Owner);
+  } else if (getFacingControlTargets().Map((e) => e.Id).Contains(selectedControl.Id)) {
+    # If a bot's facing got selected, rotate it
+    StartFacing(
+      Player: selectedControl.Owner,
+      Direction: DirectionTowards(selectedControl.Owner.EyePosition(), RayCastHitPosition(
+        StartPOS: EventPlayer().EyePosition(),
+        EndPOS: EventPlayer().EyePosition()
+          + FacingDirectionOf() * EvaluateOnce(DistanceBetween(EventPlayer().EyePosition(), selectedControl.Position)),
+        PlayersToInclude: null,
+        PlayersToExclude: null,
+        IncludePlayerOwnedObjects: false)),
+      TurnRate: 999999,
+      Reevaluation: FacingRev.DirectionAndTurnRate);
+    WaitUntil(!(EventPlayer().IsButtonHeld(Button.PrimaryFire) && botControlMode == BotControlMode.Edit), 1000000);
+    StopFacing(selectedControl.Owner);
+  }
+  selectedControl = null;
+}
+
+playervar Player selectedBot;
+rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Handle right-click"
+Event.OngoingPlayer
+if (IsDummyBot() == false)
+if (botControlMode == BotControlMode.Edit)
+if (EventPlayer().IsButtonHeld(Button.SecondaryFire))
+{
+  // TODO: Open menu to EDITING_DUMMY_BOT page
+  AbortIf(!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED));
+  selectedControl = getClosestSelectionEntity(EventPlayer());
+  AbortIf(selectedControl.Id == 0 || selectedControl.ControlType != BotControlType.DummyBot);
+  selectedBot = selectedControl.Owner;
+  currentMenuState = MenuState.EDITING_DUMMY_BOT;
+}
+
