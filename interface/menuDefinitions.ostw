@@ -30,8 +30,8 @@ MenuState[] mainMenuActionGrid: ButtonActionGrid[MenuState.MAIN_MENU];
 /** Menu parameters */
 Number xLim: 3.0;
 Number yLim: 1.25;
-Number firstRowY: 1.75;
-Number rowSeparation: 0.75;
+Number firstRowY: 1.2;
+Number rowSeparation: 0.45;
 Number firstColumnX: -3.0;
 Number columnSeparation: 1.5;
 
