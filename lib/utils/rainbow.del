@@ -1,0 +1,28 @@
+// Rainbow code by PharingWell and Provoxin
+Number rSaturation: 0.5;
+Number rValue: 1.0;
+
+Number rMin(Number rSaturation = rSaturation, Number rValue = rValue): 255 * (1-rSaturation) * (rValue);
+Number rMax(Number rSaturation = rSaturation, Number rValue = rValue): 255 * rValue;
+Number rMod: (rMax() - rMin()) * 6;
+Number rOffset: rMax() - 2 * rMin();
+
+Number rainbow_R(Number t): Min(Max(AbsoluteValue(((t + (0*rMod)/3) % rMod) - rMod/2) - rOffset, rMin()), rMax());
+Number rainbow_G(Number t): Min(Max(AbsoluteValue(((t + (1*rMod)/3) % rMod) - rMod/2) - rOffset, rMin()), rMax());
+Number rainbow_B(Number t): Min(Max(AbsoluteValue(((t + (2*rMod)/3) % rMod) - rMod/2) - rOffset, rMin()), rMax());
+Color rainbow: CustomColor(rainbowVector.X, rainbowVector.Y, rainbowVector.Z, 255);
+
+globalvar Vector rainbowVector = Vector(0,0,0);
+Number rainbowRate: 500;
+
+rule: "Initialize the gay (Patriq made me name it this, it actually just initialize the rainbow color changing)"
+{
+  ChaseVariableAtRate(
+    rainbowVector,
+    Vector(
+      rainbow_R(TotalTimeElapsed() * rainbowRate),
+      rainbow_G(TotalTimeElapsed() * rainbowRate),
+      rainbow_B(TotalTimeElapsed() * rainbowRate)),
+    99999,
+    RateChaseReevaluation.DestinationAndRate);
+}

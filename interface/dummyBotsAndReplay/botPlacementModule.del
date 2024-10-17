@@ -1,5 +1,6 @@
 import "../../lib/player/resetPoint.del";
 import "../../interface/menuDefinitions.ostw";
+import "../../lib/utils/rainbow.del";
 
 enum BotControlType {
   None,
@@ -112,7 +113,7 @@ if (HasSpawned())
     Type: Effect.Sphere,
     Color: getClosestSelectionEntity(LocalPlayer()).Id == EvaluateOnce(nextSelectionEntityId + 1) ? Color.Orange : Color.Yellow,
     Position: UpdateEveryFrame(desiredFacingControlPosition(EventPlayer())),
-    Radius: 0.25,
+    Radius: LocalPlayer().selectedControl.Id == EvaluateOnce(nextSelectionEntityId + 1) ? 0.1 : 0.25,
     Reevaluation: EffectRev.VisibleToPositionAndRadius
   );
   CreateBeamEffect(
@@ -142,14 +143,17 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on 
   );
   CreateHudText(
     VisibleTo: AllPlayers().Contains(LocalPlayer()) && LocalPlayer().botControlMode == BotControlMode.Edit ? LocalPlayer() : null,
-    Text: getClosestSelectionEntity(LocalPlayer()).toString(),
-    Location: Location.Left,
-    Reevaluation: HudTextRev.VisibleToAndString
+    Text: "Editing Bots",
+    Location: Location.Top,
+    TextColor: rainbow,
+    SortOrder: 10,
+    Reevaluation: HudTextRev.VisibleToStringAndColor
   );
   CreateInWorldText(
     VisibleTo: AllPlayers().Contains(LocalPlayer())
       && LocalPlayer().botControlMode == BotControlMode.Edit
       && LocalPlayer().currentMenuState == MenuState.CLOSED
+      && LocalPlayer().selectedControl.Id == 0
       && getClosestSelectionEntity(LocalPlayer()).Id != 0
         ? LocalPlayer() : null,
     Header: <"<0> | Drag<1>",
