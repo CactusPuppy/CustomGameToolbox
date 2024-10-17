@@ -20,7 +20,7 @@ BotEditAction[] botEditPageButtonActions: [
 String[] botEditPageButtonLabels: [
   "", "", "", "", "",
   "", "", "Change Hero", "", "",
-  "", "", "Change Team", "", "",
+  "", "", "Switch Team", "", "",
   "", "", "", "", "",
   "", "", "Delete", "", ""
 ];
