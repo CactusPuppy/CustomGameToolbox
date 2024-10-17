@@ -96,8 +96,14 @@ if (EventPlayer().IsButtonHeld(Button.SecondaryFire))
 {
   AbortIf(!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED));
   selectedControl = getClosestSelectionEntity(EventPlayer());
-  AbortIf(selectedControl.Id == 0 || selectedControl.ControlType != BotControlType.DummyBot);
+  if (selectedControl.Id == 0 || selectedControl.ControlType != BotControlType.DummyBot){
+    selectedControl = null;
+    return;
+  }
   selectedBot = selectedControl.Owner;
+  # Prevent menu logic running later in the tick from assuming we meant to close the menu
+  # due to the menu state being open and a secondary fire input being detected
+  MinWait();
   OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
 }
 

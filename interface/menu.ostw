@@ -248,6 +248,8 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
     OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
   }
   if (currentMenuState == MenuState.EDITING_DUMMY_BOT) {
+    # We need to clear the selected control so that the instructions are shown again
+    selectedControl = null;
     CloseMenu(EventPlayer());
     return;
   }
