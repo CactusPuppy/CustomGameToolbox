@@ -57,9 +57,19 @@ if (selectedBotsReplayAction == BotsReplayAction.EDIT_BOTS)
   if (botControlMode == BotControlMode.Normal) {
     UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Stop Editing Bots");
     botControlMode = BotControlMode.Edit;
+    if (!isNoClipActive) {
+      toolsActionID = ToolsAction.NO_CLIP;
+      MinWait();
+      toolsActionID = ToolsAction.EMPTY;
+    }
   } else {
     UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Edit Dummy Bots");
     botControlMode = BotControlMode.Normal;
+    if (isNoClipActive) {
+      toolsActionID = ToolsAction.NO_CLIP;
+      MinWait();
+      toolsActionID = ToolsAction.EMPTY;
+    }
   }
   CloseMenu(EventPlayer());
 }
