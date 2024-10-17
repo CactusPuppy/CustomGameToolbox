@@ -80,12 +80,21 @@ rule: "[interface/menu.ostw] Global menu setup"
     TextColor:     LocalPlayer().currentMenuState == MenuState.CLOSED ? Color.Green : Color.Red,
     Reevaluation:  HudTextRev.VisibleToStringAndColor,
     Spectators:    Spectators.VisibleNever);
-  # Create controls hint
+  # Create controls hints
   OnScreenText.CreateOnScreenText(
     VisibleTo:     LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
     Header:          "{0} SELECT  |  {2} {1}".Format([InputBindingString(Button.PrimaryFire), InputBindingString(Button.SecondaryFire), LocalPlayer().currentMenuState == MenuState.MAIN_MENU ? "CLOSE" : "BACK"]),
     PositionX:     0,
-    PositionY:     -1.5,
+    PositionY:     -1.48,
+    Scale:         2,
+    Color:         Color.White,
+    Reevaluation:  InworldTextRev.VisibleToPositionAndString,
+    Spectators:    Spectators.VisibleNever);
+  OnScreenText.CreateOnScreenText(
+    VisibleTo:     LocalPlayer().currentMenuState == MenuState.MAIN_MENU ? LocalPlayer() : null,
+    Header:        "Use WASD to Navigate",
+    PositionX:     0,
+    PositionY:     -1.25,
     Scale:         2,
     Color:         Color.White,
     Reevaluation:  InworldTextRev.VisibleToPositionAndString,
