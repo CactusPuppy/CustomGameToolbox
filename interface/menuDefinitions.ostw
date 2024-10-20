@@ -11,7 +11,8 @@ enum MenuState
   MODIFICATIONS,
   TOOLS,
   DUMMY_BOTS_AND_REPLAY,
-  EDITING_DUMMY_BOT
+  EDITING_DUMMY_BOT,
+  EDITING_DUMMY_BOT_BUTTONS
 }
 
 globalvar Any[][] ButtonActionGrid;
@@ -68,7 +69,7 @@ void CloseMenu(in Player player = EventPlayer()) {
 Color selectedColor: CustomColor(255,255,255,155 + 100 * SineFromDegrees((TotalTimeElapsed() * 720) % 360));
 Boolean isSelectingGridIndex(Player p = EventPlayer(), Number x = 0, Number y = 0): p.menuXIndex == x && p.menuYIndex == y;
 
-MenuState[] MenuStatesToHideDefaultButtonsIn: [MenuState.CLOSED, MenuState.CONFIRMING_END_GAME];
+MenuState[] MenuStatesToHideDefaultButtonsIn: [MenuState.CLOSED, MenuState.CONFIRMING_END_GAME, MenuState.EDITING_DUMMY_BOT_BUTTONS];
 Any menuButton(in Number colIndex, in Number rowIndex):
   OnScreenText.CreateOnScreenText(
     VisibleTo: MenuStatesToHideDefaultButtonsIn.Contains(LocalPlayer().currentMenuState) ? null : LocalPlayer(),
@@ -77,7 +78,9 @@ Any menuButton(in Number colIndex, in Number rowIndex):
     PositionY: rowIndexToY(rowIndex),
     Scale: 2,
     Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
-    Color: isSelectingGridIndex(LocalPlayer(), colIndex, rowIndex) && ButtonActionGrid[LocalPlayer().currentMenuState][currentGridIndex(LocalPlayer())] ? selectedColor : currentColorGrid()[gridIndex(colIndex, rowIndex)],
+    Color: isSelectingGridIndex(LocalPlayer(), colIndex, rowIndex) && ButtonActionGrid[LocalPlayer().currentMenuState][currentGridIndex(LocalPlayer())]
+      ? selectedColor
+      : currentColorGrid()[gridIndex(colIndex, rowIndex)],
     Spectators: Spectators.VisibleNever
   );
 

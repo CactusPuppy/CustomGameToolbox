@@ -228,6 +228,9 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     case MenuState.EDITING_DUMMY_BOT:
       HandleBotEditPageClick();
       break;
+    case MenuState.EDITING_DUMMY_BOT_BUTTONS:
+      BotButtonEdit_HandlePrimaryFire();
+      break;
   }
 }
 
@@ -243,9 +246,15 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
   if (ArrayContains([MenuState.INFORMATION, MenuState.MODIFICATIONS, MenuState.TOOLS,
       MenuState.DUMMY_BOTS_AND_REPLAY], currentMenuState)) {
     OpenMenuToPage();
+    return;
   }
   if (currentMenuState == MenuState.CONFIRMING_END_GAME) {
     OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
+    return;
+  }
+  if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS) {
+    OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
+    return;
   }
   if (currentMenuState == MenuState.EDITING_DUMMY_BOT) {
     # We need to clear the selected control so that the instructions are shown again
@@ -260,6 +269,10 @@ Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 if (AbsoluteValue(XOf(ThrottleOf(EventPlayer()))) > 0.5)
 {
+  if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS) {
+    # The left-right function does nothing in this menu page
+    Abort();
+  }
   if (XOf(ThrottleOf(EventPlayer())) > 0) {
     findLeft();
   } else {
@@ -271,6 +284,10 @@ rule: "[interface/menu.ostw] Menu up-down"
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
+  if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS) {
+    BotButtonEdit_HandleUpDown();
+    return;
+  }
   if (ZOf(ThrottleOf()) > 0) {
     findUp();
   } else {
@@ -278,7 +295,7 @@ if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
   }
 }
 
-MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMING_END_GAME];
+MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMING_END_GAME, MenuState.EDITING_DUMMY_BOT_BUTTONS];
 rule: "[interface/menu.ostw] When menu state changes, find new first selection" -1
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)

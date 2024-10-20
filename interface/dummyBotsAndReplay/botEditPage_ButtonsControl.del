@@ -1,0 +1,93 @@
+Number BUTTON_CONTROL_SCALE: 1.25;
+Number BUTTON_CONTROL_START_Y: -1;
+Number BUTTON_CONTROL_SPACING_Y: 0.17;
+
+playervar ButtonControlState[] buttonControlStates = [];
+
+enum ButtonControlState {
+  NONE = "None",
+  HOLDING = "Holding",
+  SPAMMING = "Spamming"
+}
+
+Button[] ValidBotButtons: AllButtons.Remove(Button.Interact);
+Button ithButton(Number i): ValidBotButtons[i];
+
+void CreateBotButtonEditPage() {
+  for (i = 0; i < ValidBotButtons; i += 1) {
+    OnScreenText.CreateOnScreenText(
+      VisibleTo: LocalPlayer().currentMenuState == MenuState.EDITING_DUMMY_BOT ? LocalPlayer() : null,
+      Header: "{0}: {1}".Format([
+        ithButton(EvaluateOnce(i)),
+        LocalPlayer().selectedBot.buttonControlStates[EvaluateOnce(i)]]),
+      PositionX: 0,
+      PositionY: BUTTON_CONTROL_START_Y + i * BUTTON_CONTROL_SPACING_Y,
+      Scale: BUTTON_CONTROL_SCALE,
+      Reevaluation: InworldTextRev.VisibleToPositionAndString,
+      Color: isSelectingGridIndex(LocalPlayer(), 0, EvaluateOnce(i)) ? selectedColor : Color.Gray,
+      Spectators: Spectators.VisibleNever
+    );
+  }
+}
+
+/*
+ * Up/Down: Selectes a button to change
+ * Primary Fire: Cycles the button control state
+*/
+
+void BotButtonEdit_HandleUpDown() {
+  if (ZOf(ThrottleOf()) > 0.5) {
+    menuYIndex -= 1;
+    if (menuYIndex < 0) {
+      menuYIndex = ValidBotButtons - 1;
+    }
+  } else {
+    menuYIndex += 1;
+    if (menuYIndex >= ValidBotButtons) {
+      menuYIndex = 0;
+    }
+  }
+}
+
+// TODO: Handle menu click while on this page
+ButtonControlState SelectedButtonControlState(Number buttonIndex): selectedBot.buttonControlStates[buttonIndex];
+
+void BotButtonEdit_HandlePrimaryFire() {
+  if (SelectedButtonControlState(i) == ButtonControlState.NONE) {
+    selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.HOLDING;
+    StartHoldingButton(selectedBot, ithButton(menuYIndex));
+  } else if (SelectedButtonControlState(i) == ButtonControlState.HOLDING) {
+    selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.SPAMMING;
+    StopHoldingButton(selectedBot, ithButton(menuYIndex));
+  } else {
+    selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.NONE;
+    StopHoldingButton(selectedBot, ithButton(menuYIndex));
+  }
+}
+
+// TODO: If any buttons are marked as being spammed, start spamming them
+rule: "If any buttons are marked as being spammed, start spamming them"
+Event.OngoingPlayer
+if (buttonControlStates.IsTrueForAny((state) => state == ButtonControlState.SPAMMING))
+{
+  for (i = 0; i < ValidBotButtons; i += 1) {
+    if (selectedBot.buttonControlStates[i] == ButtonControlState.SPAMMING) {
+      StartHoldingButton(selectedBot, ithButton(i));
+    }
+  }
+  Wait(0.064);
+  for (i = 0; i < ValidBotButtons; i += 1) {
+    if (selectedBot.buttonControlStates[i] == ButtonControlState.SPAMMING) {
+      StopHoldingButton(selectedBot, ithButton(i));
+    }
+  }
+}
+
+// TODO: need to reset menuXIndex and menuYIndex to 0 when entering this menu
+rule: "When player enters this menu, set menuXIndex and menuYIndex to 0"
+Event.OngoingPlayer
+if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS)
+{
+  menuXIndex = 0;
+  menuYIndex = 0;
+}

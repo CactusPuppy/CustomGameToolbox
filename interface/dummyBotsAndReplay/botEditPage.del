@@ -1,8 +1,11 @@
+import "botEditPage_ButtonsControl.del";
+
 enum BotEditAction {
   NONE,
   CHANGE_TEAM,
   CHANGE_HERO,
-  DELETE
+  DELETE,
+  EDIT_BUTTON_CONTROL
 }
 
 playervar BotEditAction selectedBotEditAction;
