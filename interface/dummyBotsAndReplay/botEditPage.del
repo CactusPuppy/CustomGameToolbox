@@ -5,34 +5,37 @@ enum BotEditAction {
   CHANGE_TEAM,
   CHANGE_HERO,
   DELETE,
-  EDIT_BUTTON_CONTROL
+  EDIT_BUTTON_CONTROL,
+  SET_RESPAWN_POINT,
+  PIN_BOT_TO_POSITION
 }
 
 playervar BotEditAction selectedBotEditAction;
+playervar ResetPoint pinnedPosition;
 
 BotEditAction[] BotEditActionGrid: ButtonActionGrid[MenuState.EDITING_DUMMY_BOT];
 
 BotEditAction[] botEditPageButtonActions: [
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.CHANGE_HERO, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.CHANGE_TEAM, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.EDIT_BUTTON_CONTROL, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.SET_RESPAWN_POINT, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.CHANGE_HERO, BotEditAction.NONE, BotEditAction.CHANGE_TEAM, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.PIN_BOT_TO_POSITION, BotEditAction.NONE, BotEditAction.NONE,
   BotEditAction.NONE, BotEditAction.NONE, BotEditAction.DELETE, BotEditAction.NONE, BotEditAction.NONE
 ];
 
 String[] botEditPageButtonLabels: [
-  "", "", "", "", "",
-  "", "", "Change Hero", "", "",
-  "", "", "Switch Team", "", "",
-  "", "", "", "", "",
+  "", "", "Buttons", "", "",
+  "", "", "Set Reset Point", "", "",
+  "", "Change Hero", "", "Switch Team", "",
+  "", "", "Pin Bot To Position", "", "",
   "", "", "Delete", "", ""
 ];
 
 Color[] botEditPageButtonColors: [
-  null, null, null, null, null,
-  null, null, Color.Green, null, null,
-  null, null, Color.Blue, null, null,
-  null, null, null, null, null,
+  null, null, Color.White, null, null,
+  null, null, Color.Yellow, null, null,
+  null, Color.Green, null, Color.Blue, null,
+  null, null, Color.Purple, null, null,
   null, null, Color.Red, null, null
 ];
 
@@ -41,6 +44,24 @@ void HandleBotEditPageClick() {
   selectedBotEditAction = BotEditActionGrid[currentGridIndex()];
   MinWait();
   selectedBotEditAction = BotEditAction.NONE;
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] When a bot becomes selected, initialize display options"
+Event.OngoingPlayer
+if (selectedBot != null)
+{
+  if (selectedBot.respawnPoint.location != null) {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Clear Reset Point", Color.Orange);
+  } else {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Set Reset Point", Color.Yellow);
+  }
+  if (selectedBot.pinnedPosition.location != null) {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Unpin Bot", Color.Violet);
+  } else {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Purple);
+  }
+  WaitUntil(selectedBot != EvaluateOnce(selectedBot), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 playervar Hero tempHeroStorage;
@@ -72,15 +93,20 @@ rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change team"
 Event.OngoingPlayer
 if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
 {
+  LogToInspector("Changing team of {0}".Format([selectedBot]));
   tempHeroStorage = HeroOf(selectedBot);
-  Boolean wasPunchingBag = selectedBot.isPunchingBag;
-  Team tempTeamStorage = TeamOf(selectedBot);
-  Vector tempPositionStorage = PositionOf(selectedBot);
-  Vector tempFacingStorage = FacingDirectionOf(selectedBot);
+  Boolean wasPunchingBag! = selectedBot.isPunchingBag;
+  ResetPoint tempPinnedPosition! = selectedBot.pinnedPosition;
+  Team tempTeamStorage! = TeamOf(selectedBot);
+  Vector tempPositionStorage! = PositionOf(selectedBot);
+  Vector tempFacingStorage! = FacingDirectionOf(selectedBot);
   DestroyDummyBot(selectedBot.Team(), SlotOf(selectedBot));
   selectedBot = CreateDummyBot(tempHeroStorage, OppositeTeamOf(tempTeamStorage), -1, tempPositionStorage, tempFacingStorage);
   if (wasPunchingBag) {
     MarkLastCreatedBotAsPunchingBag();
+  }
+  if (tempPinnedPosition.location != null) {
+    LastCreatedEntity().pinnedPosition = tempPinnedPosition;
   }
   Wait(0.064);
   StartFacing(selectedBot, tempFacingStorage, 1000, Relative.ToWorld, FacingRev.None);
@@ -88,10 +114,84 @@ if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
   StopFacing(selectedBot);
 }
 
+playervar Any botRespawnPoint_FX_Loc!;
+playervar Any botRespawnPoint_FX_Fac!;
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Set respawn point"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.SET_RESPAWN_POINT)
+{
+  if (selectedBot.respawnPoint.location == null) {
+    selectedBot.respawnPoint = NewResetFromPlayer(selectedBot);
+    PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, EventPlayer(), 100);
+    SmallMessage(EventPlayer(), "Respawn point set!");
+    botRespawnPoint_FX_Loc = CreateEffect(
+      VisibleTo: playersWhoShouldSeeControls(selectedBot.positionControl),
+      Type: Effect.Sphere,
+      Color: Color.Green,
+      Position: selectedBot.respawnPoint.location,
+      Radius: 0.5,
+      Reevaluation: EffectRev.VisibleToPositionAndRadius
+    );
+    botRespawnPoint_FX_Fac = CreateBeamEffect(
+      VisibleTo: playersWhoShouldSeeControls(selectedBot.positionControl),
+      BeamType: BeamType.GoodBeam,
+      StartPosition: selectedBot.respawnPoint.location + Up() * 0.25,
+      EndPosition: selectedBot.respawnPoint.location + selectedBot.respawnPoint.facing + Up() * 0.25,
+      Color: TeamOf(selectedBot),
+      Reevaluation: EffectRev.VisibleToPositionAndRadius
+    );
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Clear Reset Point", Color.Orange);
+  } else {
+    selectedBot.respawnPoint.location = null;
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+    SmallMessage(EventPlayer(), "Respawn point cleared");
+    DestroyEffect(botRespawnPoint_FX_Loc);
+    DestroyEffect(botRespawnPoint_FX_Fac);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Set Reset Point", Color.Yellow);
+  }
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Switch to button control page"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.EDIT_BUTTON_CONTROL)
+{
+  OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT_BUTTONS);
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Toggle bot gravity"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.PIN_BOT_TO_POSITION)
+{
+  if (selectedBot.pinnedPosition.location == null) {
+    selectedBot.pinnedPosition = NewResetFromPlayer(selectedBot);
+    SmallMessage(EventPlayer(), "  Pinned bot to current position");
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Unpin Bot", Color.Violet);
+  } else {
+    selectedBot.pinnedPosition = <ResetPoint>null;
+    SmallMessage(EventPlayer(), "  Unpinned bot");
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Purple);
+  }
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle pinning bot to current position"
+Event.OngoingPlayer
+if (pinnedPosition.location != null)
+{
+  StartForcingPlayerPosition(EventPlayer(), pinnedPosition.location, true);
+  WaitUntil(pinnedPosition.location == null, 1000000);
+  StopForcingPlayerPosition();
+  MinWait();
+  if (SpeedOf(EventPlayer()) > 0.05) {
+    ApplyImpulse(EventPlayer(), VelocityOf() * -1, 0.01, Relative.ToWorld, ContraryMotion.CancelXYZ);
+  }
+}
+
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Delete"
 Event.OngoingPlayer
 if (selectedBotEditAction == BotEditAction.DELETE)
 {
   DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
+  selectedBot = null;
   CloseMenu(EventPlayer());
 }

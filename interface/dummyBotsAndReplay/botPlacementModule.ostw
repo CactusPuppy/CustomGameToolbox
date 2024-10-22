@@ -46,6 +46,12 @@ if (EventPlayer().IsButtonHeld(Button.PrimaryFire))
   selectedControl = getClosestSelectionEntity(EventPlayer());
   AbortIf(selectedControl.Id == 0);
   if (getAllMovableTargetsAsSelectionEntities().Map((e) => e.Id).Contains(selectedControl.Id)) {
+    # Check if the bot is currently pinned to a position
+    if (selectedControl.Owner.pinnedPosition.location != null) {
+      SmallMessage(EventPlayer(), "  This bot is pinned to its current location, unpin it first.");
+      PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+      Abort();
+    }
     # If a bot got selected, move it
     selectionSetDistance = DistanceBetween(EventPlayer().EyePosition(), selectedControl.Owner);
     StartForcingPlayerPosition(
@@ -56,16 +62,25 @@ if (EventPlayer().IsButtonHeld(Button.PrimaryFire))
           + FacingDirectionOf() * selectionSetDistance,
         PlayersToInclude: null,
         PlayersToExclude: null,
-        IncludePlayerOwnedObjects: false) + Down()),
+        IncludePlayerOwnedObjects: false)),
       Reevaluation: true);
     WaitUntil(!(EventPlayer().IsButtonHeld(Button.PrimaryFire) && botControlMode == BotControlMode.Edit), 1000000);
-    selectedControl.Position = RayCastHitPosition(
-      StartPOS: EventPlayer().EyePosition(),
-      EndPOS: EventPlayer().EyePosition()
-        + FacingDirectionOf() * selectionSetDistance,
-      PlayersToInclude: null,
-      PlayersToExclude: null,
-      IncludePlayerOwnedObjects: false) + Down();
+    // selectedControl.Position = RayCastHitPosition(
+    //   StartPOS: EventPlayer().EyePosition(),
+    //   EndPOS: EventPlayer().EyePosition()
+    //     + FacingDirectionOf() * selectionSetDistance,
+    //   PlayersToInclude: null,
+    //   PlayersToExclude: null,
+    //   IncludePlayerOwnedObjects: false)+ Up();
+    if (AltitudeOf(selectedControl.Owner) > 1) {
+      SetGravity(selectedControl.Owner, 0);
+      MinWait();
+      if (SpeedOf(selectedControl.Owner) > 0.05) {
+        ApplyImpulse(selectedControl.Owner, VelocityOf() * -1, 0.01, Relative.ToWorld, ContraryMotion.CancelXYZ);
+      }
+    } else {
+      SetGravity(selectedControl.Owner, 100);
+    }
     StopForcingPlayerPosition(selectedControl.Owner);
   } else if (getFacingControlTargets().Map((e) => e.Id).Contains(selectedControl.Id)) {
     # If a bot's facing got selected, rotate it

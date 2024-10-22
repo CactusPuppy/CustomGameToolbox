@@ -48,8 +48,8 @@ if (EventDamage() > 0)
     lastDamageDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
       Header: <"-<0><1>", lastDamageInstanceAmount, (cumulativeHealingDisplayTextID != -1 ? OFFSET : "")>,
-      Position: lastDamageInstancePosition + Up() * 2,
-      Scale: 1.5,
+      Position: lastDamageInstancePosition + Up() * 3,
+      Scale: 2,
       Clipping: Clipping.DoNotClip,
       Reevaluation: InworldTextRev.VisibleToPositionAndString,
       TextColor: LighterRed

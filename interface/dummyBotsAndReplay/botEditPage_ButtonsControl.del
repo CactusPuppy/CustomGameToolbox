@@ -1,8 +1,16 @@
 Number BUTTON_CONTROL_SCALE: 1.25;
-Number BUTTON_CONTROL_START_Y: -1;
-Number BUTTON_CONTROL_SPACING_Y: 0.17;
+Number BUTTON_CONTROL_START_Y: 1;
+Number BUTTON_CONTROL_SPACING_Y: -0.17;
 
 playervar ButtonControlState[] buttonControlStates = [];
+
+rule: "Initialize button control states array"
+Event.OngoingPlayer
+if (IsControllable(EventPlayer()))
+{
+  buttonControlStates[CountOf(ValidBotButtons) - 1] = 0;
+  buttonControlStates = buttonControlStates.Map((_) => ButtonControlState.NONE);
+}
 
 enum ButtonControlState {
   NONE = "None",
@@ -10,22 +18,24 @@ enum ButtonControlState {
   SPAMMING = "Spamming"
 }
 
-Button[] ValidBotButtons: AllButtons.Remove(Button.Interact);
+Button[] ValidBotButtons: AllButtons;
 Button ithButton(Number i): ValidBotButtons[i];
+Number indexOfButton(Button button): ValidBotButtons.IndexOf(button);
 
 void CreateBotButtonEditPage() {
-  for (i = 0; i < ValidBotButtons; i += 1) {
+  for (i = 0; i < ValidBotButtons.Length; i += 1) {
     OnScreenText.CreateOnScreenText(
-      VisibleTo: LocalPlayer().currentMenuState == MenuState.EDITING_DUMMY_BOT ? LocalPlayer() : null,
+      VisibleTo: LocalPlayer().currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS ? LocalPlayer() : null,
       Header: "{0}: {1}".Format([
         ithButton(EvaluateOnce(i)),
         LocalPlayer().selectedBot.buttonControlStates[EvaluateOnce(i)]]),
-      PositionX: 0,
-      PositionY: BUTTON_CONTROL_START_Y + i * BUTTON_CONTROL_SPACING_Y,
+      PositionX: 0.5,
+      PositionY: BUTTON_CONTROL_START_Y + EvaluateOnce(i) * BUTTON_CONTROL_SPACING_Y,
       Scale: BUTTON_CONTROL_SCALE,
-      Reevaluation: InworldTextRev.VisibleToPositionAndString,
+      Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
       Color: isSelectingGridIndex(LocalPlayer(), 0, EvaluateOnce(i)) ? selectedColor : Color.Gray,
-      Spectators: Spectators.VisibleNever
+      Spectators: Spectators.VisibleNever,
+      PerspectivePlayer: LocalPlayer()
     );
   }
 }
@@ -39,51 +49,133 @@ void BotButtonEdit_HandleUpDown() {
   if (ZOf(ThrottleOf()) > 0.5) {
     menuYIndex -= 1;
     if (menuYIndex < 0) {
-      menuYIndex = ValidBotButtons - 1;
+      menuYIndex = ValidBotButtons.Length - 1;
     }
   } else {
     menuYIndex += 1;
-    if (menuYIndex >= ValidBotButtons) {
+    if (menuYIndex >= ValidBotButtons.Length) {
       menuYIndex = 0;
     }
   }
 }
 
-// TODO: Handle menu click while on this page
 ButtonControlState SelectedButtonControlState(Number buttonIndex): selectedBot.buttonControlStates[buttonIndex];
 
 void BotButtonEdit_HandlePrimaryFire() {
-  if (SelectedButtonControlState(i) == ButtonControlState.NONE) {
+  if (selectedBot.buttonControlStates.Length < menuYIndex + 1) {
+    selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.NONE;
+  }
+  if (SelectedButtonControlState(menuYIndex) == ButtonControlState.NONE) {
     selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.HOLDING;
     StartHoldingButton(selectedBot, ithButton(menuYIndex));
-  } else if (SelectedButtonControlState(i) == ButtonControlState.HOLDING) {
+  } else if (SelectedButtonControlState(menuYIndex) == ButtonControlState.HOLDING) {
     selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.SPAMMING;
     StopHoldingButton(selectedBot, ithButton(menuYIndex));
   } else {
     selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.NONE;
-    StopHoldingButton(selectedBot, ithButton(menuYIndex));
   }
 }
 
 // TODO: If any buttons are marked as being spammed, start spamming them
-rule: "If any buttons are marked as being spammed, start spamming them"
+rule: "If primary fire button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates.IsTrueForAny((state) => state == ButtonControlState.SPAMMING))
+if (buttonControlStates[indexOfButton(Button.PrimaryFire)] == ButtonControlState.SPAMMING)
 {
-  for (i = 0; i < ValidBotButtons; i += 1) {
-    if (selectedBot.buttonControlStates[i] == ButtonControlState.SPAMMING) {
-      StartHoldingButton(selectedBot, ithButton(i));
-    }
-  }
+  StartHoldingButton(EventPlayer(), Button.PrimaryFire);
   Wait(0.064);
-  for (i = 0; i < ValidBotButtons; i += 1) {
-    if (selectedBot.buttonControlStates[i] == ButtonControlState.SPAMMING) {
-      StopHoldingButton(selectedBot, ithButton(i));
-    }
-  }
+  StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
 }
 
-// TODO: need to reset menuXIndex and menuYIndex to 0 when entering this menu
+rule: "If secondary fire button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.SecondaryFire)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.SecondaryFire);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+rule: "If Ability 1 button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Ability1)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.Ability1);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.Ability1);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+rule: "If Ability 2 button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Ability2)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.Ability2);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.Ability2);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+rule: "If Ultimate button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Ultimate)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.Ultimate);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.Ultimate);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+rule: "If Interact button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Interact)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.Interact);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.Interact);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+rule: "If Reload button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Reload)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.Reload);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.Reload);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+rule: "If Jump button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Jump)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.Jump);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.Jump);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
+rule: "If Crouch button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Crouch)] == ButtonControlState.SPAMMING)
+{
+  StartHoldingButton(EventPlayer(), Button.Crouch);
+  Wait(0.064);
+  StopHoldingButton(EventPlayer(), Button.Crouch);
+  Wait(1, WaitBehavior.AbortWhenFalse);
+  Loop();
+}
+
 rule: "When player enters this menu, set menuXIndex and menuYIndex to 0"
 Event.OngoingPlayer
 if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS)

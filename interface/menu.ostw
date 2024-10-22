@@ -11,6 +11,8 @@ import "dummyBotsAndReplay/botEditPage.del";
 
 playervar ResetPoint menuActivationPoint;
 
+Any INTENTIONALLY_EMPTY_ACTION_GRID: 42;
+
 rule: "[interface/menu.ostw] Set up action grid" -100
 {
   ButtonActionGrid = [];
@@ -21,6 +23,7 @@ rule: "[interface/menu.ostw] Set up action grid" -100
   ButtonActionGrid[MenuState.MODIFICATIONS] = modificationMenuButtonActions;
   ButtonActionGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonActions;
   ButtonActionGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonActions;
+  ButtonActionGrid[MenuState.EDITING_DUMMY_BOT_BUTTONS] = INTENTIONALLY_EMPTY_ACTION_GRID;
 }
 rule: "[interface/menu.ostw] Set up button label grid" -100
 Event.OngoingPlayer
@@ -46,25 +49,25 @@ Event.OngoingPlayer
 }
 
 MenuState[] mainMenuButtonActions: [
-  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED, MenuState.CLOSED,                MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.INFORMATION, MenuState.CLOSED, MenuState.MODIFICATIONS,         MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED, MenuState.CLOSED,                MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.TOOLS,       MenuState.CLOSED, MenuState.DUMMY_BOTS_AND_REPLAY, MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED, MenuState.CLOSED,                MenuState.CLOSED
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED,      MenuState.CLOSED,                MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.INFORMATION, MenuState.CLOSED,      MenuState.MODIFICATIONS,         MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED,      MenuState.CLOSED,                MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.TOOLS,       MenuState.CLOSED,      MenuState.DUMMY_BOTS_AND_REPLAY, MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED,      MenuState.CLOSED,                MenuState.CLOSED
 ];
 String[] mainMenuButtonLabels: [
-  "", "",            "", "",                  "",
-  "", "Information", "", "Modifications",     "",
-  "", "",            "", "",                  "",
-  "", "Tools",       "", "Dummy Bots",        "",
+  "", "",            "",                   "",                  "",
+  "", "Information", "",                   "Modifications",     "",
+  "", "",            "",                   "",                  "",
+  "", "Tools",       "",                   "Dummy Bots",        "",
   "", "",            "", "",                  ""
 ];
 Color[] mainMenuButtonColors: [
-  null, null,               null, null,         null,
-  null, LighterRed,  null, Color.Green,  null,
-  null, null,               null, null,         null,
-  null, Color.SkyBlue,      null, Color.Yellow, null,
-  null, null,               null, null,         null
+  null, null,               null,       null,         null,
+  null, LighterRed,         null,       Color.Green,  null,
+  null, null,               null,       null,         null,
+  null, Color.SkyBlue,      null,       Color.Yellow, null,
+  null, null,               null,       null,         null
 ];
 
 rule: "[interface/menu.ostw] Global menu setup"
@@ -109,6 +112,8 @@ rule: "[interface/menu.ostw] Global menu setup"
   }
   # Create bespoke end match confirm screen
   CreateEndGameConfirmationScreen();
+  # Create dummy bot editing screen
+  CreateBotButtonEditPage();
   # Create background orbie
   CreateEffect(
     VisibleTo:    LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
@@ -189,6 +194,7 @@ if (currentMenuState != MenuState.CLOSED)
 
 rule: "[interface/menu.ostw] When player holds Interact long enough, toggle menu"
 Event.OngoingPlayer
+if (IsDummyBot() == false)
 if (IsAlive())
 if (IsButtonHeld(EventPlayer(), Button.Interact))
 {
@@ -205,7 +211,7 @@ Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
 {
   AbortIf(currentMenuState == MenuState.CLOSED);
-  AbortIf(currentActionItem() == 0);
+  AbortIf(currentActionGrid() != INTENTIONALLY_EMPTY_ACTION_GRID && currentActionItem() == 0);
   switch (currentMenuState) {
     case MenuState.MAIN_MENU:
       HandleMainMenuClick();

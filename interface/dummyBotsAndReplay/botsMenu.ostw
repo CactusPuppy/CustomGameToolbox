@@ -6,7 +6,7 @@ enum BotsReplayAction {
   CREATE_BOT,
   CREATE_PUNCHING_BAG,
   EDIT_BOTS,
-  // RESET_BOTS,
+  RESET_BOTS,
   REMOVE_ALL_BOTS
 }
 
@@ -18,7 +18,7 @@ BotsReplayAction[] botsReplayMenuButtonActions: [
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.CREATE_BOT, BotsReplayAction.NONE, BotsReplayAction.NONE,
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.CREATE_PUNCHING_BAG, BotsReplayAction.NONE, BotsReplayAction.NONE,
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.EDIT_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE,
-  BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.NONE,
+  BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.RESET_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE,
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.REMOVE_ALL_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE
 ];
 
@@ -26,7 +26,7 @@ String[] botsReplayMenuButtonLabels: [
   "", "", "Create Dummy Bot", "", "",
   "", "", "Create Punching Bag", "", "",
   "", "", "Edit Dummy Bots", "", "",
-  "", "", "", "", "",
+  "", "", "Reset Bot Positions", "", "",
   "", "", "Remove All Bots", "", ""
 ];
 
@@ -34,13 +34,14 @@ Color[] botsReplayMenuButtonColors: [
   null, null, Color.Green, null, null,
   null, null, Color.Green, null, null,
   null, null, Color.Yellow, null, null,
-  null, null, null, null, null,
+  null, null, Color.Purple, null, null,
   null, null, Color.Red, null, null
 ];
 
 void MarkLastCreatedBotAsPunchingBag() {
   LastCreatedEntity().isPunchingBag = true;
   AddHealthPoolToPlayer(LastCreatedEntity(), HealthType.Health, 1250, true, false);
+  StartForcingDummyBotName(LastCreatedEntity(), "Punching Bag");
 }
 
 void HandleBotsMenuClick() {
@@ -87,6 +88,35 @@ if (selectedBotsReplayAction == BotsReplayAction.CREATE_PUNCHING_BAG)
 {
   Menu_CreateBot();
   MarkLastCreatedBotAsPunchingBag();
+}
+
+rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Initiator perspective for resetting all bots to reset points"
+Event.OngoingPlayer
+if (selectedBotsReplayAction == BotsReplayAction.RESET_BOTS)
+{
+  BigMessage(AllPlayers(), "Reset all bots to their reset points");
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle resetting all bots to their reset points"
+Event.OngoingPlayer
+if (IsControllable(EventPlayer()))
+if (respawnPoint.location != null)
+if (IsTrueForAny(AllPlayers().Filter((p) => !IsDummyBot(p)), ArrayElement().selectedBotsReplayAction == BotsReplayAction.RESET_BOTS))
+{
+  if (IsDead()) {
+    Respawn();
+    WaitUntil(IsAlive(), 1);
+  }
+  TeleportPlayerToResetPoint(EventPlayer(), respawnPoint);
+  if (AltitudeOf(EventPlayer()) > 1) {
+    SetGravity(EventPlayer(), 0);
+    MinWait();
+    if (SpeedOf(EventPlayer()) > 0.05) {
+      ApplyImpulse(EventPlayer(), VelocityOf() * -1, SpeedOf(), Relative.ToWorld, ContraryMotion.Incorporate);
+    }
+  } else {
+    SetGravity(EventPlayer(), 100);
+  }
 }
 
 rule: "[interface/dummyBots/botsMenu.ostw] Destroy all bots"

@@ -4,7 +4,7 @@ settings
     main
     {
         Mode Name: "Overwatch Content Creation Toolbox"
-        Description: "v0.2-ALPHA
+        Description: "v1.0.0
 Created by CactusPuppy"
     }
     modes
@@ -64,13 +64,20 @@ String MenuSettingsCategory: "3. Menu Settings";
 String ModSettingsCategory: "4. Mod Settings";
 String InformationCategory: "5. Information";
 
+globalvar Number i;
+
 // DEBUG: Diagnostics
-// import "OSTWUtils/Diagnostics.del";
-// disabled rule: "[DEBUG | main.ostw] Show diagnostics"
-// {
-//   new Diagnostics(ShowEntityCount: true, ShowTextCount: true, ShowServerLoad: true, ShowServerLoadAverage: true, ShowServerLoadPeak: true);
-//   printMenuValues();
-// }
+import "./OSTWUtils/Diagnostics.del";
+rule: "[DEBUG | main.ostw] Show diagnostics"
+{
+  new Diagnostics(
+    ShowEntityCount: true,
+    ShowTextCount: true,
+    ShowServerLoad: true,
+    ShowServerLoadAverage: true,
+    ShowServerLoadPeak: true);
+  // printMenuValues();
+}
 
 rule: "[main.ostw] Skip assembling heroes"
 if (IsAssemblingHeroes())

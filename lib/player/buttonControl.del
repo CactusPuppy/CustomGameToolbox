@@ -61,6 +61,12 @@ void RemoveOneLockFromAllButtons(in Player player = EventPlayer())
   UpdatePlayerButtonStatus(player);
 }
 
+void UnlockAllButtons(in Player player = EventPlayer())
+{
+  player.buttonLocks = player.buttonLocks.Map((lockCount) => 0);
+  UpdatePlayerButtonStatus(player);
+}
+
 void AddOneLockToButton(in Player player = EventPlayer(), in Button button)
 {
   player.buttonLocks[AllButtons.IndexOf(button)] += 1;
