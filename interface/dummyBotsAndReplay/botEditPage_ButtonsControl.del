@@ -76,7 +76,7 @@ void BotButtonEdit_HandlePrimaryFire() {
   }
 }
 
-// TODO: If any buttons are marked as being spammed, start spamming them
+// If any buttons are marked as being spammed, start spamming them
 rule: "If primary fire button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
 if (buttonControlStates[indexOfButton(Button.PrimaryFire)] == ButtonControlState.SPAMMING)
