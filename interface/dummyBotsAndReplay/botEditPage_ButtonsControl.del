@@ -67,113 +67,202 @@ void BotButtonEdit_HandlePrimaryFire() {
   }
   if (SelectedButtonControlState(menuYIndex) == ButtonControlState.NONE) {
     selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.HOLDING;
-    StartHoldingButton(selectedBot, ithButton(menuYIndex));
   } else if (SelectedButtonControlState(menuYIndex) == ButtonControlState.HOLDING) {
     selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.SPAMMING;
-    StopHoldingButton(selectedBot, ithButton(menuYIndex));
   } else {
     selectedBot.buttonControlStates[menuYIndex] = ButtonControlState.NONE;
   }
 }
 
 // If any buttons are marked as being spammed, start spamming them
-rule: "If primary fire button is marked as being spammed, start spamming it"
+rule: "[interface/dummyBotsAndReplay/botEditPage_ButtonsControl] Primary fire control"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.PrimaryFire)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.PrimaryFire)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.PrimaryFire);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.PrimaryFire);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.PrimaryFire)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.PrimaryFire);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+  }
+  while (buttonControlStates[indexOfButton(Button.PrimaryFire)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.PrimaryFire);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.PrimaryFire)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.PrimaryFire)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If secondary fire button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
 if (buttonControlStates[indexOfButton(Button.SecondaryFire)] == ButtonControlState.SPAMMING)
 {
-  StartHoldingButton(EventPlayer(), Button.SecondaryFire);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.SecondaryFire);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.SecondaryFire)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.SecondaryFire);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+  }
+  while (buttonControlStates[indexOfButton(Button.SecondaryFire)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.SecondaryFire);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.SecondaryFire)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.SecondaryFire)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If Ability 1 button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.Ability1)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.Ability1)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.Ability1);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.Ability1);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.Ability1)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Ability1);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Ability1);
+  }
+  while (buttonControlStates[indexOfButton(Button.Ability1)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Ability1);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Ability1);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Ability1)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Ability1)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If Ability 2 button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.Ability2)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.Ability2)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.Ability2);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.Ability2);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.Ability2)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Ability2);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Ability2);
+  }
+  while (buttonControlStates[indexOfButton(Button.Ability2)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Ability2);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Ability2);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Ability2)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Ability2)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If Ultimate button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.Ultimate)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.Ultimate)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.Ultimate);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.Ultimate);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.Ultimate)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Ultimate);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Ultimate);
+  }
+  while (buttonControlStates[indexOfButton(Button.Ultimate)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Ultimate);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Ultimate);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Ultimate)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Ultimate)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If Interact button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.Interact)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.Interact)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.Interact);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.Interact);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.Interact)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Interact);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Interact);
+  }
+  while (buttonControlStates[indexOfButton(Button.Interact)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Interact);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Interact);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Interact)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Interact)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If Reload button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.Reload)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.Reload)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.Reload);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.Reload);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.Reload)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Reload);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Reload);
+  }
+  while (buttonControlStates[indexOfButton(Button.Reload)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Reload);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Reload);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Reload)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Reload)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If Jump button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.Jump)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.Jump)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.Jump);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.Jump);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.Jump)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Jump);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Jump);
+  }
+  while (buttonControlStates[indexOfButton(Button.Jump)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Jump);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Jump);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Jump)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Jump)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "If Crouch button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.Crouch)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.Crouch)] != ButtonControlState.NONE)
 {
-  StartHoldingButton(EventPlayer(), Button.Crouch);
-  Wait(0.064);
-  StopHoldingButton(EventPlayer(), Button.Crouch);
-  Wait(1, WaitBehavior.AbortWhenFalse);
-  Loop();
+  if (buttonControlStates[indexOfButton(Button.Crouch)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Crouch);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Crouch);
+  }
+  while (buttonControlStates[indexOfButton(Button.Crouch)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Crouch);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Crouch);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Crouch)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Crouch)]), 1000000);
+  LoopIfConditionIsTrue();
+}
+
+rule: "If Melee button is marked as being spammed, start spamming it"
+Event.OngoingPlayer
+if (buttonControlStates[indexOfButton(Button.Melee)] != ButtonControlState.NONE)
+{
+  if (buttonControlStates[indexOfButton(Button.Melee)] == ButtonControlState.HOLDING) {
+    StartHoldingButton(EventPlayer(), Button.Melee);
+  } else {
+    StopHoldingButton(EventPlayer(), Button.Melee);
+  }
+  while (buttonControlStates[indexOfButton(Button.Melee)] == ButtonControlState.SPAMMING) {
+    StartHoldingButton(EventPlayer(), Button.Melee);
+    Wait(0.064);
+    StopHoldingButton(EventPlayer(), Button.Melee);
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  WaitUntil(buttonControlStates[indexOfButton(Button.Melee)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Melee)]), 1000000);
+  LoopIfConditionIsTrue();
 }
 
 rule: "When player enters this menu, set menuXIndex and menuYIndex to 0"
