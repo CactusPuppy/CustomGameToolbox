@@ -59,7 +59,7 @@ void HandleInformationMenuClick() {
     SmallMessage(EventPlayer(), <"<0> Remove some readouts and try again", IconString(Icon.Warning)>);
     return;
   }
-  LogToInspector(<"Grid Index: <0> | InfoActionGrid[<0>]: <1>", currentGridIndex(), InfoActionGrid[currentGridIndex()]>);
+  // LogToInspector(<"Grid Index: <0> | InfoActionGrid[<0>]: <1>", currentGridIndex(), InfoActionGrid[currentGridIndex()]>);
   if (activeInfoDisplays.Contains((InfoActionGrid[currentGridIndex()]))) {
     activeInfoDisplays.ModRemoveByValue(InfoActionGrid[currentGridIndex()]);
   } else {
