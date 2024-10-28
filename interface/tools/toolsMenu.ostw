@@ -16,7 +16,8 @@ enum ToolsAction {
   TOGGLE_PAUSE,
   RULER,
   THIRD_PERSON,
-  UNLOCK_ALL_BUTTONS
+  UNLOCK_ALL_BUTTONS,
+  RETURN_TO_ASSEMBLING_HEROES
 }
 
 globalvar Boolean isTimePaused;
@@ -30,7 +31,7 @@ ToolsAction[] ToolsActionGrid: ButtonActionGrid[MenuState.TOOLS];
 ToolsAction[] toolsMenuButtonActions: [
   ToolsAction.EMPTY, ToolsAction.EMPTY,        ToolsAction.EMPTY,               ToolsAction.EMPTY,        ToolsAction.EMPTY,
   ToolsAction.EMPTY, ToolsAction.SET_RESPAWN,  ToolsAction.CHANGE_HERO,         ToolsAction.NO_CLIP,      ToolsAction.EMPTY,
-  ToolsAction.EMPTY, ToolsAction.RULER,        ToolsAction.EMPTY,               ToolsAction.THIRD_PERSON, ToolsAction.EMPTY,
+  ToolsAction.EMPTY, ToolsAction.RULER,        ToolsAction.RETURN_TO_ASSEMBLING_HEROES,               ToolsAction.THIRD_PERSON, ToolsAction.EMPTY,
   ToolsAction.EMPTY, ToolsAction.TOGGLE_PAUSE, ToolsAction.FAST_FORWARD,        ToolsAction.END_GAME,     ToolsAction.EMPTY,
   ToolsAction.EMPTY, ToolsAction.EMPTY,        ToolsAction.UNLOCK_ALL_BUTTONS,  ToolsAction.EMPTY,        ToolsAction.EMPTY
 ];
@@ -38,7 +39,7 @@ ToolsAction[] toolsMenuButtonActions: [
 String[] toolsMenuButtonLabels: [
   "", "",                   "",             "",                 "",
   "", "Set Respawn Point",  "Change Hero",  "Enable NoClip",    "",
-  "", "Place Ruler",        "",             "Enable 3rd Person",       "",
+  "", "Place Ruler",        "Back to Hero Select",             "Enable 3rd Person",       "",
   "", "Unpause Match Time", "Skip Setup",   "End Match",        "",
   "", "",                   "Unlock All Buttons",             "",                 ""
 ];
@@ -46,7 +47,7 @@ String[] toolsMenuButtonLabels: [
 Color[] toolsMenuButtonColors: [
   Colors.Hidden, Colors.Hidden,                   Colors.Hidden,             Colors.Hidden,      Colors.Hidden,
   Colors.Hidden, CustomColor(80, 187, 217, 255),  Color.Blue,                Color.Green,        Colors.Hidden,
-  Colors.Hidden, Color.Yellow,                    Colors.Hidden,             Color.Orange,       Colors.Hidden,
+  Colors.Hidden, Color.Yellow,                    Color.Turquoise,             Color.Orange,       Colors.Hidden,
   Colors.Hidden, CustomColor(50, 220, 27, 255),   Color.Aqua,                LighterRed,         Colors.Hidden,
   Colors.Hidden, Colors.Hidden,                   CustomColor(97,97,97,255), Colors.Hidden,      Colors.Hidden
 ];
@@ -146,6 +147,14 @@ Event.OngoingPlayer
 if (!isTimePaused)
 {
   UpdateButtonAppearance(MenuState.TOOLS, 1, 3, "Pause Match Time", Color.Purple);
+}
+
+rule: "[interface/toolsMenu.ostw] Handle request for returning to assembling heroes"
+Event.OngoingPlayer
+if (toolsActionID == ToolsAction.RETURN_TO_ASSEMBLING_HEROES)
+{
+  GoToAssembleHeroes();
+  CloseMenu(EventPlayer());
 }
 
 rule: "[interface/toolsMenu.ostw] When fast-forward is requested, make it happen"

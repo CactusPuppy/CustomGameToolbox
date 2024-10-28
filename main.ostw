@@ -68,23 +68,30 @@ String ReplaySettingsCategory: "6. Replay Settings";
 globalvar Number i;
 
 // DEBUG: Diagnostics
-import "./OSTWUtils/Diagnostics.del";
-rule: "[DEBUG | main.ostw] Show diagnostics"
-{
-  new Diagnostics(
-    ShowEntityCount: true,
-    ShowTextCount: true,
-    ShowServerLoad: true,
-    ShowServerLoadAverage: true,
-    ShowServerLoadPeak: true);
-  // printMenuValues();
-}
+// import "./OSTWUtils/Diagnostics.del";
+// rule: "[DEBUG | main.ostw] Show diagnostics"
+// {
+//   new Diagnostics(
+//     ShowEntityCount: true,
+//     ShowTextCount: true,
+//     ShowServerLoad: true,
+//     ShowServerLoadAverage: true,
+//     ShowServerLoadPeak: true);
+//   // printMenuValues();
+// }
 // import "interface/dummyBotsAndReplay/replay/magzie_echo_recorder.del";
 
 
 rule: "[main.ostw] Skip assembling heroes"
 if (IsAssemblingHeroes())
 {
+  if (AllPlayers().Any(p => p.toolsActionID == ToolsAction.RETURN_TO_ASSEMBLING_HEROES)) {
+    if (isTimePaused) {
+      UnpauseMatchTime();
+      isTimePaused = false;
+    }
+    Abort();
+  }
   SetMatchTime(WorkshopSettingInteger(GeneralSettingsCategory, "Assembling Heroes Length", 5, 0, 30));
   if (isTimePaused) {
     UnpauseMatchTime();
