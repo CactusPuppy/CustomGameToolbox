@@ -107,15 +107,20 @@ Event.OngoingPlayer
 if (selectedBotsReplayAction == BotsReplayAction.RESET_BOTS)
 {
   BigMessage(AllPlayers(), "Reset all bots to their reset points");
+  if (AllControllablePlayers().Any(p => p.replayResetPoint.location == null && p.respawnPoint.location == null)) {
+    SmallMessage(EventPlayer(), "  Some bots do not have reset points set!");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+    Wait(0.25);
+    SmallMessage(EventPlayer(), "  Teleporting those bots to you...");
+    Abort();
+  }
 }
 
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle resetting all bots to their reset points"
 Event.OngoingPlayer
 if (IsControllable(EventPlayer()))
-if (respawnPoint.location != null || replayResetPoint.location != null)
-if (IsTrueForAny(AllPlayers().Filter((p) => !IsDummyBot(p)), ArrayElement().selectedBotsReplayAction == BotsReplayAction.RESET_BOTS))
+if (IsTrueForAny(AllPlayers().Filter((p) => !IsControllable(p)), ArrayElement().selectedBotsReplayAction == BotsReplayAction.RESET_BOTS))
 {
-  // if (IsDead()) {
   StopForcingHero();
   Respawn();
   ForcePlayerHero(EventPlayer(), recordingHero);
@@ -124,6 +129,8 @@ if (IsTrueForAny(AllPlayers().Filter((p) => !IsDummyBot(p)), ArrayElement().sele
     TeleportPlayerToResetPoint(EventPlayer(), replayResetPoint);
   } else if (respawnPoint.location != null) {
     TeleportPlayerToResetPoint(EventPlayer(), respawnPoint);
+  } else {
+    Teleport(EventPlayer(), AllPlayers().Filter((p) => !IsControllable(p) && p.selectedBotsReplayAction == BotsReplayAction.RESET_BOTS)[0]);
   }
   if (AltitudeOf(EventPlayer()) > 1) {
     SetGravity(EventPlayer(), 0);

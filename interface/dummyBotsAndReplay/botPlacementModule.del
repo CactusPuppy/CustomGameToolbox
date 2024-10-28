@@ -82,6 +82,7 @@ Vector desiredFacingControlPosition(Player controlOwner = EventPlayer()): RayCas
   IncludePlayerOwnedObjects: false);
 
 Boolean IsControllable(Player player = EventPlayer()): IsDummyBot(player);
+Player[] AllControllablePlayers(): AllPlayers().FilteredArray((player) => IsControllable(player));
 Player | Player[] playersWhoShouldSeeControls(SelectionEntity entity):
   AllPlayers().Contains(LocalPlayer())
   && IsControllable(entity.Owner)
