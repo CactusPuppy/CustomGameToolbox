@@ -17,6 +17,9 @@ playervar Vector lastHealInstancePosition!;
 
 String OFFSET: "    ";
 
+Number lastInstanceYOffset: 3;
+Number cumulativeInstanceYOffset: 4;
+
 rule: "[interface/information/damageNumbers.ostw] Update Information Menu button appearance for damage/heal numbers"
 Event.OngoingPlayer
 if (activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS))
@@ -39,7 +42,7 @@ if (EventDamage() > 0)
     cumulativeDamageDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
       Header: <"-<0><1>", cumulativeDamage, (cumulativeHealingDisplayTextID != -1 ? OFFSET : "")>,
-      Position: UpdateEveryFrame(PositionOf()) + Up() * 2.5,
+      Position: UpdateEveryFrame(PositionOf()) + Up() * cumulativeInstanceYOffset,
       Scale: 4,
       Clipping: Clipping.DoNotClip,
       Reevaluation: InworldTextRev.VisibleToPositionAndString,
@@ -48,7 +51,7 @@ if (EventDamage() > 0)
     lastDamageDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
       Header: <"-<0><1>", lastDamageInstanceAmount, (cumulativeHealingDisplayTextID != -1 ? OFFSET : "")>,
-      Position: lastDamageInstancePosition + Up() * 3,
+      Position: lastDamageInstancePosition + Up() * lastInstanceYOffset,
       Scale: 2,
       Clipping: Clipping.DoNotClip,
       Reevaluation: InworldTextRev.VisibleToPositionAndString,
@@ -77,7 +80,7 @@ if (EventHealing() > 0)
     cumulativeHealingDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
       Header: <"<1>+<0>", cumulativeHealing, (cumulativeDamageDisplayTextID != -1 ? OFFSET : "")>,
-      Position: UpdateEveryFrame(PositionOf()) + Up() * 2.5,
+      Position: UpdateEveryFrame(PositionOf()) + Up() * cumulativeInstanceYOffset,
       Scale: 4,
       Clipping: Clipping.DoNotClip,
       Reevaluation: InworldTextRev.VisibleToPositionAndString,
@@ -86,7 +89,7 @@ if (EventHealing() > 0)
     lastHealingDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
       Header: <"<1>+<0>", lastHealInstanceAmount, (cumulativeDamageDisplayTextID != -1 ? OFFSET : "")>,
-      Position: lastHealInstancePosition + Up() * 2,
+      Position: lastHealInstancePosition + Up() * lastInstanceYOffset,
       Scale: 1.5,
       Clipping: Clipping.DoNotClip,
       Reevaluation: InworldTextRev.VisibleToPositionAndString,
