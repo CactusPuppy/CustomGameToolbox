@@ -462,6 +462,8 @@ void PlayFrameAbility1() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
   if (sampleValue == true) {
     if (!IsButtonHeld(EventPlayer(), Button.Ability1)) {
       StartHoldingButton(EventPlayer(), Button.Ability1);
+      # Allow bot rein to cancel charge
+      async! Rein_Ability1Handling();
     }
   } else {
     if (IsButtonHeld(EventPlayer(), Button.Ability1)) {
@@ -473,6 +475,14 @@ void PlayFrameAbility1() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
     currentEventIndices[InputType.ABILITY_1] += 1;
     currentEventFrames[InputType.ABILITY_1] = 0;
   }
+}
+
+void Rein_Ability1Handling() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Rein - Ability 1 Handling" {
+  WaitUntil(!EventPlayer().IsButtonHeld(Button.Ability1) || !IsUsingAbility1(), 1000000);
+  AbortIf(!IsUsingAbility1());
+  WaitUntil(EventPlayer().IsButtonHeld(Button.Ability1) || !IsUsingAbility1(), 1000000);
+  AbortIf(!IsUsingAbility1());
+  CancelPrimaryAction();
 }
 
 void PlayFrameAbility2() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Ability 2" {
