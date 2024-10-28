@@ -1,0 +1,656 @@
+enum ReplayState {
+  NONE,
+  RECORDING,
+  PLAYING
+}
+
+enum InputType {
+  PRIMARY_FIRE,
+  SECONDARY_FIRE,
+  ABILITY_1,
+  ABILITY_2,
+  ULTIMATE,
+  JUMP,
+  CROUCH,
+  MELEE,
+  RELOAD,
+  THROTTLE,
+  FACING,
+  WEAPON
+}
+
+single struct InputEvent {
+  public Any value;
+  public Number duration;
+
+  public static InputEvent New(Any value, Number duration): single { value: value, duration: duration };
+}
+
+globalvar Number longestRecordingLength = 0;
+
+playervar ReplayState replayState;
+playervar Number recordingLength;
+playervar Number frame;
+playervar Number sampleCount = 0;
+
+playervar Any sampleValue;
+playervar Any[] currentInputValues;
+playervar Number[] currentEventIndices;
+playervar Number[] currentEventFrames;
+playervar InputEvent[] primaryFireEvents;
+playervar InputEvent[] secondaryFireEvents;
+playervar InputEvent[] ability1Events;
+playervar InputEvent[] ability2Events;
+playervar InputEvent[] ultimateEvents;
+playervar InputEvent[] jumpEvents;
+playervar InputEvent[] crouchEvents;
+playervar InputEvent[] meleeEvents;
+playervar InputEvent[] reloadEvents;
+playervar InputEvent[] throttleEvents;
+playervar InputEvent[] facingEvents;
+playervar InputEvent[] weaponEvents;
+Boolean hasRecordedClip(Player p = EventPlayer()): p.sampleCount > 0;
+
+Number MAX_SAMPLES: 999;
+
+void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recording" {
+  frame = 0;
+  recordingLength = 0;
+  sampleCount = 0;
+  currentInputValues = [];
+  currentEventIndices = [];
+  currentEventFrames = [];
+  primaryFireEvents = [];
+  secondaryFireEvents = [];
+  ability1Events = [];
+  ability2Events = [];
+  ultimateEvents = [];
+  jumpEvents = [];
+  crouchEvents = [];
+  meleeEvents = [];
+  reloadEvents = [];
+  throttleEvents = [];
+  facingEvents = [];
+  UpdateLongestRecordingLength();
+}
+
+void UpdateSampleCount() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Sample Count" {
+  sampleCount = 0;
+  sampleCount = Max(sampleCount, primaryFireEvents.Length);
+  sampleCount = Max(sampleCount, secondaryFireEvents.Length);
+  sampleCount = Max(sampleCount, ability1Events.Length);
+  sampleCount = Max(sampleCount, ability2Events.Length);
+  sampleCount = Max(sampleCount, ultimateEvents.Length);
+  sampleCount = Max(sampleCount, jumpEvents.Length);
+  sampleCount = Max(sampleCount, crouchEvents.Length);
+  sampleCount = Max(sampleCount, meleeEvents.Length);
+  sampleCount = Max(sampleCount, reloadEvents.Length);
+  sampleCount = Max(sampleCount, throttleEvents.Length);
+  sampleCount = Max(sampleCount, facingEvents.Length);
+  sampleCount = Max(sampleCount, weaponEvents.Length);
+}
+
+void UpdateLongestRecordingLength() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Longest Recording Length" {
+  longestRecordingLength = AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).Sort(p => p.recordingLength).Last.recordingLength;
+}
+
+void StartRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording" {
+  DeleteRecording();
+  frame = 0;
+  recordingLength = 0;
+  replayState = ReplayState.RECORDING;
+
+}
+
+void StopRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Stop Recording" {
+  replayState = ReplayState.NONE;
+  recordingLength = frame;
+  UpdateSampleCount();
+  UpdateLongestRecordingLength();
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Primary Fire"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.PrimaryFire))
+{
+  currentInputValues[InputType.PRIMARY_FIRE] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Secondary Fire"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.SecondaryFire))
+{
+  currentInputValues[InputType.SECONDARY_FIRE] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Ability 1"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Ability1))
+{
+  currentInputValues[InputType.ABILITY_1] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Ability 2"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Ability2))
+{
+  currentInputValues[InputType.ABILITY_2] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Ultimate"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Ultimate))
+{
+  currentInputValues[InputType.ULTIMATE] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Jump"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Jump))
+{
+  currentInputValues[InputType.JUMP] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Crouch"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Crouch))
+{
+  currentInputValues[InputType.CROUCH] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Melee"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Melee))
+{
+  currentInputValues[InputType.MELEE] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Reload"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Reload))
+{
+  currentInputValues[InputType.RELOAD] = true;
+}
+
+void RecordFramePrimaryFire() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Primary Fire" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.PrimaryFire) || currentInputValues[InputType.PRIMARY_FIRE];
+  if (primaryFireEvents[currentEventIndices[InputType.PRIMARY_FIRE]].value != sampleValue) {
+    currentEventIndices[InputType.PRIMARY_FIRE] += frame == 0 ? 0 : 1;
+    primaryFireEvents[currentEventIndices[InputType.PRIMARY_FIRE]] = InputEvent.New(sampleValue, 0);
+  }
+  primaryFireEvents[currentEventIndices[InputType.PRIMARY_FIRE]].duration += 1;
+}
+
+void RecordFrameSecondaryFire() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Secondary Fire" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.SecondaryFire) || currentInputValues[InputType.SECONDARY_FIRE];
+  if (secondaryFireEvents[currentEventIndices[InputType.SECONDARY_FIRE]].value != sampleValue) {
+    currentEventIndices[InputType.SECONDARY_FIRE] += frame == 0 ? 0 : 1;
+    secondaryFireEvents[currentEventIndices[InputType.SECONDARY_FIRE]] = InputEvent.New(sampleValue, 0);
+  }
+  secondaryFireEvents[currentEventIndices[InputType.SECONDARY_FIRE]].duration += 1;
+}
+
+void RecordFrameAbility1() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Ability 1" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Ability1) || currentInputValues[InputType.ABILITY_1];
+  if (ability1Events[currentEventIndices[InputType.ABILITY_1]].value != sampleValue) {
+    currentEventIndices[InputType.ABILITY_1] += frame == 0 ? 0 : 1;
+    ability1Events[currentEventIndices[InputType.ABILITY_1]] = InputEvent.New(sampleValue, 0);
+  }
+  ability1Events[currentEventIndices[InputType.ABILITY_1]].duration += 1;
+}
+
+void RecordFrameAbility2() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Ability 2" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Ability2) || currentInputValues[InputType.ABILITY_2];
+  if (ability2Events[currentEventIndices[InputType.ABILITY_2]].value != sampleValue) {
+    currentEventIndices[InputType.ABILITY_2] += frame == 0 ? 0 : 1;
+    ability2Events[currentEventIndices[InputType.ABILITY_2]] = InputEvent.New(sampleValue, 0);
+  }
+  ability2Events[currentEventIndices[InputType.ABILITY_2]].duration += 1;
+}
+
+void RecordFrameUltimate() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Ultimate" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Ultimate) || currentInputValues[InputType.ULTIMATE];
+  if (ultimateEvents[currentEventIndices[InputType.ULTIMATE]].value != sampleValue) {
+    currentEventIndices[InputType.ULTIMATE] += frame == 0 ? 0 : 1;
+    ultimateEvents[currentEventIndices[InputType.ULTIMATE]] = InputEvent.New(sampleValue, 0);
+  }
+  ultimateEvents[currentEventIndices[InputType.ULTIMATE]].duration += 1;
+}
+
+void RecordFrameJump() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Jump" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Jump) || currentInputValues[InputType.JUMP];
+  if (jumpEvents[currentEventIndices[InputType.JUMP]].value != sampleValue) {
+    currentEventIndices[InputType.JUMP] += frame == 0 ? 0 : 1;
+    jumpEvents[currentEventIndices[InputType.JUMP]] = InputEvent.New(sampleValue, 0);
+  }
+  jumpEvents[currentEventIndices[InputType.JUMP]].duration += 1;
+}
+
+void RecordFrameCrouch() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Crouch" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Crouch) || currentInputValues[InputType.CROUCH];
+  if (crouchEvents[currentEventIndices[InputType.CROUCH]].value != sampleValue) {
+    currentEventIndices[InputType.CROUCH] += frame == 0 ? 0 : 1;
+    crouchEvents[currentEventIndices[InputType.CROUCH]] = InputEvent.New(sampleValue, 0);
+  }
+  crouchEvents[currentEventIndices[InputType.CROUCH]].duration += 1;
+}
+
+void RecordFrameMelee() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Melee" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Melee) || currentInputValues[InputType.MELEE];
+  if (meleeEvents[currentEventIndices[InputType.MELEE]].value != sampleValue) {
+    currentEventIndices[InputType.MELEE] += frame == 0 ? 0 : 1;
+    meleeEvents[currentEventIndices[InputType.MELEE]] = InputEvent.New(sampleValue, 0);
+  }
+  meleeEvents[currentEventIndices[InputType.MELEE]].duration += 1;
+}
+
+void RecordFrameReload() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Reload" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Reload) || currentInputValues[InputType.RELOAD];
+  if (reloadEvents[currentEventIndices[InputType.RELOAD]].value != sampleValue) {
+    currentEventIndices[InputType.RELOAD] += frame == 0 ? 0 : 1;
+    reloadEvents[currentEventIndices[InputType.RELOAD]] = InputEvent.New(sampleValue, 0);
+  }
+  reloadEvents[currentEventIndices[InputType.RELOAD]].duration += 1;
+}
+
+void RecordFrameThrottle() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Throttle" {
+  sampleValue = ThrottleOf(EventPlayer());
+  if (throttleEvents[currentEventIndices[InputType.THROTTLE]].value != sampleValue) {
+    currentEventIndices[InputType.THROTTLE] += frame == 0 ? 0 : 1;
+    throttleEvents[currentEventIndices[InputType.THROTTLE]] = InputEvent.New(sampleValue, 0);
+  }
+  throttleEvents[currentEventIndices[InputType.THROTTLE]].duration += 1;
+}
+
+void RecordFrameFacing() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Facing" {
+  sampleValue = FacingDirectionOf(EventPlayer());
+  if (facingEvents[currentEventIndices[InputType.FACING]].value != sampleValue) {
+    currentEventIndices[InputType.FACING] += frame == 0 ? 0 : 1;
+    facingEvents[currentEventIndices[InputType.FACING]] = InputEvent.New(sampleValue, 0);
+  }
+  facingEvents[currentEventIndices[InputType.FACING]].duration += 1;
+}
+
+void RecordFrameWeapon() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Weapon" {
+  sampleValue = Weapon(EventPlayer());
+  if (weaponEvents[currentEventIndices[InputType.WEAPON]].value != sampleValue) {
+    currentEventIndices[InputType.WEAPON] += frame == 0 ? 0 : 1;
+    weaponEvents[currentEventIndices[InputType.WEAPON]] = InputEvent.New(sampleValue, 0);
+  }
+  weaponEvents[currentEventIndices[InputType.WEAPON]].duration += 1;
+}
+
+void RecordFrame() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame" {
+  RecordFramePrimaryFire();
+  RecordFrameSecondaryFire();
+  RecordFrameAbility1();
+  RecordFrameAbility2();
+  RecordFrameUltimate();
+  RecordFrameJump();
+  RecordFrameCrouch();
+  RecordFrameMelee();
+  RecordFrameReload();
+  RecordFrameThrottle();
+  RecordFrameFacing();
+  RecordFrameWeapon();
+  frame += 1;
+}
+
+void TransferRecording(Player SourcePlayer = EventPlayer(), Player TargetPlayer) "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Transfer Recording" {
+  TargetPlayer.primaryFireEvents = SourcePlayer.primaryFireEvents;
+  TargetPlayer.secondaryFireEvents = SourcePlayer.secondaryFireEvents;
+  TargetPlayer.ability1Events = SourcePlayer.ability1Events;
+  TargetPlayer.ability2Events = SourcePlayer.ability2Events;
+  TargetPlayer.ultimateEvents = SourcePlayer.ultimateEvents;
+  TargetPlayer.jumpEvents = SourcePlayer.jumpEvents;
+  TargetPlayer.crouchEvents = SourcePlayer.crouchEvents;
+  TargetPlayer.meleeEvents = SourcePlayer.meleeEvents;
+  TargetPlayer.reloadEvents = SourcePlayer.reloadEvents;
+  TargetPlayer.throttleEvents = SourcePlayer.throttleEvents;
+  TargetPlayer.facingEvents = SourcePlayer.facingEvents;
+  TargetPlayer.weaponEvents = SourcePlayer.weaponEvents;
+
+  TargetPlayer.recordingLength = SourcePlayer.recordingLength;
+  TargetPlayer.sampleCount = 0;
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.primaryFireEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.secondaryFireEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.ability1Events.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.ability2Events.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.ultimateEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.jumpEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.crouchEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.meleeEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.reloadEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.throttleEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.facingEvents.Length);
+  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.weaponEvents.Length);
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Recording Loop"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+{
+  # End the recording if the player opens the menu, switches heroes, or exceeds the maximum sample count
+  if (currentMenuState != MenuState.CLOSED || HeroOf() != recordingHero || sampleCount >= MAX_SAMPLES)
+  {
+    Recorder_StopRecording();
+    Abort();
+  }
+  RecordFrame();
+  currentInputValues = [];
+  UpdateSampleCount();
+  Wait(0.016, WaitBehavior.AbortWhenFalse);
+  LoopIfConditionIsTrue();
+}
+
+void Recorder_StopRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Recorder - Stop Recording" {
+  StopRecording();
+  # Transfer recording to selected bot
+  TransferRecording(EventPlayer(), selectedBot);
+  selectedBot.recordingHero = recordingHero;
+  DeleteRecording();
+
+  # Restore bot to reset point and recording player to original hero
+  ForcePlayerHero(EventPlayer(), originalHero);
+  StopForcingHero(EventPlayer());
+  StopForcingPlayerPosition(selectedBot);
+  SetInvisible(selectedBot, InvisibleTo.None);
+  TeleportPlayerToResetPoint(selectedBot, selectedBot.replayResetPoint);
+  if (currentMenuState != MenuState.CLOSED) CloseMenu();
+  MinWait();
+  StartEditingBots();
+  Wait(0.25);
+  SmallMessage(EventPlayer(), "  Recording stopped");
+}
+
+playervar Boolean botReadyToReplay;
+
+void PlayClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip" {
+  StopClip();
+  StopForcingHero(EventPlayer());
+  Respawn();
+  WaitUntil(HeroOf() != recordingHero, 0.25);
+  ForcePlayerHero(EventPlayer(), recordingHero);
+  Wait(0.064);
+  TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().replayResetPoint);
+  Wait(1);
+  botReadyToReplay = true;
+  replayState = ReplayState.PLAYING;
+}
+
+void StopClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Stop Clip" {
+  botReadyToReplay = false;
+  frame = 0;
+  currentEventFrames = [];
+  currentEventIndices = [];
+  StopThrottleInDirection();
+  StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+  StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+  StopHoldingButton(EventPlayer(), Button.Ability1);
+  StopHoldingButton(EventPlayer(), Button.Ability2);
+  StopHoldingButton(EventPlayer(), Button.Ultimate);
+  StopHoldingButton(EventPlayer(), Button.Jump);
+  StopHoldingButton(EventPlayer(), Button.Crouch);
+  StopHoldingButton(EventPlayer(), Button.Melee);
+  StopHoldingButton(EventPlayer(), Button.Reload);
+  if (IsAlive()) TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().replayResetPoint);
+  replayState = ReplayState.NONE;
+}
+
+void LoopClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip" {
+  botReadyToReplay = false;
+  frame = 0;
+  currentEventIndices = [];
+  currentEventFrames = [];
+  StopForcingHero(EventPlayer());
+  Respawn();
+  WaitUntil(HeroOf() != recordingHero, 0.25);
+  ForcePlayerHero(EventPlayer(), recordingHero);
+  // Wait(0.064);
+  TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().replayResetPoint);
+  Wait(0.5);
+  botReadyToReplay = true;
+}
+
+void PlayFramePrimaryFire() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Primary Fire" {
+  sampleValue = EventPlayer().primaryFireEvents[currentEventIndices[InputType.PRIMARY_FIRE]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.PrimaryFire)) {
+      StartHoldingButton(EventPlayer(), Button.PrimaryFire);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.PrimaryFire)) {
+      StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+    }
+  }
+  currentEventFrames[InputType.PRIMARY_FIRE] += 1;
+  if (currentEventFrames[InputType.PRIMARY_FIRE] >= primaryFireEvents[currentEventIndices[InputType.PRIMARY_FIRE]].duration) {
+    currentEventIndices[InputType.PRIMARY_FIRE] += 1;
+    currentEventFrames[InputType.PRIMARY_FIRE] = 0;
+  }
+}
+
+void PlayFrameSecondaryFire() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Secondary Fire" {
+  sampleValue = EventPlayer().secondaryFireEvents[currentEventIndices[InputType.SECONDARY_FIRE]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.SecondaryFire)) {
+      StartHoldingButton(EventPlayer(), Button.SecondaryFire);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.SecondaryFire)) {
+      StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+    }
+  }
+  currentEventFrames[InputType.SECONDARY_FIRE] += 1;
+  if (currentEventFrames[InputType.SECONDARY_FIRE] >= secondaryFireEvents[currentEventIndices[InputType.SECONDARY_FIRE]].duration) {
+    currentEventIndices[InputType.SECONDARY_FIRE] += 1;
+    currentEventFrames[InputType.SECONDARY_FIRE] = 0;
+  }
+}
+
+void PlayFrameAbility1() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Ability 1" {
+  sampleValue = EventPlayer().ability1Events[currentEventIndices[InputType.ABILITY_1]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Ability1)) {
+      StartHoldingButton(EventPlayer(), Button.Ability1);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Ability1)) {
+      StopHoldingButton(EventPlayer(), Button.Ability1);
+    }
+  }
+  currentEventFrames[InputType.ABILITY_1] += 1;
+  if (currentEventFrames[InputType.ABILITY_1] >= ability1Events[currentEventIndices[InputType.ABILITY_1]].duration) {
+    currentEventIndices[InputType.ABILITY_1] += 1;
+    currentEventFrames[InputType.ABILITY_1] = 0;
+  }
+}
+
+void PlayFrameAbility2() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Ability 2" {
+  sampleValue = EventPlayer().ability2Events[currentEventIndices[InputType.ABILITY_2]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Ability2)) {
+      StartHoldingButton(EventPlayer(), Button.Ability2);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Ability2)) {
+      StopHoldingButton(EventPlayer(), Button.Ability2);
+    }
+  }
+  currentEventFrames[InputType.ABILITY_2] += 1;
+  if (currentEventFrames[InputType.ABILITY_2] >= ability2Events[currentEventIndices[InputType.ABILITY_2]].duration) {
+    currentEventIndices[InputType.ABILITY_2] += 1;
+    currentEventFrames[InputType.ABILITY_2] = 0;
+  }
+}
+
+void PlayFrameUltimate() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Ultimate" {
+  sampleValue = EventPlayer().ultimateEvents[currentEventIndices[InputType.ULTIMATE]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Ultimate)) {
+      StartHoldingButton(EventPlayer(), Button.Ultimate);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Ultimate)) {
+      StopHoldingButton(EventPlayer(), Button.Ultimate);
+    }
+  }
+  currentEventFrames[InputType.ULTIMATE] += 1;
+  if (currentEventFrames[InputType.ULTIMATE] >= ultimateEvents[currentEventIndices[InputType.ULTIMATE]].duration) {
+    currentEventIndices[InputType.ULTIMATE] += 1;
+    currentEventFrames[InputType.ULTIMATE] = 0;
+  }
+}
+
+void PlayFrameJump() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Jump" {
+  sampleValue = EventPlayer().jumpEvents[currentEventIndices[InputType.JUMP]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Jump)) {
+      StartHoldingButton(EventPlayer(), Button.Jump);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Jump)) {
+      StopHoldingButton(EventPlayer(), Button.Jump);
+    }
+  }
+  currentEventFrames[InputType.JUMP] += 1;
+  if (currentEventFrames[InputType.JUMP] >= jumpEvents[currentEventIndices[InputType.JUMP]].duration) {
+    currentEventIndices[InputType.JUMP] += 1;
+    currentEventFrames[InputType.JUMP] = 0;
+  }
+}
+
+void PlayFrameCrouch() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Crouch" {
+  sampleValue = EventPlayer().crouchEvents[currentEventIndices[InputType.CROUCH]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Crouch)) {
+      StartHoldingButton(EventPlayer(), Button.Crouch);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Crouch)) {
+      StopHoldingButton(EventPlayer(), Button.Crouch);
+    }
+  }
+  currentEventFrames[InputType.CROUCH] += 1;
+  if (currentEventFrames[InputType.CROUCH] >= crouchEvents[currentEventIndices[InputType.CROUCH]].duration) {
+    currentEventIndices[InputType.CROUCH] += 1;
+    currentEventFrames[InputType.CROUCH] = 0;
+  }
+}
+
+void PlayFrameMelee() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Melee" {
+  sampleValue = EventPlayer().meleeEvents[currentEventIndices[InputType.MELEE]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Melee)) {
+      StartHoldingButton(EventPlayer(), Button.Melee);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Melee)) {
+      StopHoldingButton(EventPlayer(), Button.Melee);
+    }
+  }
+  currentEventFrames[InputType.MELEE] += 1;
+  if (currentEventFrames[InputType.MELEE] >= meleeEvents[currentEventIndices[InputType.MELEE]].duration) {
+    currentEventIndices[InputType.MELEE] += 1;
+    currentEventFrames[InputType.MELEE] = 0;
+  }
+}
+
+void PlayFrameReload() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Reload" {
+  sampleValue = EventPlayer().reloadEvents[currentEventIndices[InputType.RELOAD]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Reload)) {
+      StartHoldingButton(EventPlayer(), Button.Reload);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Reload)) {
+      StopHoldingButton(EventPlayer(), Button.Reload);
+    }
+  }
+  currentEventFrames[InputType.RELOAD] += 1;
+  if (currentEventFrames[InputType.RELOAD] >= reloadEvents[currentEventIndices[InputType.RELOAD]].duration) {
+    currentEventIndices[InputType.RELOAD] += 1;
+    currentEventFrames[InputType.RELOAD] = 0;
+  }
+}
+
+void PlayFrameThrottle() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Throttle" {
+  sampleValue = throttleEvents[currentEventIndices[InputType.THROTTLE]].value;
+  if (ThrottleOf(EventPlayer()) != sampleValue) {
+    StartThrottleInDirection(EventPlayer(), Normalize(EvaluateOnce(sampleValue)), MagnitudeOf(EvaluateOnce(sampleValue)),
+      Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.DirectionAndMagnitude);
+  }
+  currentEventFrames[InputType.THROTTLE] += 1;
+  if (currentEventFrames[InputType.THROTTLE] >= throttleEvents[currentEventIndices[InputType.THROTTLE]].duration) {
+    currentEventIndices[InputType.THROTTLE] += 1;
+    currentEventFrames[InputType.THROTTLE] = 0;
+  }
+}
+
+void PlayFrameFacing() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Facing" {
+  sampleValue = facingEvents[currentEventIndices[InputType.FACING]].value;
+  if (FacingDirectionOf(EventPlayer()) != sampleValue) {
+    SetFacing(EventPlayer(), sampleValue, Relative.ToWorld);
+  }
+  currentEventFrames[InputType.FACING] += 1;
+  if (currentEventFrames[InputType.FACING] >= facingEvents[currentEventIndices[InputType.FACING]].duration) {
+    currentEventIndices[InputType.FACING] += 1;
+    currentEventFrames[InputType.FACING] = 0;
+  }
+}
+
+void PlayFrameWeapon() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Weapon" {
+  sampleValue = weaponEvents[currentEventIndices[InputType.WEAPON]].value;
+  if (Weapon(EventPlayer()) != sampleValue) {
+    SetWeapon(EventPlayer(), sampleValue);
+  }
+  currentEventFrames[InputType.WEAPON] += 1;
+  if (currentEventFrames[InputType.WEAPON] >= weaponEvents[currentEventIndices[InputType.WEAPON]].duration) {
+    currentEventIndices[InputType.WEAPON] += 1;
+    currentEventFrames[InputType.WEAPON] = 0;
+  }
+}
+
+globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(ReplaySettingsCategory, "Loop Clip", true);
+
+void PlayFrame() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame (a very good YouTube channel btw)" {
+  if (frame < recordingLength) {
+    if (frame > 0) {
+      PlayFramePrimaryFire();
+      PlayFrameSecondaryFire();
+      PlayFrameAbility1();
+      PlayFrameAbility2();
+      PlayFrameUltimate();
+      PlayFrameMelee();
+      PlayFrameReload();
+    }
+    PlayFrameJump();
+    PlayFrameCrouch();
+    PlayFrameThrottle();
+    PlayFrameFacing();
+    PlayFrameWeapon();
+  }
+  frame += 1;
+  if (SHOULD_LOOP_CLIP && frame >= longestRecordingLength) {
+    LoopClip();
+  }
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Playback Loop"
+Event.OngoingPlayer
+if (replayState == ReplayState.PLAYING)
+if (botReadyToReplay)
+{
+  PlayFrame();
+  Wait(0.016, WaitBehavior.AbortWhenFalse);
+  LoopIfConditionIsTrue();
+}

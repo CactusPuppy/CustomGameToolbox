@@ -68,7 +68,7 @@ playervar SelectionEntity facingControl;
 playervar BotControlMode botControlMode;
 playervar Boolean isPunchingBag;
 
-Player[] getAllMovableTargets(): AllPlayers(Team.All).FilteredArray((player) => IsControllable(player));
+Player[] getAllMovableTargets(): AllPlayers(Team.All).FilteredArray((player) => IsControllable(player) && player.replayState == ReplayState.NONE);
 SelectionEntity[] getAllMovableTargetsAsSelectionEntities(): getAllMovableTargets().Map((p) => p.positionControl);
 SelectionEntity[] getFacingControlTargets(): getAllMovableTargets().Map((p) => p.facingControl);
 SelectionEntity[] getAllSelectionEntities(): getAllMovableTargetsAsSelectionEntities().Append(getFacingControlTargets());
@@ -85,6 +85,7 @@ Boolean IsControllable(Player player = EventPlayer()): IsDummyBot(player);
 Player | Player[] playersWhoShouldSeeControls(SelectionEntity entity):
   AllPlayers().Contains(LocalPlayer())
   && IsControllable(entity.Owner)
+  && entity.Owner.replayState == ReplayState.NONE
   && LocalPlayer().botControlMode == BotControlMode.Edit
     ? LocalPlayer()
     : null;
@@ -171,6 +172,7 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on 
 rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Update position control orb"
 Event.OngoingPlayer
 if (IsDummyBot())
+if (replayState == ReplayState.NONE)
 if (DistanceBetween(EventPlayer().Position() + Up(), positionControl.Position) > 0.01)
 {
   positionControl.Position = EventPlayer().Position() + Up();
@@ -181,6 +183,7 @@ if (DistanceBetween(EventPlayer().Position() + Up(), positionControl.Position) >
 rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Update facing control orb"
 Event.OngoingPlayer
 if (IsDummyBot())
+if (replayState == ReplayState.NONE)
 if (DistanceBetween(
   desiredFacingControlPosition(),
   facingControl.Position)

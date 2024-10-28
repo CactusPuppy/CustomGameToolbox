@@ -93,9 +93,10 @@ rule: "[interface/menu.ostw] Global menu setup"
     Color:         Color.White,
     Reevaluation:  InworldTextRev.VisibleToPositionAndString,
     Spectators:    Spectators.VisibleNever);
+  # Additional helper text
   OnScreenText.CreateOnScreenText(
-    VisibleTo:     LocalPlayer().currentMenuState == MenuState.MAIN_MENU ? LocalPlayer() : null,
-    Header:        "Use WASD to Navigate",
+    VisibleTo:     [MenuState.MAIN_MENU, MenuState.EDITING_DUMMY_BOT_BUTTONS].Contains(LocalPlayer().currentMenuState) ? LocalPlayer() : null,
+    Header:        ["Use WASD to Navigate", $"Press/Hold {InputBindingString(Button.Reload)} for Manual Control"][[MenuState.MAIN_MENU, MenuState.EDITING_DUMMY_BOT_BUTTONS].IndexOf(LocalPlayer().currentMenuState)],
     PositionX:     0,
     PositionY:     -1.25,
     Scale:         2,
@@ -154,6 +155,8 @@ rule: "[interface/menu.ostw] Initialize player and perform cleanup"
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
 {
+  // # DEBUG
+  // LogToInspector("{0} is in menu state: {1}".Format([EventPlayer(), currentMenuState]));
   // cursor = new Cursor();
   # Note that we store it for reevaluation, because changing heroes causes a respawn which overwrites non-reeval force pos and facing
   menuActivationPoint = NewResetFromPlayer(EventPlayer());
@@ -174,6 +177,9 @@ if (currentMenuState != MenuState.CLOSED)
   menuXIndex = 0; menuYIndex = 0;
 
   WaitUntil(currentMenuState == MenuState.CLOSED, 9999);
+
+  // # DEBUG
+  // LogToInspector("{0} exited the menu".Format([EventPlayer()]));
 
   StopCamera();
   EnableKillFeed();

@@ -1,4 +1,5 @@
 import "botEditPage_ButtonsControl.del";
+import "replay/replay.del";
 
 enum BotEditAction {
   NONE,
@@ -7,7 +8,9 @@ enum BotEditAction {
   DELETE,
   EDIT_BUTTON_CONTROL,
   SET_RESPAWN_POINT,
-  PIN_BOT_TO_POSITION
+  PIN_BOT_TO_POSITION,
+  RECORD_REPLAY,
+  DELETE_REPLAY
 }
 
 playervar BotEditAction selectedBotEditAction;
@@ -18,24 +21,24 @@ BotEditAction[] BotEditActionGrid: ButtonActionGrid[MenuState.EDITING_DUMMY_BOT]
 BotEditAction[] botEditPageButtonActions: [
   BotEditAction.NONE, BotEditAction.NONE, BotEditAction.EDIT_BUTTON_CONTROL, BotEditAction.NONE, BotEditAction.NONE,
   BotEditAction.NONE, BotEditAction.NONE, BotEditAction.SET_RESPAWN_POINT, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.CHANGE_HERO, BotEditAction.NONE, BotEditAction.CHANGE_TEAM, BotEditAction.NONE,
+  BotEditAction.DELETE_REPLAY, BotEditAction.RECORD_REPLAY, BotEditAction.NONE, BotEditAction.CHANGE_HERO, BotEditAction.CHANGE_TEAM,
   BotEditAction.NONE, BotEditAction.NONE, BotEditAction.PIN_BOT_TO_POSITION, BotEditAction.NONE, BotEditAction.NONE,
   BotEditAction.NONE, BotEditAction.NONE, BotEditAction.DELETE, BotEditAction.NONE, BotEditAction.NONE
 ];
 
 String[] botEditPageButtonLabels: [
   "", "", "Buttons", "", "",
-  "", "", "Set Reset Point", "", "",
-  "", "Change Hero", "", "Switch Team", "",
+  "", "", "Set Respawn Point", "", "",
+  "Delete Replay", "Record Replay", "", "Change Hero", "Switch Team",
   "", "", "Pin Bot To Position", "", "",
   "", "", "Delete", "", ""
 ];
 
 Color[] botEditPageButtonColors: [
-  null, null, Color.White, null, null,
+  null, null, Color.Gray, null, null,
   null, null, Color.Yellow, null, null,
-  null, Color.Green, null, Color.Blue, null,
-  null, null, Color.Purple, null, null,
+  Color.Red, CustomColor(186, 70, 213, 255), null, Color.Green, Color.Blue,
+  null, null, Color.Orange, null, null,
   null, null, Color.Red, null, null
 ];
 
@@ -51,16 +54,21 @@ Event.OngoingPlayer
 if (selectedBot != null)
 {
   if (selectedBot.respawnPoint.location != null) {
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Clear Reset Point", Color.Orange);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Clear Respawn Point", Color.Orange);
   } else {
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Set Reset Point", Color.Yellow);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Set Respawn Point", Color.Yellow);
   }
   if (selectedBot.pinnedPosition.location != null) {
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Unpin Bot", Color.Violet);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Unpin Bot", Color.Orange);
   } else {
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Purple);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Orange);
   }
-  WaitUntil(selectedBot != EvaluateOnce(selectedBot), 1000000);
+  if (hasRecordedClip(selectedBot)) {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Play Replay", Color.LimeGreen);
+  } else {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Record Replay", CustomColor(186, 70, 213, 255));
+  }
+  WaitUntil(selectedBot != EvaluateOnce(selectedBot) || selectedBot.sampleCount != EvaluateOnce(selectedBot.sampleCount), 1000000);
   LoopIfConditionIsTrue();
 }
 
@@ -75,6 +83,7 @@ if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
   ResetHeroAvailability(EventPlayer());
   WaitUntil(HasSpawned(), 1000000);
   ForcePlayerHero(selectedBot, HeroOf());
+  selectedBot.tempHeroStorage = HeroOf();
   MinWait();
   StopForcingHero(selectedBot);
   ForcePlayerHero(EventPlayer(), tempHeroStorage);
@@ -89,26 +98,65 @@ if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
   CloseMenu(EventPlayer());
 }
 
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] BUGFIX: When dummy bot respawns, force it back onto the right hero"
+Event.OnDeath
+if (IsDummyBot())
+{
+  tempHeroStorage = HeroOf();
+  StopForcingHero(EventPlayer());
+  WaitUntil(IsAlive(), 10000000);
+  WaitUntil(HeroOf() != tempHeroStorage, 1);
+  ForcePlayerHero(EventPlayer(), tempHeroStorage);
+}
+
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change team"
 Event.OngoingPlayer
 if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
 {
-  LogToInspector("Changing team of {0}".Format([selectedBot]));
+  // LogToInspector("Changing team of {0}".Format([selectedBot]));
   tempHeroStorage = HeroOf(selectedBot);
   Boolean wasPunchingBag! = selectedBot.isPunchingBag;
   ResetPoint tempPinnedPosition! = selectedBot.pinnedPosition;
+  ResetPoint tempRespawnPoint! = selectedBot.respawnPoint;
+  ResetPoint tempResetPoint! = selectedBot.replayResetPoint;
   Team tempTeamStorage! = TeamOf(selectedBot);
   Vector tempPositionStorage! = PositionOf(selectedBot);
   Vector tempFacingStorage! = FacingDirectionOf(selectedBot);
+  # Temporarily store recording on player who is performing the action
+  TransferRecording(selectedBot, EventPlayer());
   DestroyDummyBot(selectedBot.Team(), SlotOf(selectedBot));
   selectedBot = CreateDummyBot(tempHeroStorage, OppositeTeamOf(tempTeamStorage), -1, tempPositionStorage, tempFacingStorage);
   if (wasPunchingBag) {
     MarkLastCreatedBotAsPunchingBag();
   }
   if (tempPinnedPosition.location != null) {
-    LastCreatedEntity().pinnedPosition = tempPinnedPosition;
+    selectedBot.pinnedPosition = tempPinnedPosition;
+  }
+  if (tempResetPoint.location != null) {
+    selectedBot.replayResetPoint = tempResetPoint;
+  }
+  if (tempRespawnPoint.location != null) {
+    selectedBot.respawnPoint = tempRespawnPoint;
+    botRespawnPoint_FX_Loc = CreateEffect(
+      VisibleTo: playersWhoShouldSeeControls(selectedBot.positionControl),
+      Type: Effect.Sphere,
+      Color: Color.Green,
+      Position: selectedBot.respawnPoint.location,
+      Radius: 0.5,
+      Reevaluation: EffectRev.VisibleToPositionAndRadius
+    );
+    botRespawnPoint_FX_Fac = CreateBeamEffect(
+      VisibleTo: playersWhoShouldSeeControls(selectedBot.positionControl),
+      BeamType: BeamType.GoodBeam,
+      StartPosition: selectedBot.respawnPoint.location + Up() * 0.25,
+      EndPosition: selectedBot.respawnPoint.location + selectedBot.respawnPoint.facing + Up() * 0.25,
+      Color: TeamOf(selectedBot),
+      Reevaluation: EffectRev.VisibleToPositionAndRadius
+    );
   }
   Wait(0.064);
+  # We wait to transfer the recording to the new bot to avoid overloading the server
+  TransferRecording(EventPlayer(), selectedBot);
   StartFacing(selectedBot, tempFacingStorage, 1000, Relative.ToWorld, FacingRev.None);
   WaitUntil(AngleBetweenVectors(FacingDirectionOf(selectedBot), tempFacingStorage) < 0.1, 1);
   StopFacing(selectedBot);
@@ -141,14 +189,14 @@ if (selectedBotEditAction == BotEditAction.SET_RESPAWN_POINT)
       Color: TeamOf(selectedBot),
       Reevaluation: EffectRev.VisibleToPositionAndRadius
     );
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Clear Reset Point", Color.Orange);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Clear Respawn Point", Color.Orange);
   } else {
     selectedBot.respawnPoint.location = null;
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
     SmallMessage(EventPlayer(), "Respawn point cleared");
     DestroyEffect(botRespawnPoint_FX_Loc);
     DestroyEffect(botRespawnPoint_FX_Fac);
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Set Reset Point", Color.Yellow);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 1, "Set Respawn Point", Color.Yellow);
   }
 }
 
@@ -159,18 +207,18 @@ if (selectedBotEditAction == BotEditAction.EDIT_BUTTON_CONTROL)
   OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT_BUTTONS);
 }
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Toggle bot gravity"
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Toggle bot pin"
 Event.OngoingPlayer
 if (selectedBotEditAction == BotEditAction.PIN_BOT_TO_POSITION)
 {
   if (selectedBot.pinnedPosition.location == null) {
     selectedBot.pinnedPosition = NewResetFromPlayer(selectedBot);
     SmallMessage(EventPlayer(), "  Pinned bot to current position");
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Unpin Bot", Color.Violet);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Unpin Bot", Color.Orange);
   } else {
     selectedBot.pinnedPosition = <ResetPoint>null;
     SmallMessage(EventPlayer(), "  Unpinned bot");
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Purple);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Orange);
   }
 }
 
@@ -185,6 +233,91 @@ if (pinnedPosition.location != null)
   if (SpeedOf(EventPlayer()) > 0.05) {
     ApplyImpulse(EventPlayer(), VelocityOf() * -1, 0.01, Relative.ToWorld, ContraryMotion.CancelXYZ);
   }
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Record actions"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.RECORD_REPLAY)
+{
+  if (replayState == ReplayState.PLAYING) {
+    if (selectedBot == null) {
+      SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
+      Wait(0.25);
+      SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
+      Abort();
+    }
+    selectedBot.recordingPlayStopFlag = RecordingAction.STOP;
+    Abort();
+  }
+  if (replayState == ReplayState.RECORDING) {
+    SmallMessage(EventPlayer(), "  Menu opening should end recording. This is a bug!");
+    Wait(0.25);
+    SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
+    Abort();
+  }
+  if (replayState == ReplayState.NONE) {
+    if (selectedBot == null) {
+      SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
+      Wait(0.25);
+      SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
+      Abort();
+    }
+    if (hasRecordedClip(selectedBot)) {
+      selectedBot.recordingPlayStopFlag = RecordingAction.PLAY;
+      CloseMenu(EventPlayer());
+    } else {
+      PreparePlayerForRecording();
+    }
+    Abort();
+  }
+}
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Delete replay"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.DELETE_REPLAY)
+{
+  if (selectedBot == null) {
+    SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
+    Wait(0.25);
+    SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
+    Abort();
+  }
+  if (hasRecordedClip(selectedBot)) {
+    selectedBot.recordingPlayStopFlag = RecordingAction.DELETE;
+    Wait(0.5);
+    SmallMessage(EventPlayer(), "  Replay deleted");
+  } else {
+    SmallMessage(EventPlayer(), "  No replay to delete");
+  }
+}
+
+enum RecordingAction {
+  NONE,
+  PLAY,
+  STOP,
+  DELETE
+}
+
+playervar RecordingAction recordingPlayStopFlag;
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle when replay flag is set to true"
+Event.OngoingPlayer
+if (IsControllable(EventPlayer()))
+if (recordingPlayStopFlag != RecordingAction.NONE)
+{
+  if (replayState == ReplayState.PLAYING && recordingPlayStopFlag == RecordingAction.STOP) {
+    StopClip();
+  } else if (replayState == ReplayState.NONE
+    && recordingPlayStopFlag == RecordingAction.PLAY
+    && hasRecordedClip(EventPlayer())) {
+    PlayClip();
+  } else if (recordingPlayStopFlag == RecordingAction.DELETE) {
+    if (replayState == ReplayState.PLAYING) {
+      StopClip();
+    }
+    DeleteRecording();
+  }
+  recordingPlayStopFlag = RecordingAction.NONE;
 }
 
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Delete"

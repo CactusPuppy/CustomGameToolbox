@@ -8,9 +8,13 @@ ResetPoint NewResetFromPlayer(Player p = EventPlayer()): { location: PositionOf(
 
 void TeleportPlayerToResetPoint(in Player p, in ResetPoint resetPoint) {
   Teleport(p, resetPoint.location);
-  # Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT
+  StopFacing(p);
   MinWait();
+  SetFacing(p, resetPoint.facing, Relative.ToWorld);
+  # Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT
+  Wait(0.032);
   StartFacing(p, resetPoint.facing, 1000, Relative.ToWorld);
-  WaitUntil(AngleBetweenVectors(FacingDirectionOf(p), resetPoint.facing) < 0.1, 0.1);
+  MinWait();
+  WaitUntil(AngleBetweenVectors(FacingDirectionOf(p), resetPoint.facing) < 0.1, 0.25);
   StopFacing(p);
 }

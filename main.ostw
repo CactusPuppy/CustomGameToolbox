@@ -63,6 +63,7 @@ String HeroSettingsCategory: "2. Hero Settings";
 String MenuSettingsCategory: "3. Menu Settings";
 String ModSettingsCategory: "4. Mod Settings";
 String InformationCategory: "5. Information";
+String ReplaySettingsCategory: "6. Replay Settings";
 
 globalvar Number i;
 
@@ -78,6 +79,8 @@ rule: "[DEBUG | main.ostw] Show diagnostics"
     ShowServerLoadPeak: true);
   // printMenuValues();
 }
+// import "interface/dummyBotsAndReplay/replay/magzie_echo_recorder.del";
+
 
 rule: "[main.ostw] Skip assembling heroes"
 if (IsAssemblingHeroes())

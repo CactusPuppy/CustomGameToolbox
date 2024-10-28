@@ -1,7 +1,7 @@
 import "./shared.del";
 import "./config.del";
 
-struct DamageInstance {
+single struct DamageInstance {
   public Number timestamp;
   public Number amount;
   public Player attacker;

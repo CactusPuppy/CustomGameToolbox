@@ -1,5 +1,6 @@
 import "../menu.ostw";
 import "botPlacementModule.ostw";
+import "botPlacementExtras.del";
 
 enum BotsReplayAction {
   NONE,
@@ -7,7 +8,10 @@ enum BotsReplayAction {
   CREATE_PUNCHING_BAG,
   EDIT_BOTS,
   RESET_BOTS,
-  REMOVE_ALL_BOTS
+  REMOVE_ALL_BOTS,
+  TRIGGER_ALL_REPLAYS,
+  DELETE_ALL_REPLAYS,
+  TOGGLE_LOOPING_REPLAYS
 }
 
 playervar BotsReplayAction selectedBotsReplayAction;
@@ -17,7 +21,7 @@ BotsReplayAction[] BotsReplayActionGrid: ButtonActionGrid[MenuState.DUMMY_BOTS_A
 BotsReplayAction[] botsReplayMenuButtonActions: [
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.CREATE_BOT, BotsReplayAction.NONE, BotsReplayAction.NONE,
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.CREATE_PUNCHING_BAG, BotsReplayAction.NONE, BotsReplayAction.NONE,
-  BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.EDIT_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE,
+  BotsReplayAction.NONE, BotsReplayAction.TRIGGER_ALL_REPLAYS, BotsReplayAction.EDIT_BOTS, BotsReplayAction.DELETE_ALL_REPLAYS, BotsReplayAction.NONE,
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.RESET_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE,
   BotsReplayAction.NONE, BotsReplayAction.NONE, BotsReplayAction.REMOVE_ALL_BOTS, BotsReplayAction.NONE, BotsReplayAction.NONE
 ];
@@ -25,15 +29,15 @@ BotsReplayAction[] botsReplayMenuButtonActions: [
 String[] botsReplayMenuButtonLabels: [
   "", "", "Create Dummy Bot", "", "",
   "", "", "Create Punching Bag", "", "",
-  "", "", "Edit Dummy Bots", "", "",
+  "", "Play All Replays", "Edit Dummy Bots", "Delete All Replays", "",
   "", "", "Reset Bot Positions", "", "",
   "", "", "Remove All Bots", "", ""
 ];
 
 Color[] botsReplayMenuButtonColors: [
   null, null, Color.Green, null, null,
-  null, null, Color.Green, null, null,
-  null, null, Color.Yellow, null, null,
+  null, null, Color.SkyBlue, null, null,
+  null, Color.LimeGreen, Color.Yellow, CustomColor(229, 100, 100, 255), null,
   null, null, Color.Purple, null, null,
   null, null, Color.Red, null, null
 ];
@@ -51,26 +55,34 @@ void HandleBotsMenuClick() {
   selectedBotsReplayAction = BotsReplayAction.NONE;
 }
 
+void StartEditingBots() {
+  UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Stop Editing Bots");
+  botControlMode = BotControlMode.Edit;
+  if (!isNoClipActive) {
+    toolsActionID = ToolsAction.NO_CLIP;
+    MinWait();
+    toolsActionID = ToolsAction.EMPTY;
+  }
+}
+
+void StopEditingBots() {
+  UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Edit Dummy Bots");
+  botControlMode = BotControlMode.Normal;
+  if (isNoClipActive) {
+    toolsActionID = ToolsAction.NO_CLIP;
+    MinWait();
+    toolsActionID = ToolsAction.EMPTY;
+  }
+}
+
 rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Start/stop editing bots"
 Event.OngoingPlayer
 if (selectedBotsReplayAction == BotsReplayAction.EDIT_BOTS)
 {
   if (botControlMode == BotControlMode.Normal) {
-    UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Stop Editing Bots");
-    botControlMode = BotControlMode.Edit;
-    if (!isNoClipActive) {
-      toolsActionID = ToolsAction.NO_CLIP;
-      MinWait();
-      toolsActionID = ToolsAction.EMPTY;
-    }
+    StartEditingBots();
   } else {
-    UpdateButtonLabel(MenuState.DUMMY_BOTS_AND_REPLAY, 2, 2, "Edit Dummy Bots");
-    botControlMode = BotControlMode.Normal;
-    if (isNoClipActive) {
-      toolsActionID = ToolsAction.NO_CLIP;
-      MinWait();
-      toolsActionID = ToolsAction.EMPTY;
-    }
+    StopEditingBots();
   }
   CloseMenu(EventPlayer());
 }
@@ -100,14 +112,19 @@ if (selectedBotsReplayAction == BotsReplayAction.RESET_BOTS)
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle resetting all bots to their reset points"
 Event.OngoingPlayer
 if (IsControllable(EventPlayer()))
-if (respawnPoint.location != null)
+if (respawnPoint.location != null || replayResetPoint.location != null)
 if (IsTrueForAny(AllPlayers().Filter((p) => !IsDummyBot(p)), ArrayElement().selectedBotsReplayAction == BotsReplayAction.RESET_BOTS))
 {
-  if (IsDead()) {
-    Respawn();
-    WaitUntil(IsAlive(), 1);
+  // if (IsDead()) {
+  StopForcingHero();
+  Respawn();
+  ForcePlayerHero(EventPlayer(), recordingHero);
+  WaitUntil(IsAlive(), 1);
+  if (replayResetPoint.location != null) {
+    TeleportPlayerToResetPoint(EventPlayer(), replayResetPoint);
+  } else if (respawnPoint.location != null) {
+    TeleportPlayerToResetPoint(EventPlayer(), respawnPoint);
   }
-  TeleportPlayerToResetPoint(EventPlayer(), respawnPoint);
   if (AltitudeOf(EventPlayer()) > 1) {
     SetGravity(EventPlayer(), 0);
     MinWait();
@@ -117,6 +134,44 @@ if (IsTrueForAny(AllPlayers().Filter((p) => !IsDummyBot(p)), ArrayElement().sele
   } else {
     SetGravity(EventPlayer(), 100);
   }
+}
+
+rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Update Play/Stop All Replays button appearance"
+Event.OngoingPlayer
+if (AllPlayers().Filter((p) => IsControllable(p)).IsTrueForAny((p) => p.replayState == ReplayState.PLAYING))
+{
+  UpdateButtonAppearance(MenuState.DUMMY_BOTS_AND_REPLAY, 1, 2, "Stop All Replays", Color.Red);
+  WaitUntil(AllPlayers().Filter((p) => IsControllable(p)).IsTrueForAny((p) => p.replayState == ReplayState.PLAYING) == false, 9999);
+  UpdateButtonAppearance(MenuState.DUMMY_BOTS_AND_REPLAY, 1, 2, "Play All Replays", Color.LimeGreen);
+}
+
+rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Play all replays"
+Event.OngoingPlayer
+if (selectedBotsReplayAction == BotsReplayAction.TRIGGER_ALL_REPLAYS)
+{
+  if (AllPlayers().Filter((p) => IsControllable(p) && hasRecordedClip(p)).Length == 0) {
+    BigMessage(EventPlayer(), "  No replays recorded yet!");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+    Abort();
+  }
+  if (AllPlayers().Filter((p) => IsControllable(p)).Any((p) => p.replayState == ReplayState.PLAYING)) {
+    AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.STOP;
+    Abort();
+  }
+  AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.PLAY;
+  CloseMenu(EventPlayer());
+}
+
+rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Delete all replays"
+Event.OngoingPlayer
+if (selectedBotsReplayAction == BotsReplayAction.DELETE_ALL_REPLAYS)
+{
+  if (AllPlayers().Filter((p) => IsControllable(p) && hasRecordedClip(p)).Length == 0) {
+    BigMessage(EventPlayer(), "  No replays recorded yet!");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+    Abort();
+  }
+  AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.DELETE;
 }
 
 rule: "[interface/dummyBots/botsMenu.ostw] Destroy all bots"

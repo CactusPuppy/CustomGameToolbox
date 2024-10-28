@@ -29,9 +29,11 @@ if (botControlMode == BotControlMode.Edit)
 {
   AddOneLockToButton(EventPlayer(), Button.PrimaryFire);
   AddOneLockToButton(EventPlayer(), Button.SecondaryFire);
+  AddOneLockToButton(EventPlayer(), Button.Reload);
   WaitUntil(botControlMode != BotControlMode.Edit, 1000000);
   RemoveOneLockFromButton(EventPlayer(), Button.PrimaryFire);
   RemoveOneLockFromButton(EventPlayer(), Button.SecondaryFire);
+  RemoveOneLockFromButton(EventPlayer(), Button.Reload);
 }
 
 playervar SelectionEntity selectedControl;

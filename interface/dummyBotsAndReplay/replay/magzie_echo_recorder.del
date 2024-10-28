@@ -1,0 +1,960 @@
+globalvar define MaxSamples;
+playervar define Recording;
+playervar define HasClip;
+playervar define Playing;
+playervar define State;
+playervar define ValueIndex;
+playervar define EventValues;
+playervar define CurrentTimestamp;
+playervar define StartTimestamp;
+playervar define StopTimestamp;
+playervar define ClipPosition;
+playervar define ClipHero;
+playervar define ClipFacing;
+playervar define FirstFrame;
+playervar define Increment;
+playervar define FrameCount;
+playervar define SampleCount;
+playervar define SampleValue;
+playervar define SampleIndices;
+playervar define PrimaryFireValues;
+playervar define PrimaryFireFrames;
+playervar define SecondaryFireValues;
+playervar define SecondaryFireFrames;
+playervar define Ability1Values;
+playervar define Ability1Frames;
+playervar define Ability2Values;
+playervar define Ability2Frames;
+playervar define UltimateValues;
+playervar define UltimateFrames;
+playervar define JumpValues;
+playervar define JumpFrames;
+playervar define CrouchValues;
+playervar define CrouchFrames;
+playervar define MeleeValues;
+playervar define MeleeFrames;
+playervar define ReloadValues;
+playervar define ReloadFrames;
+playervar define ThrottleValues;
+playervar define ThrottleFrames;
+playervar define FacingValues;
+playervar define FacingFrames;
+playervar define CommunicationValues;
+playervar define CommunicationFrames;
+playervar define RecordingBot;
+playervar define RecordingBotReady;
+playervar define ClipFrameCount;
+playervar define ClipValue;
+playervar define ClipIndices;
+playervar define ClipFrames;
+playervar define DebugValue;
+
+disabled rule: "[Main] - Inspector Init"
+{
+    DisableInspectorRecording();
+}
+
+rule: "[Main] - Global Init"
+{
+    MaxSamples = 999;
+}
+
+rule: "[Main] - Player Init"
+Event.OngoingPlayer
+{
+    Recording = false;
+    HasClip = false;
+    Playing = false;
+}
+
+rule: "[Main] - Player State (0: None, 1: Recording, 2: HasClip, 3: Playing)"
+Event.OngoingPlayer
+{
+    if (Playing)
+    {
+        State = 3;
+    }
+    else if (HasClip)
+    {
+        State = 2;
+    }
+    else if (Recording)
+    {
+        State = 1;
+    }
+    else
+    {
+        State = 0;
+    }
+    WaitUntil(Playing != EvaluateOnce(Playing) || HasClip != EvaluateOnce(HasClip) || Recording != EvaluateOnce(Recording), 1000000);
+    Loop();
+}
+
+rule: "[Input] - Interact - (0: StartRecording, 1: StopRecording, 2: PlayClip, 3: StopClip)"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+{
+    if (State == 3)
+    {
+        StopClip();
+    }
+    else if (State == 2)
+    {
+        PlayClip();
+    }
+    else if (State == 1)
+    {
+        StopRecording();
+    }
+    else
+    {
+        StartRecording();
+    }
+}
+
+rule: "[Input] - Crouch - (2: StopClip, DeleteClip)"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+{
+    if (State == 2)
+    {
+        StopClip();
+        DeleteClip();
+    }
+}
+
+rule: "[UI] - HUD"
+Event.OngoingPlayer
+{
+    CreateHudText(EventPlayer(), null, "========================", null, Location.Right, -10, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, "========================", null, Location.Right, -5, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(EventPlayer(), null, "========================", null, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 0), IconString(Icon.Dizzy), null, "Cloning Device", Location.Right, -9, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 0), null, "Press Interact to Record", null, Location.Right, -4, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 1), IconString(Icon.Radioactive), null, "Recording...", Location.Right, -9, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 1), null, <"Clip: <0> Seconds", CurrentTimestamp - StartTimestamp>, null, Location.Right, -8, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 1), null, <"<0> Size: <1>%", IconString(Icon.Warning), SampleCount / MaxSamples * 100>, null, Location.Right, -7, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 1), null, "Press Interact to Save", null, Location.Right, -4, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 2), HeroIconString(ClipHero), null, "Clip Saved", Location.Right, -9, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 2), null, <"Clip: <0> Seconds", CurrentTimestamp - StartTimestamp>, null, Location.Right, -8, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 2), null, "Press Interact to Play", null, Location.Right, -4, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 2), null, "Press Crouch to Delete", null, Location.Right, -3, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 3), IconString(Icon.Spiral), null, "Playing...", Location.Right, -9, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 3), null, <"Frame: <0>/<1>", ClipFrameCount, FrameCount>, null, Location.Right, -8, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(EventPlayer(), ArrayElement().State == 3), null, "Press Interact to Cancel", null, Location.Right, -4, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "[Effects] - Effects"
+Event.OngoingPlayer
+{
+    CreateEffect(FilteredArray(EventPlayer(), ArrayElement().State == 2), Effect.Ring, Color.Purple, ClipPosition, 2, EffectRev.VisibleToPositionAndRadius);
+    CreateEffect(FilteredArray(EventPlayer(), ArrayElement().State == 2), Effect.Sparkles, Color.Purple, ClipPosition, 2, EffectRev.VisibleToPositionAndRadius);
+    CreateInWorldText(FilteredArray(EventPlayer(), ArrayElement().State == 2), HeroIconString(ClipHero), ClipPosition + Up(), 2, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.Purple, Spectators.DefaultVisibility);
+}
+
+rule: "[Update] - If the Player Dies, Stop Recording"
+Event.OnDeath
+if (IsDummyBot(EventPlayer()) == false)
+{
+    StopRecording();
+}
+
+rule: "[Update] - If the Bot Dies, Stop Clip"
+Event.OnDeath
+if (IsDummyBot(EventPlayer()) == true)
+{
+    FilteredArray(AllPlayers(Team.All), ArrayElement().RecordingBot == EventPlayer()).Playing = false;
+    DestroyDummyBot(TeamOf(EventPlayer()), SlotOf(EventPlayer()));
+}
+
+void DeleteClip() "[Subroutine] - Delete Clip"
+{
+    HasClip = false;
+    FrameCount = 0;
+    SampleCount = 0;
+    SampleIndices = [];
+    PrimaryFireValues = [];
+    PrimaryFireFrames = [];
+    SecondaryFireValues = [];
+    SecondaryFireFrames = [];
+    Ability1Values = [];
+    Ability1Frames = [];
+    Ability2Values = [];
+    Ability2Frames = [];
+    UltimateValues = [];
+    UltimateFrames = [];
+    JumpValues = [];
+    JumpFrames = [];
+    CrouchValues = [];
+    CrouchFrames = [];
+    MeleeValues = [];
+    MeleeFrames = [];
+    ReloadValues = [];
+    ReloadFrames = [];
+    ThrottleValues = [];
+    ThrottleFrames = [];
+    FacingValues = [];
+    FacingFrames = [];
+    CommunicationValues = [];
+    CommunicationFrames = [];
+}
+
+void UpdateSampleCount() "[Subroutine] - Update Sample Count"
+{
+    SampleCount = 0;
+    SampleCount = Max(SampleCount, CountOf(PrimaryFireValues));
+    SampleCount = Max(SampleCount, CountOf(SecondaryFireValues));
+    SampleCount = Max(SampleCount, CountOf(Ability1Values));
+    SampleCount = Max(SampleCount, CountOf(Ability2Values));
+    SampleCount = Max(SampleCount, CountOf(UltimateValues));
+    SampleCount = Max(SampleCount, CountOf(JumpValues));
+    SampleCount = Max(SampleCount, CountOf(CrouchValues));
+    SampleCount = Max(SampleCount, CountOf(MeleeValues));
+    SampleCount = Max(SampleCount, CountOf(ReloadValues));
+    SampleCount = Max(SampleCount, CountOf(ThrottleValues));
+    SampleCount = Max(SampleCount, CountOf(FacingValues));
+    SampleCount = Max(SampleCount, CountOf(CommunicationValues));
+}
+
+void StartRecording() "[Subroutine] - Start Recording"
+{
+    DeleteClip();
+    StartTimestamp = TotalTimeElapsed();
+    FirstFrame = true;
+    ClipHero = HeroOf(EventPlayer());
+    ClipPosition = PositionOf(EventPlayer());
+    ClipFacing = FacingDirectionOf(EventPlayer());
+    Recording = true;
+}
+
+void StopRecording() "[Subroutine] - Stop Recording"
+{
+    Recording = false;
+    StopTimestamp = TotalTimeElapsed();
+    EventValues = [];
+    UpdateSampleCount();
+    HasClip = SampleCount > 0;
+}
+
+rule: "[Input Event] - Primary Fire (ValueIndex: 0)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.PrimaryFire) == true)
+{
+    ValueIndex = 0;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.PrimaryFire);
+}
+
+rule: "[Input Event] - Secondary Fire (ValueIndex: 1)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == true)
+{
+    ValueIndex = 1;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.SecondaryFire);
+}
+
+rule: "[Input Event] - Ability 1 (ValueIndex: 2)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.Ability1) == true)
+{
+    ValueIndex = 2;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.Ability1);
+}
+
+rule: "[Input Event] - Ability 2 (ValueIndex: 3)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.Ability2) == true)
+{
+    ValueIndex = 3;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.Ability2);
+}
+
+rule: "[Input Event] - Ultimate (ValueIndex: 4)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.Ultimate) == true)
+{
+    ValueIndex = 4;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.Ultimate);
+}
+
+rule: "[Input Event] - Jump (ValueIndex: 5)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.Jump) == true)
+{
+    ValueIndex = 5;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.Jump);
+}
+
+rule: "[Input Event] - Crouch (ValueIndex: 6)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+{
+    ValueIndex = 6;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.Crouch);
+}
+
+rule: "[Input Event] - Melee (ValueIndex: 7)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.Melee) == true)
+{
+    ValueIndex = 7;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.Melee);
+}
+
+rule: "[Input Event] - Reload (ValueIndex: 8)"
+Event.OngoingPlayer
+if (Recording == true)
+if (IsButtonHeld(EventPlayer(), Button.Reload) == true)
+{
+    ValueIndex = 8;
+    EventValues[ValueIndex] = IsButtonHeld(EventPlayer(), Button.Reload);
+}
+
+void RecordFramePrimaryFire() "[Subroutine] - Record Frame Primary Fire (ValueIndex: 0)"
+{
+    ValueIndex = 0;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.PrimaryFire) || EventValues[ValueIndex];
+    if (PrimaryFireValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        PrimaryFireValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    PrimaryFireFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameSecondaryFire() "[Subroutine] - Record Frame Secondary Fire (ValueIndex: 1)"
+{
+    ValueIndex = 1;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.SecondaryFire) || EventValues[ValueIndex];
+    if (SecondaryFireValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        SecondaryFireValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    SecondaryFireFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameAbility1() "[Subroutine] - Record Frame Ability 1 (ValueIndex: 2)"
+{
+    ValueIndex = 2;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.Ability1) || EventValues[ValueIndex];
+    if (Ability1Values[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        Ability1Values[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    Ability1Frames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameAbility2() "[Subroutine] - Record Frame Ability 2 (ValueIndex: 3)"
+{
+    ValueIndex = 3;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.Ability2) || EventValues[ValueIndex];
+    if (Ability2Values[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        Ability2Values[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    Ability2Frames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameUltimate() "[Subroutine] - Record Frame Ultimate (ValueIndex: 4)"
+{
+    ValueIndex = 4;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.Ultimate) || EventValues[ValueIndex];
+    if (UltimateValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        UltimateValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    UltimateFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameJump() "[Subroutine] - Record Frame Jump (ValueIndex: 5)"
+{
+    ValueIndex = 5;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.Jump) || EventValues[ValueIndex];
+    if (JumpValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        JumpValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    JumpFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameCrouch() "[Subroutine] - Record Frame Crouch (ValueIndex: 6)"
+{
+    ValueIndex = 6;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.Crouch) || EventValues[ValueIndex];
+    if (CrouchValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        CrouchValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    CrouchFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameMelee() "[Subroutine] - Record Frame Melee (ValueIndex: 7)"
+{
+    ValueIndex = 7;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.Melee) || EventValues[ValueIndex];
+    if (MeleeValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        MeleeValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    MeleeFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameReload() "[Subroutine] - Record Frame Reload (ValueIndex: 8)"
+{
+    ValueIndex = 8;
+    SampleValue = IsButtonHeld(EventPlayer(), Button.Reload) || EventValues[ValueIndex];
+    if (ReloadValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        ReloadValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    ReloadFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameThrottle() "[Subroutine] - Record Frame Throttle (ValueIndex: 9)"
+{
+    ValueIndex = 9;
+    SampleValue = ThrottleOf(EventPlayer());
+    if (ThrottleValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        ThrottleValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    ThrottleFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameFacing() "[Subroutine] - Record Frame Facing (ValueIndex: 10)"
+{
+    ValueIndex = 10;
+    SampleValue = FacingDirectionOf(EventPlayer());
+    if (FacingValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        FacingValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    FacingFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrameCommunication() "[Subroutine] - Record Frame Communication (ValueIndex: 11)"
+{
+    ValueIndex = 11;
+    SampleValue = 0;
+    if (IsCommunicating(EventPlayer(), Communication.VoiceLineUp))
+    {
+        SampleValue = 1;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.VoiceLineLeft))
+    {
+        SampleValue = 2;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.VoiceLineRight))
+    {
+        SampleValue = 3;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.VoiceLineDown))
+    {
+        SampleValue = 4;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.EmoteUp))
+    {
+        SampleValue = 5;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.EmoteLeft))
+    {
+        SampleValue = 6;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.EmoteRight))
+    {
+        SampleValue = 7;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.EmoteDown))
+    {
+        SampleValue = 8;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.UltimateStatus))
+    {
+        SampleValue = 9;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.Hello))
+    {
+        SampleValue = 10;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.NeedHealing))
+    {
+        SampleValue = 11;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.GroupUp))
+    {
+        SampleValue = 12;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.Thanks))
+    {
+        SampleValue = 13;
+    }
+    else if (IsCommunicating(EventPlayer(), Communication.Acknowledge))
+    {
+        SampleValue = 14;
+    }
+    if (CommunicationValues[SampleIndices[ValueIndex]] != SampleValue)
+    {
+        SampleIndices[ValueIndex] += Increment;
+        CommunicationValues[SampleIndices[ValueIndex]] = SampleValue;
+    }
+    CommunicationFrames[SampleIndices[ValueIndex]] += 1;
+}
+
+void RecordFrame() "[Subroutine] - Record Frame"
+{
+    Increment = !FirstFrame;
+    RecordFramePrimaryFire();
+    RecordFrameSecondaryFire();
+    RecordFrameAbility1();
+    RecordFrameAbility2();
+    RecordFrameUltimate();
+    RecordFrameJump();
+    RecordFrameCrouch();
+    RecordFrameMelee();
+    RecordFrameReload();
+    RecordFrameThrottle();
+    RecordFrameFacing();
+    RecordFrameCommunication();
+    FrameCount += 1;
+    FirstFrame = false;
+}
+
+rule: "[Update] - Update Recording"
+Event.OngoingPlayer
+if (Recording == true)
+{
+    if (SampleCount >= MaxSamples || ClipHero != HeroOf(EventPlayer()))
+    {
+        StopRecording();
+        Abort();
+    }
+    CurrentTimestamp = TotalTimeElapsed();
+    RecordFrame();
+    EventValues = [];
+    UpdateSampleCount();
+    Wait(0.016, WaitBehavior.AbortWhenFalse);
+    LoopIfConditionIsTrue();
+}
+
+void PlayClip() "[Subroutine] - Play Clip"
+{
+    StopClip();
+    CreateDummyBot(ClipHero, OppositeTeamOf(TeamOf(EventPlayer())), SlotOf(EventPlayer()), ClipPosition, ClipFacing);
+    RecordingBot = LastCreatedEntity();
+    Wait(1, WaitBehavior.IgnoreCondition);
+    RecordingBotReady = true;
+    Playing = true;
+}
+
+void StopClip() "[Subroutine] - Stop Clip"
+{
+    Playing = false;
+    DestroyDummyBot(OppositeTeamOf(TeamOf(EventPlayer())), SlotOf(RecordingBot));
+    RecordingBot = 0;
+    RecordingBotReady = false;
+    ClipFrameCount = 0;
+    ClipIndices = [];
+    ClipFrames = [];
+}
+
+void LoopClip() "[Subroutine] - Loop Clip"
+{
+    RecordingBotReady = false;
+    ClipFrameCount = 0;
+    ClipIndices = [];
+    ClipFrames = [];
+    Teleport(RecordingBot, ClipPosition);
+    SetFacing(RecordingBot, ClipFacing, Relative.ToWorld);
+    Wait(0.5, WaitBehavior.IgnoreCondition);
+    RecordingBotReady = true;
+}
+
+void PlayFramePrimaryFire() "[Subroutine] - Play Frame Primary Fire (ValueIndex: 0)"
+{
+    ValueIndex = 0;
+    ClipValue = PrimaryFireValues[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.PrimaryFire))
+        {
+            StartHoldingButton(RecordingBot, Button.PrimaryFire);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.PrimaryFire))
+        {
+            StopHoldingButton(RecordingBot, Button.PrimaryFire);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= PrimaryFireFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameSecondaryFire() "[Subroutine] - Play Frame Secondary Fire (ValueIndex: 1)"
+{
+    ValueIndex = 1;
+    ClipValue = SecondaryFireValues[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.SecondaryFire))
+        {
+            StartHoldingButton(RecordingBot, Button.SecondaryFire);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.SecondaryFire))
+        {
+            StopHoldingButton(RecordingBot, Button.SecondaryFire);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= SecondaryFireFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameAbility1() "[Subroutine] - Play Frame Ability 1 (ValueIndex: 2)"
+{
+    ValueIndex = 2;
+    ClipValue = Ability1Values[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.Ability1))
+        {
+            StartHoldingButton(RecordingBot, Button.Ability1);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.Ability1))
+        {
+            StopHoldingButton(RecordingBot, Button.Ability1);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= Ability1Frames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameAbility2() "[Subroutine] - Play Frame Ability 2 (ValueIndex: 3)"
+{
+    ValueIndex = 3;
+    ClipValue = Ability2Values[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.Ability2))
+        {
+            StartHoldingButton(RecordingBot, Button.Ability2);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.Ability2))
+        {
+            StopHoldingButton(RecordingBot, Button.Ability2);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= Ability2Frames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameUltimate() "[Subroutine] - Play Frame Ultimate (ValueIndex: 4)"
+{
+    ValueIndex = 4;
+    ClipValue = UltimateValues[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.Ultimate))
+        {
+            StartHoldingButton(RecordingBot, Button.Ultimate);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.Ultimate))
+        {
+            StopHoldingButton(RecordingBot, Button.Ultimate);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= UltimateFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameJump() "[Subroutine] - Play Frame Jump (ValueIndex: 5)"
+{
+    ValueIndex = 5;
+    ClipValue = JumpValues[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.Jump))
+        {
+            StartHoldingButton(RecordingBot, Button.Jump);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.Jump))
+        {
+            StopHoldingButton(RecordingBot, Button.Jump);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= JumpFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameCrouch() "[Subroutine] - Play Frame Crouch (ValueIndex: 6)"
+{
+    ValueIndex = 6;
+    ClipValue = CrouchValues[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.Crouch))
+        {
+            StartHoldingButton(RecordingBot, Button.Crouch);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.Crouch))
+        {
+            StopHoldingButton(RecordingBot, Button.Crouch);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= CrouchFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameMelee() "[Subroutine] - Play Frame Melee (ValueIndex: 7)"
+{
+    ValueIndex = 7;
+    ClipValue = MeleeValues[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.Melee))
+        {
+            StartHoldingButton(RecordingBot, Button.Melee);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.Melee))
+        {
+            StopHoldingButton(RecordingBot, Button.Melee);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= MeleeFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameReload() "[Subroutine] - Play Frame Reload (ValueIndex: 8)"
+{
+    ValueIndex = 8;
+    ClipValue = ReloadValues[ClipIndices[ValueIndex]];
+    if (ClipValue != false)
+    {
+        if (!IsButtonHeld(RecordingBot, Button.Reload))
+        {
+            StartHoldingButton(RecordingBot, Button.Reload);
+        }
+    }
+    else
+    {
+        if (IsButtonHeld(RecordingBot, Button.Reload))
+        {
+            StopHoldingButton(RecordingBot, Button.Reload);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= ReloadFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameThrottle() "[Subroutine] - Play Frame Throttle (ValueIndex: 9)"
+{
+    ValueIndex = 9;
+    DebugValue = ThrottleValues[ClipIndices[ValueIndex]];
+    if (ClipValue != ThrottleOf(RecordingBot))
+    {
+        StartThrottleInDirection(RecordingBot, Normalize(DebugValue), SquareRoot(DotProduct(DebugValue, DebugValue)), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.DirectionAndMagnitude);
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= ThrottleFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameFacing() "[Subroutine] - Play Frame Facing (ValueIndex: 10)"
+{
+    ValueIndex = 10;
+    ClipValue = FacingValues[ClipIndices[ValueIndex]];
+    if (ClipValue != FacingDirectionOf(RecordingBot))
+    {
+        SetFacing(RecordingBot, ClipValue, Relative.ToWorld);
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= FacingFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrameCommunication() "[Subroutine] - Play Frame Communication (ValueIndex: 11)"
+{
+    ValueIndex = 11;
+    ClipValue = CommunicationValues[ClipIndices[ValueIndex]];
+    if (!IsCommunicatingAny(RecordingBot))
+    {
+        if (ClipValue == 1)
+        {
+            Communicate(RecordingBot, Communication.VoiceLineUp);
+        }
+        else if (ClipValue == 2)
+        {
+            Communicate(RecordingBot, Communication.VoiceLineLeft);
+        }
+        else if (ClipValue == 3)
+        {
+            Communicate(RecordingBot, Communication.VoiceLineRight);
+        }
+        else if (ClipValue == 4)
+        {
+            Communicate(RecordingBot, Communication.VoiceLineDown);
+        }
+        else if (ClipValue == 5)
+        {
+            Communicate(RecordingBot, Communication.EmoteUp);
+        }
+        else if (ClipValue == 6)
+        {
+            Communicate(RecordingBot, Communication.EmoteLeft);
+        }
+        else if (ClipValue == 7)
+        {
+            Communicate(RecordingBot, Communication.EmoteRight);
+        }
+        else if (ClipValue == 8)
+        {
+            Communicate(RecordingBot, Communication.EmoteDown);
+        }
+        else if (ClipValue == 9)
+        {
+            Communicate(RecordingBot, Communication.UltimateStatus);
+        }
+        else if (ClipValue == 10)
+        {
+            Communicate(RecordingBot, Communication.Hello);
+        }
+        else if (ClipValue == 11)
+        {
+            Communicate(RecordingBot, Communication.NeedHealing);
+        }
+        else if (ClipValue == 12)
+        {
+            Communicate(RecordingBot, Communication.GroupUp);
+        }
+        else if (ClipValue == 13)
+        {
+            Communicate(RecordingBot, Communication.Thanks);
+        }
+        else if (ClipValue == 14)
+        {
+            Communicate(RecordingBot, Communication.Acknowledge);
+        }
+    }
+    ClipFrames[ValueIndex] += 1;
+    if (ClipFrames[ValueIndex] >= CommunicationFrames[ClipIndices[ValueIndex]])
+    {
+        ClipIndices[ValueIndex] += 1;
+        ClipFrames[ValueIndex] = 0;
+    }
+}
+
+void PlayFrame() "[Subroutine] - Play Frame"
+{
+    # Note: Changes to movement happen on the next frame. So we can delay button presses by one frame to match.
+    if (ClipFrameCount > 0)
+    {
+        PlayFramePrimaryFire();
+        PlayFrameSecondaryFire();
+        PlayFrameAbility1();
+        PlayFrameAbility2();
+        PlayFrameUltimate();
+        PlayFrameMelee();
+        PlayFrameReload();
+    }
+    PlayFrameJump();
+    PlayFrameCrouch();
+    PlayFrameThrottle();
+    PlayFrameFacing();
+    PlayFrameCommunication();
+    ClipFrameCount += 1;
+    if (ClipFrameCount >= FrameCount)
+    {
+        LoopClip();
+    }
+}
+
+rule: "[Update] - Update Playing"
+Event.OngoingPlayer
+if (Playing == true)
+if (HasSpawned(RecordingBot) == true)
+if (RecordingBotReady == true)
+{
+    PlayFrame();
+    Wait(0.016, WaitBehavior.AbortWhenFalse);
+    LoopIfConditionIsTrue();
+}

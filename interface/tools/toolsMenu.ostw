@@ -83,10 +83,10 @@ if (toolsActionID == ToolsAction.SET_RESPAWN)
 
 rule: "[interface/toolsMenu.ostw] If respawn point is set, and player dies, respawn them at the respawn point"
 Event.OnDeath
-if (respawnPoint.location != null)
 {
   WaitUntil(IsAlive(), 9999);
-  TeleportPlayerToResetPoint(EventPlayer(), respawnPoint);
+  if (respawnPoint.location != null) TeleportPlayerToResetPoint(EventPlayer(), respawnPoint);
+  else if (replayResetPoint.location != null) TeleportPlayerToResetPoint(EventPlayer(), replayResetPoint);
 }
 
 rule: "[interface/toolsMenu.ostw] Change hero"
@@ -249,3 +249,5 @@ if (toolsActionID == ToolsAction.UNLOCK_ALL_BUTTONS)
   UnlockAllButtons();
   CloseMenu(EventPlayer());
 }
+
+// TODO: Send back to assembling heroes

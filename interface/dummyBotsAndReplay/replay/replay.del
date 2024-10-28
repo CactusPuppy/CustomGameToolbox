@@ -1,0 +1,95 @@
+import "replayDefs.del";
+globalvar Boolean allBotsReplayDuringRecording = WorkshopSettingToggle(ReplaySettingsCategory, "All Bots Replay During Recording", true);
+
+playervar Hero recordingHero;
+playervar Hero originalHero;
+Boolean shouldAbortRecordingCountdown(Player p = EventPlayer()): p.IsDead() || p.currentMenuState != MenuState.CLOSED;
+
+rule: "[UI] - HUD"
+Event.OngoingGlobal
+{
+    // CreateHudText(LocalPlayer().replayState, null, "========================", null, Location.Right, -10, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(LocalPlayer().replayState, null, "========================", null, Location.Right, -5, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(LocalPlayer().replayState, null, "========================", null, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == ReplayState.RECORDING), IconString(Icon.Radioactive), null, "Recording...", Location.Right, -9, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == ReplayState.RECORDING), null, <"Clip: <0> Seconds", LocalPlayer().frame / 62.5>, null, Location.Right, -8, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == ReplayState.RECORDING), null, <"<0> Size: <1>%", IconString(Icon.Warning), LocalPlayer().sampleCount / MAX_SAMPLES * 100>, null, Location.Right, -7, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == ReplayState.RECORDING), null, "Hold Interact to Save", null, Location.Right, -4, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == 3), IconString(Icon.Spiral), null, "Playing...", Location.Right, -9, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == 3), null, <"Frame: <0>/<1>", ClipFrameCount, FrameCount>, null, Location.Right, -8, Color.Red, Color.Red, Color.Red, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    // CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == 3), null, "Press Interact to Cancel", null, Location.Right, -4, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replay.del] Prep player to record for selectedBot"
+{
+  selectedBot.replayResetPoint = NewResetFromPlayer(selectedBot);
+  recordingHero = selectedBot.Hero();
+  originalHero = HeroOf();
+
+  # Move bot away from recording area
+  StopForcingPlayerPosition(selectedBot);
+  StartForcingPlayerPosition(selectedBot, Up() * 1000);
+  SetInvisible(selectedBot, InvisibleTo.All);
+
+  # Prepare player to record
+  StopEditingBots();
+  CloseMenu();
+  if (botControlMode == BotControlMode.Edit) {
+    botControlMode = BotControlMode.Normal;
+  }
+  MinWait();
+  ForcePlayerHero(EventPlayer(), recordingHero);
+  StartForcingPlayerPosition(EventPlayer(), selectedBot.replayResetPoint.location, true);
+  StartFacing(EventPlayer(), selectedBot.replayResetPoint.facing, 1000, Relative.ToWorld);
+
+  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+
+  SmallMessage(EventPlayer(), "{0}  Recording starts in 3...".Format([IconString(Icon.ExclamationMark)]));
+  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+  SmallMessage(EventPlayer(), "  2...");
+  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+  SmallMessage(EventPlayer(), "  1...");
+  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+
+  # Release player to record
+  StopForcingPlayerPosition(EventPlayer());
+  StopFacing(EventPlayer());
+  # If we should prompt all other bots to play their recordings,
+  # prompt them now.
+  if (allBotsReplayDuringRecording) {
+    AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.PLAY;
+  }
+  # Start recording
+  StartRecording();
+  SmallMessage(EventPlayer(), "  Recording started");
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replay.del] If player dies while recording, stop recording"
+Event.OnDeath
+if (EventPlayer().replayState == ReplayState.RECORDING)
+{
+  Recorder_StopRecording();
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replay.del] If player dies while playing, stop playing"
+Event.OnDeath
+if (EventPlayer().replayState == ReplayState.PLAYING)
+{
+  StopClip();
+}

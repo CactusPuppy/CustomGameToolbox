@@ -1,7 +1,7 @@
 import "./shared.del";
 import "./config.del";
 
-struct HealingInstance {
+single struct HealingInstance {
   public Number timestamp;
   public Number amount;
   public Player healer;
