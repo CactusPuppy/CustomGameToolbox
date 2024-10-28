@@ -3,9 +3,9 @@ settings
 {
     main
     {
-        Mode Name: "Overwatch Content Creation Toolbox"
-        Description: "v1.0.0
-Created by CactusPuppy"
+        Mode Name: "CactusPuppy's Toolbox"
+        Description: "CactusPuppy's Toolbox | v1.0.0
+A set of tools that make custom games more useful for recreating, testing, and recording Overwatch scenarios."
     }
     modes
     {
