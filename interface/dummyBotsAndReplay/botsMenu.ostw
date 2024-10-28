@@ -157,7 +157,7 @@ Event.OngoingPlayer
 if (selectedBotsReplayAction == BotsReplayAction.TRIGGER_ALL_REPLAYS)
 {
   if (AllPlayers().Filter((p) => IsControllable(p) && hasRecordedClip(p)).Length == 0) {
-    BigMessage(EventPlayer(), "  No replays recorded yet!");
+    SmallMessage(EventPlayer(), "  No replays recorded yet!");
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
     Abort();
   }
