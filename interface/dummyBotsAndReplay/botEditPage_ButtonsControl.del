@@ -43,6 +43,7 @@ void CreateBotButtonEditPage() {
 /*
  * Up/Down: Selectes a button to change
  * Primary Fire: Cycles the button control state
+ * Reload: manual button control
 */
 
 void BotButtonEdit_HandleUpDown() {
@@ -271,4 +272,16 @@ if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS)
 {
   menuXIndex = 0;
   menuYIndex = 0;
+}
+
+rule: "When player is holding Reload in the button control menu, start holding the current button until reload is released"
+Event.OngoingPlayer
+if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS)
+if (EventPlayer().IsButtonHeld(Button.Reload))
+{
+  Number cacheMenuYIndex = menuYIndex;
+  StartHoldingButton(selectedBot, ithButton(cacheMenuYIndex));
+  WaitUntil(!EventPlayer().IsButtonHeld(Button.Reload) || menuYIndex != cacheMenuYIndex, 1000000);
+  StopHoldingButton(selectedBot, ithButton(cacheMenuYIndex));
+  LoopIfConditionIsTrue();
 }
