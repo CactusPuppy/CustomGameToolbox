@@ -226,9 +226,12 @@ rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle pinning bot to curr
 Event.OngoingPlayer
 if (pinnedPosition.location != null)
 {
-  StartForcingPlayerPosition(EventPlayer(), pinnedPosition.location, true);
-  WaitUntil(pinnedPosition.location == null, 1000000);
-  StopForcingPlayerPosition();
+  while (pinnedPosition.location != null) {
+    StartForcingPlayerPosition(EventPlayer(), pinnedPosition.location, true);
+    WaitUntil(pinnedPosition.location == null, 0.2);
+    StopForcingPlayerPosition();
+    MinWait();
+  }
   MinWait();
   if (SpeedOf(EventPlayer()) > 0.05) {
     ApplyImpulse(EventPlayer(), VelocityOf() * -1, 0.01, Relative.ToWorld, ContraryMotion.CancelXYZ);
