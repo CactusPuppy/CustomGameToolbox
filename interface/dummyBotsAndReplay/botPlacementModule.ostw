@@ -4,7 +4,7 @@ import "botPlacementModule.del";
 // import "botPlacementExtras.del";
 void Menu_CreateBot() {
   CreateDummyBot(
-    Hero.Soldier76,
+    HeroOf(),
     OppositeTeamOf(TeamOf()),
     -1,
     RayCastHitPosition(EyePosition(), EyePosition() + FacingDirectionOf() * 10, null, null, false),
