@@ -1,6 +1,7 @@
 Number BUTTON_CONTROL_SCALE: 1.25;
 Number BUTTON_CONTROL_START_Y: 1;
 Number BUTTON_CONTROL_SPACING_Y: -0.17;
+Number BUTTON_CONTROL_X: 0.75;
 
 playervar ButtonControlState[] buttonControlStates = [];
 
@@ -29,7 +30,7 @@ void CreateBotButtonEditPage() {
       Header: "{0}: {1}".Format([
         ithButton(EvaluateOnce(i)),
         LocalPlayer().selectedBot.buttonControlStates[EvaluateOnce(i)]]),
-      PositionX: 0.5,
+      PositionX: BUTTON_CONTROL_X,
       PositionY: BUTTON_CONTROL_START_Y + EvaluateOnce(i) * BUTTON_CONTROL_SPACING_Y,
       Scale: BUTTON_CONTROL_SCALE,
       Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
