@@ -9,7 +9,7 @@ enum InfoAction {
   HEALING_RECEIVED_PER_SECOND_DISPLAY,
   DAMAGE_DEALT_PER_SECOND_DISPLAY,
   DAMAGE_RECEIVED_PER_SECOND_DISPLAY,
-  POSITION_DISPLAY,
+  POSITION_FACING_DISPLAY,
   FACING_DISPLAY,
   ALTITUDE_DISPLAY,
   ON_GROUND_DISPLAY,
@@ -18,7 +18,8 @@ enum InfoAction {
   STATUS_EFFECT_READOUT,
   ON_OBJECTIVE,
   EXACT_HEALTH,
-  DAMAGE_HEAL_NUMBERS
+  DAMAGE_HEAL_NUMBERS,
+  THROTTLE
 }
 
 Number maxActiveDisplays: 5;
@@ -28,7 +29,7 @@ playervar Any[] infoDisplayEntities = [];
 InfoAction[] InfoActionGrid: ButtonActionGrid[MenuState.INFORMATION];
 InfoAction[] informationMenuButtonActions: [
   InfoAction.NONE,  InfoAction.EXACT_HEALTH,                             InfoAction.DISTANCE_TO_CROSSHAIR_DISPLAY,  InfoAction.ON_OBJECTIVE,                       InfoAction.NONE,
-  InfoAction.NONE,  InfoAction.POSITION_DISPLAY,                         InfoAction.FACING_DISPLAY,                 InfoAction.MOVE_SPEED_DISPLAY,                 InfoAction.NONE,
+  InfoAction.NONE,  InfoAction.POSITION_FACING_DISPLAY,                         InfoAction.THROTTLE,                 InfoAction.MOVE_SPEED_DISPLAY,                 InfoAction.NONE,
   InfoAction.NONE,  InfoAction.ALTITUDE_DISPLAY,                         InfoAction.ON_GROUND_DISPLAY,              InfoAction.ON_WALL_DISPLAY,                    InfoAction.NONE,
   InfoAction.NONE,  InfoAction.HEALING_DEALT_PER_SECOND_DISPLAY,         InfoAction.STATUS_EFFECT_READOUT,          InfoAction.DAMAGE_DEALT_PER_SECOND_DISPLAY,    InfoAction.NONE,
   InfoAction.NONE,  InfoAction.HEALING_RECEIVED_PER_SECOND_DISPLAY,      InfoAction.DAMAGE_HEAL_NUMBERS,            InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY, InfoAction.NONE
@@ -36,7 +37,7 @@ InfoAction[] informationMenuButtonActions: [
 
 String[] informationMenuButtonLabels: [
   "",  "Show Exact Health",      "Show Distance To Crosshair",  "Show Is On Objective",    "",
-  "",  "Show Position",          "Show Facing Direction",       "Show Move Speed",         "",
+  "",  "Show Position/Facing",   "Show Throttle",               "Show Move Speed",         "",
   "",  "Show Altitude",          "Show If On Ground",           "Show If On Wall",         "",
   "",  "Show HPS Dealt",         "Show Status Effects",         "Show DPS Dealt",          "",
   "",  "Show HPS Received",      "Show Damage/Heal Numbers",    "Show DPS Received",       ""

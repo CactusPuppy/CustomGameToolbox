@@ -7,42 +7,42 @@ import "../../OSTWUtils/Colors.del";
 
 rule: "[interface/information/simpleInfoReadouts.ostw] If player has Position HUD, enable it"
 Event.OngoingPlayer
-if (activeInfoDisplays.Contains(InfoAction.POSITION_DISPLAY))
+if (activeInfoDisplays.Contains(InfoAction.POSITION_FACING_DISPLAY))
 {
-  infoDisplayEntities[InfoAction.POSITION_DISPLAY] = CreateHudText(
+  infoDisplayEntities[InfoAction.POSITION_FACING_DISPLAY] = CreateHudText(
     VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
     Header: <" POS: <0> ", UpdateEveryFrame(PositionOf(EventPlayer()))>,
-    Subheader: " ",
-    Text: <"<0>", MANY_SPACES>,
+    Subheader: <"<0>", MANY_SPACES>,
+    Text: <"LOOK: <0>", UpdateEveryFrame(FacingDirectionOf(EventPlayer()))>,
     Location: Location.Left,
     HeaderColor: Color.White,
-    SortOrder: activeInfoDisplays.IndexOf(InfoAction.POSITION_DISPLAY),
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.POSITION_FACING_DISPLAY),
     Reevaluation: HudTextRev.VisibleToSortOrderAndString
   );
-  UpdateButtonAppearance(MenuState.INFORMATION, 1, 1, "Hide Position", Color.Gray);
-  WaitUntil(!activeInfoDisplays.Contains(InfoAction.POSITION_DISPLAY), 99999);
-  DestroyHudText(infoDisplayEntities[InfoAction.POSITION_DISPLAY]);
-  UpdateButtonAppearance(MenuState.INFORMATION, 1, 1, "Show Position", Color.Green);
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 1, "Hide Position/Facing", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.POSITION_FACING_DISPLAY), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.POSITION_FACING_DISPLAY]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 1, 1, "Show Position/Facing", Color.Green);
 }
 
-rule: "[interface/information/simpleInfoReadouts.ostw] If player has Facing Direction HUD, enable it"
+rule: "[interface/information/simpleInfoReadouts.ostw] If player has Throttle HUD, enable it"
 Event.OngoingPlayer
-if (activeInfoDisplays.Contains(InfoAction.FACING_DISPLAY))
+if (activeInfoDisplays.Contains(InfoAction.THROTTLE))
 {
-  infoDisplayEntities[InfoAction.FACING_DISPLAY] = CreateHudText(
+  infoDisplayEntities[InfoAction.THROTTLE] = CreateHudText(
     VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
-    Header: <" LOOK: <0> ", UpdateEveryFrame(FacingDirectionOf(EventPlayer()))>,
+    Header: <" THROTTLE: <0> ", UpdateEveryFrame(ThrottleOf(EventPlayer()))>,
     Subheader: " ",
     Text: <"<0>", MANY_SPACES>,
     Location: Location.Left,
     HeaderColor: Color.White,
-    SortOrder: activeInfoDisplays.IndexOf(InfoAction.FACING_DISPLAY),
+    SortOrder: activeInfoDisplays.IndexOf(InfoAction.THROTTLE),
     Reevaluation: HudTextRev.VisibleToSortOrderAndString
   );
-  UpdateButtonAppearance(MenuState.INFORMATION, 2, 1, "Hide Facing Direction", Color.Gray);
-  WaitUntil(!activeInfoDisplays.Contains(InfoAction.FACING_DISPLAY), 99999);
-  DestroyHudText(infoDisplayEntities[InfoAction.FACING_DISPLAY]);
-  UpdateButtonAppearance(MenuState.INFORMATION, 2, 1, "Show Facing Direction", Color.Rose);
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 1, "Hide Throttle", Color.Gray);
+  WaitUntil(!activeInfoDisplays.Contains(InfoAction.THROTTLE), 99999);
+  DestroyHudText(infoDisplayEntities[InfoAction.THROTTLE]);
+  UpdateButtonAppearance(MenuState.INFORMATION, 2, 1, "Show Throttle", Color.Rose);
 }
 
 rule: "[interface/information/simpleInfoReadouts.ostw] If player has Move Speed HUD, enable it"
