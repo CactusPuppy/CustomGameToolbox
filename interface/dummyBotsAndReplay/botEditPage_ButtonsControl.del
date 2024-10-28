@@ -96,7 +96,7 @@ if (buttonControlStates[indexOfButton(Button.PrimaryFire)] != ButtonControlState
 
 rule: "If secondary fire button is marked as being spammed, start spamming it"
 Event.OngoingPlayer
-if (buttonControlStates[indexOfButton(Button.SecondaryFire)] == ButtonControlState.SPAMMING)
+if (buttonControlStates[indexOfButton(Button.SecondaryFire)] != ButtonControlState.NONE)
 {
   if (buttonControlStates[indexOfButton(Button.SecondaryFire)] == ButtonControlState.HOLDING) {
     StartHoldingButton(EventPlayer(), Button.SecondaryFire);
