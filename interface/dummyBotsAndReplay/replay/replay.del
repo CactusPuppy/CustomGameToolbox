@@ -77,9 +77,21 @@ void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/
     Abort();
   }
   SmallMessage(EventPlayer(), "  1...");
+
+  # If we should prompt all other bots to play their recordings,
+  # prompt them now.
+  if (allBotsReplayDuringRecording) {
+    AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).waitingOnPlayer = EventPlayer();
+    AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.PLAY;
+  }
+
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
     ReturnToPreRecordState();
+    if (allBotsReplayDuringRecording) {
+      AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).waitingOnPlayer = null;
+      AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.STOP;
+    }
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -87,11 +99,7 @@ void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/
   # Release player to record
   StopForcingPlayerPosition(EventPlayer());
   StopFacing(EventPlayer());
-  # If we should prompt all other bots to play their recordings,
-  # prompt them now.
-  if (allBotsReplayDuringRecording) {
-    AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.PLAY;
-  }
+
   # Start recording
   StartRecording();
   SmallMessage(EventPlayer(), "  Recording started");

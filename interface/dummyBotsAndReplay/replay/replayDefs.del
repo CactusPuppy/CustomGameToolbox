@@ -32,6 +32,8 @@ playervar ReplayState replayState;
 playervar Number recordingLength;
 playervar Number frame;
 playervar Number sampleCount = 0;
+playervar Boolean botReadyToReplay;
+
 
 playervar Any sampleValue;
 playervar Any[] currentInputValues;
@@ -364,7 +366,7 @@ void Recorder_StopRecording() playervar "[SUB | interface/dummyBotsAndReplay/rep
   SmallMessage(EventPlayer(), "  Recording stopped");
 }
 
-playervar Boolean botReadyToReplay;
+playervar Player waitingOnPlayer;
 
 void PlayClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip" {
   StopClip();
@@ -374,7 +376,12 @@ void PlayClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   ForcePlayerHero(EventPlayer(), recordingHero);
   Wait(0.064);
   TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().replayResetPoint);
-  Wait(1);
+  if (waitingOnPlayer != null) {
+    WaitUntil(waitingOnPlayer.replayState == ReplayState.RECORDING, 3);
+  } else {
+    Wait(1);
+  }
+  waitingOnPlayer = null;
   botReadyToReplay = true;
   replayState = ReplayState.PLAYING;
 }
