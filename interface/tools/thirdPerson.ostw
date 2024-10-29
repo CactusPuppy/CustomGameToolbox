@@ -8,6 +8,7 @@ enum ThirdPersonState {
 playervar ThirdPersonState thirdPersonState;
 playervar Number thirdPersonDirection = 1;
 playervar Number thirdPersonZoom = -2.5;
+playervar Number thirdPersonHeight = 0;
 
 rule: "[interface/tools/thirdPerson.ostw] When person is in third person and their menu state becomes closed, start third person camera"
 Event.OngoingPlayer
@@ -24,7 +25,8 @@ if (currentMenuState == MenuState.CLOSED)
       StartPOS: EyePosition(),
       EndPOS: EyePosition()
         + WorldVectorOf(Vector(thirdPersonDirection * Min(thirdPersonZoom / 2.5, -0.75), 0, 0), EventPlayer(), LocalVector.Rotation)
-        + FacingDirectionOf() * thirdPersonZoom,
+        + FacingDirectionOf() * thirdPersonZoom
+        + CrossProduct(FacingDirectionOf(), WorldVectorOf(Left(), EventPlayer(), LocalVector.Rotation)) * thirdPersonHeight,
       PlayersToInclude: AllPlayers(),
       PlayersToExclude: EventPlayer(),
       IncludePlayerOwnedObjects: false),
@@ -38,8 +40,12 @@ Event.OngoingPlayer
 if (thirdPersonState == ThirdPersonState.ADJUSTING)
 {
   SetMoveSpeed(EventPlayer(), 0.01);
+  AddOneLockToButton(EventPlayer(), Button.Jump);
+  AddOneLockToButton(EventPlayer(), Button.Crouch);
   WaitUntil(thirdPersonState != ThirdPersonState.ADJUSTING, 1000000);
   SetMoveSpeed(EventPlayer(), 100);
+  RemoveOneLockFromButton(EventPlayer(), Button.Jump);
+  RemoveOneLockFromButton(EventPlayer(), Button.Crouch);
 }
 
 rule: "[interface/tools/thirdPerson.ostw] While adjusting, use Z Component of Throttle to adjust zoom"
@@ -66,10 +72,34 @@ if (currentMenuState == MenuState.CLOSED)
 if (AbsoluteValue(XOf(ThrottleOf())) >= 0.5)
 {
   if (XOf(ThrottleOf()) > 0) {
-    thirdPersonDirection = Max(thirdPersonDirection - 0.1, -1);
+    thirdPersonDirection = Max(thirdPersonDirection - 0.1, -2);
   } else {
-    thirdPersonDirection = Min(thirdPersonDirection + 0.1, 1);
+    thirdPersonDirection = Min(thirdPersonDirection + 0.1, 2);
   }
+  Wait(0.064);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/tools/thirdPerson.ostw] While adjusting, use jump to increase height"
+Event.OngoingPlayer
+if (thirdPersonState == ThirdPersonState.ADJUSTING)
+if (IsAlive())
+if (currentMenuState == MenuState.CLOSED)
+if (IsButtonHeld(EventPlayer(), Button.Jump))
+{
+  thirdPersonHeight = Min(thirdPersonHeight + 0.1, 5);
+  Wait(0.064);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/tools/thirdPerson.ostw] While adjusting, use crouch to decrease height"
+Event.OngoingPlayer
+if (thirdPersonState == ThirdPersonState.ADJUSTING)
+if (IsAlive())
+if (currentMenuState == MenuState.CLOSED)
+if (IsButtonHeld(EventPlayer(), Button.Crouch))
+{
+  thirdPersonHeight = Max(thirdPersonHeight - 0.1, -2);
   Wait(0.064);
   LoopIfConditionIsTrue();
 }
