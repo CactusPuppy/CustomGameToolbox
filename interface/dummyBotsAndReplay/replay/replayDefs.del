@@ -359,15 +359,7 @@ void Recorder_StopRecording() playervar "[SUB | interface/dummyBotsAndReplay/rep
   selectedBot.recordingHero = recordingHero;
   DeleteRecording();
 
-  # Restore bot to reset point and recording player to original hero
-  ForcePlayerHero(EventPlayer(), originalHero);
-  StopForcingHero(EventPlayer());
-  StopForcingPlayerPosition(selectedBot);
-  SetInvisible(selectedBot, InvisibleTo.None);
-  TeleportPlayerToResetPoint(selectedBot, selectedBot.replayResetPoint);
-  if (currentMenuState != MenuState.CLOSED) CloseMenu();
-  MinWait();
-  StartEditingBots();
+  ReturnToPreRecordState();
   Wait(0.25);
   SmallMessage(EventPlayer(), "  Recording stopped");
 }

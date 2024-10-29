@@ -20,6 +20,19 @@ Event.OngoingGlobal
     // CreateHudText(FilteredArray(LocalPlayer(), ArrayElement().replayState == 3), null, "Press Interact to Cancel", null, Location.Right, -4, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
 }
 
+void ReturnToPreRecordState() playervar "[SUB | interface/dummyBotsAndReplay/replay/replay.del] Restore selected bot to original state"
+{
+  # Restore bot to reset point and recording player to original hero
+  ForcePlayerHero(EventPlayer(), originalHero);
+  StopForcingHero(EventPlayer());
+  StopForcingPlayerPosition(selectedBot);
+  SetInvisible(selectedBot, InvisibleTo.None);
+  TeleportPlayerToResetPoint(selectedBot, selectedBot.replayResetPoint);
+  if (currentMenuState != MenuState.CLOSED) CloseMenu();
+  Wait(0.032);
+  StartEditingBots();
+}
+
 void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replay.del] Prep player to record for selectedBot"
 {
   selectedBot.replayResetPoint = NewResetFromPlayer(selectedBot);
@@ -44,6 +57,7 @@ void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/
 
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
+    ReturnToPreRecordState();
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -51,18 +65,21 @@ void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/
   SmallMessage(EventPlayer(), "{0}  Recording starts in 3...".Format([IconString(Icon.ExclamationMark)]));
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
+    ReturnToPreRecordState();
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
   SmallMessage(EventPlayer(), "  2...");
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
+    ReturnToPreRecordState();
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
   SmallMessage(EventPlayer(), "  1...");
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
+    ReturnToPreRecordState();
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
