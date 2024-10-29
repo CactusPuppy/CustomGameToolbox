@@ -33,6 +33,47 @@ if (currentMenuState == MenuState.CLOSED)
   );
 }
 
+rule: "[interface/tools/thirdPerson.ostw] During adjustment, reduce move speed"
+Event.OngoingPlayer
+if (thirdPersonState == ThirdPersonState.ADJUSTING)
+{
+  SetMoveSpeed(EventPlayer(), 0.01);
+  WaitUntil(thirdPersonState != ThirdPersonState.ADJUSTING, 1000000);
+  SetMoveSpeed(EventPlayer(), 100);
+}
+
+rule: "[interface/tools/thirdPerson.ostw] While adjusting, use Z Component of Throttle to adjust zoom"
+Event.OngoingPlayer
+if (thirdPersonState == ThirdPersonState.ADJUSTING)
+if (IsAlive())
+if (currentMenuState == MenuState.CLOSED)
+if (AbsoluteValue(ZOf(ThrottleOf())) >= 0.5)
+{
+  if (ZOf(ThrottleOf()) > 0) {
+    thirdPersonZoom = Min(thirdPersonZoom + 0.1, -0.5);
+  } else {
+    thirdPersonZoom = Max(thirdPersonZoom - 0.1, -5);
+  }
+  Wait(0.064);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/tools/thirdPerson.ostw] While adjusting, use X Component of Throttle to adjust direction"
+Event.OngoingPlayer
+if (thirdPersonState == ThirdPersonState.ADJUSTING)
+if (IsAlive())
+if (currentMenuState == MenuState.CLOSED)
+if (AbsoluteValue(XOf(ThrottleOf())) >= 0.5)
+{
+  if (XOf(ThrottleOf()) > 0) {
+    thirdPersonDirection = Max(thirdPersonDirection - 0.1, -1);
+  } else {
+    thirdPersonDirection = Min(thirdPersonDirection + 0.1, 1);
+  }
+  Wait(0.064);
+  LoopIfConditionIsTrue();
+}
+
 rule: "[interface/tools/thirdPerson.ostw] Stop third person during certain conditions"
 Event.OngoingPlayer
 if ([Hero.Widowmaker, Hero.Ashe, Hero.Ana].Contains(HeroOf()))
