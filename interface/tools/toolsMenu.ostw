@@ -166,7 +166,7 @@ if (toolsActionID == ToolsAction.FAST_FORWARD)
     SetMatchTime(0);
   # Otherwise, logic to end round
   } else if (IsGameInProgress()) {
-    if (CurrentGameMode() == GameMode.Control) {
+    if (CurrentGameMode() == GameMode.Control || CurrentGameMode() == GameMode.Flashpoint) {
       DeclareRoundVictory(TeamOf());
     } else {
       SetMatchTime(0);
