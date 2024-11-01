@@ -260,5 +260,3 @@ if (toolsActionID == ToolsAction.UNLOCK_ALL_BUTTONS)
   UnlockAllButtons();
   CloseMenu(EventPlayer());
 }
-
-// TODO: Send back to assembling heroes
