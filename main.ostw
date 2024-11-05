@@ -63,7 +63,7 @@ String HeroSettingsCategory: "2. Hero Settings";
 String MenuSettingsCategory: "3. Menu Settings";
 String ModSettingsCategory: "4. Mod Settings";
 String InformationCategory: "5. Information";
-String ReplaySettingsCategory: "6. Replay Settings";
+String BotAndReplaySettingsCategory: "6. Bot and Replay";
 
 globalvar Number i;
 
