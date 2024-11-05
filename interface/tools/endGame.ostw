@@ -60,7 +60,7 @@ void HandleConfirmEndGameClick() "Handle confirm/cancel for ending game"
     OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
   } else if (cursorOnConfirmBtn()) {
     DeclareMatchDraw();
-    Wait(0.25);
+    WaitUntil(IsMatchComplete(), 3);
     if (IsMatchComplete()) {
       CloseMenu(EventPlayer());
       return;
