@@ -59,16 +59,7 @@ void HandleConfirmEndGameClick() "Handle confirm/cancel for ending game"
   if (cursorOnCancelBtn()) {
     OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
   } else if (cursorOnConfirmBtn()) {
-    if (CurrentGameMode() == GameMode.Flashpoint) {
-      i = 0;
-      while (!IsMatchComplete() && i < 30) {
-        DeclareRoundVictory(TeamOf());
-        i += 1;
-        WaitUntil(IsMatchComplete(), 0.064);
-      }
-    } else {
-      DeclareMatchDraw();
-    }
+    DeclareMatchDraw();
     WaitUntil(IsMatchComplete(), 3);
     if (IsMatchComplete()) {
       CloseMenu(EventPlayer());
