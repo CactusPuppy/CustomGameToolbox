@@ -60,7 +60,7 @@ import "UndoTankHealthReduction.ostw";
 import "interface/menu.ostw";
 import "lib/logs/logs.del";
 
-String GeneralSettingsCategory: "1. Settings";
+String GeneralSettingsCategory: "1. General";
 String HeroSettingsCategory: "2. Hero Settings";
 String MenuSettingsCategory: "3. Menu Settings";
 String ModSettingsCategory: "4. Mod Settings";
