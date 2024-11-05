@@ -91,14 +91,9 @@ rule: "[main.ostw] Disable Inspector Recording" -100
 rule: "[main.ostw] Skip assembling heroes"
 if (IsAssemblingHeroes())
 {
-  if (AllPlayers().Any(p => p.toolsActionID == ToolsAction.RETURN_TO_ASSEMBLING_HEROES)) {
-    if (isTimePaused) {
-      UnpauseMatchTime();
-      isTimePaused = false;
-    }
-    Abort();
+  if (AllPlayers().All(p => p.toolsActionID != ToolsAction.RETURN_TO_ASSEMBLING_HEROES)) {
+    SetMatchTime(WorkshopSettingInteger(GeneralSettingsCategory, "Assembling Heroes Length", 5, 0, 30));
   }
-  SetMatchTime(WorkshopSettingInteger(GeneralSettingsCategory, "Assembling Heroes Length", 5, 0, 30));
   if (isTimePaused) {
     UnpauseMatchTime();
     isTimePaused = false;

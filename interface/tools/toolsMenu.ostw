@@ -239,10 +239,12 @@ if (toolsActionID == ToolsAction.THIRD_PERSON)
     case ThirdPersonState.OFF:
       UpdateButtonAppearance(MenuState.TOOLS, 3, 2, "Set 3P Camera Pos", Color.Green);
       thirdPersonState = ThirdPersonState.ADJUSTING;
+      CloseMenu(EventPlayer());
       break;
     case ThirdPersonState.ADJUSTING:
       UpdateButtonAppearance(MenuState.TOOLS, 3, 2, "Stop 3rd Person", Color.Red);
       thirdPersonState = ThirdPersonState.ON;
+      CloseMenu(EventPlayer());
       break;
     case ThirdPersonState.ON:
       UpdateButtonAppearance(MenuState.TOOLS, 3, 2, "Enable 3rd Person", Color.Orange);
@@ -258,5 +260,3 @@ if (toolsActionID == ToolsAction.UNLOCK_ALL_BUTTONS)
   UnlockAllButtons();
   CloseMenu(EventPlayer());
 }
-
-// TODO: Send back to assembling heroes

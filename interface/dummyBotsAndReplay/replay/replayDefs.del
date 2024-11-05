@@ -629,7 +629,7 @@ void PlayFrameWeapon() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   }
 }
 
-globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Loop Clip", true);
+globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Loop Replay Playback", true);
 
 void PlayFrame() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame (a very good YouTube channel btw)" {
   if (frame < recordingLength) {
