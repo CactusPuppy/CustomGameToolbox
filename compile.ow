@@ -4,6 +4,8 @@ settings
     {
         Mode Name: "CactusPuppy's Toolbox"
         Description: "CactusPuppy's Toolbox | v1.0.0
+Code: OVVVC
+
 A set of tools that make custom games more useful for recreating, testing, and recording Overwatch scenarios."
     }
     modes
@@ -67,20 +69,22 @@ variables
         11: isInSetup
         12: OptimizeMetricsForOverTime
         13: activeModifications
-        14: punchingBagTargetHealthProportio
-        15: nextSelectionEntityId
-        16: uniqueHeroSkinCombosRemaining
-        17: rainbowVector
-        18: allBotsReplayDuringRecording
-        19: longestRecordingLength
-        20: SHOULD_LOOP_CLIP
-        21: colIndex
-        22: rowIndex
-        23: player
-        24: button
-        25: _arrayConstructor
-        26: SourcePlayer
-        27: TargetPlayer
+        14: SLOW_MOTION_SPEED
+        15: punchingBagTargetHealthProportio
+        16: nextSelectionEntityId
+        17: uniqueHeroSkinCombosRemaining
+        18: rainbowVector
+        19: BUTTON_SPAM_PERIOD
+        20: allBotsReplayDuringRecording
+        21: longestRecordingLength
+        22: SHOULD_LOOP_CLIP
+        23: colIndex
+        24: rowIndex
+        25: player
+        26: button
+        27: _arrayConstructor
+        28: SourcePlayer
+        29: TargetPlayer
     player:
         0: menuActivationPoint
         1: ButtonLabelGrid
@@ -133,33 +137,34 @@ variables
         48: selectedBotEditAction
         49: pinnedPosition
         50: tempHeroStorage
-        51: recordingPlayStopFlag
-        52: buttonControlStates
-        53: recordingHero
-        54: originalHero
-        55: replayState
-        56: recordingLength
-        57: frame
-        58: sampleCount
-        59: botReadyToReplay
-        60: sampleValue
-        61: currentInputValues
-        62: currentEventIndices
-        63: currentEventFrames
-        64: primaryFireEvents
-        65: secondaryFireEvents
-        66: ability1Events
-        67: ability2Events
-        68: ultimateEvents
-        69: jumpEvents
-        70: crouchEvents
-        71: meleeEvents
-        72: reloadEvents
-        73: throttleEvents
-        74: facingEvents
-        75: weaponEvents
-        76: waitingOnPlayer
-        77: cacheMenuYIndex
+        51: buttonControlStates
+        52: recordingHero
+        53: originalHero
+        54: recordingCountdownText
+        55: recordingPlayStopFlag
+        56: replayState
+        57: recordingLength
+        58: frame
+        59: sampleCount
+        60: botReadyToReplay
+        61: sampleValue
+        62: currentInputValues
+        63: currentEventIndices
+        64: currentEventFrames
+        65: primaryFireEvents
+        66: secondaryFireEvents
+        67: ability1Events
+        68: ability2Events
+        69: ultimateEvents
+        70: jumpEvents
+        71: crouchEvents
+        72: meleeEvents
+        73: reloadEvents
+        74: throttleEvents
+        75: facingEvents
+        76: weaponEvents
+        77: waitingOnPlayer
+        78: cacheMenuYIndex
 }
 
 // Extended collection variables:
@@ -208,11 +213,11 @@ subroutines
     11: StartRecording
     12: DeleteRecording
     13: UpdateLongestRecordingLength
-    14: StopClip
-    15: PlayClip
-    16: Recorder_StopRecording
-    17: StopRecording
-    18: UpdateSampleCount
+    14: Recorder_StopRecording
+    15: StopRecording
+    16: UpdateSampleCount
+    17: StopClip
+    18: PlayClip
     19: RecordFrame
     20: RecordFramePrimaryFire
     21: RecordFrameSecondaryFire
@@ -370,7 +375,7 @@ rule("[interface/menu.ostw] When menu state changes, find new first selection")
     }
 }
 
-// Rule Element Count: 93
+// Rule Element Count: 113
 rule("Initial Global")
 {
     event
@@ -378,21 +383,23 @@ rule("Initial Global")
         Ongoing - Global;
     }
 
-    // Element Count: 92, Action Count: 11
+    // Element Count: 112, Action Count: 13
     // Largest Action Index: 2 using 22 Elements
     actions
     {
         Global.UseRoleQueueHealth = Workshop Setting Toggle(Custom String("2. Hero Settings"), Custom String("Use Role Queue Tank Health"), True, 0);
-        Global._extendedGlobalCollection[0] = Workshop Setting Combo(Custom String("1. Settings"), Custom String("Log Level"), 0, Array(Custom String("Debug"), Custom String("Info"), Custom String("Warning"), Custom String("Error")), 0);
+        Global._extendedGlobalCollection[0] = Workshop Setting Combo(Custom String("1. General"), Custom String("Log Level"), 0, Array(Custom String("Debug"), Custom String("Info"), Custom String("Warning"), Custom String("Error")), 0);
         Global.AllButtons = Array(Button(Primary Fire), Button(Secondary Fire), Button(Ability 1), Button(Ability 2), Button(Crouch), Button(Jump), Button(Melee), Button(Reload), Button(Ultimate), Button(Interact));
         Global.OptimizeMetricsForOverTime = Workshop Setting Toggle(Custom String("5. Information"), Custom String("Optimize DPS/HPS Meters for Over Time Effects"), False, 0);
-        Global.punchingBagTargetHealthProportio = Workshop Setting Real(Custom String("1. Settings"), Custom String("Punching Bag Target Health Proportion"), 0.8, 0, 1, 0.01);
+        Global.SLOW_MOTION_SPEED = Workshop Setting Integer(Custom String("4. Mod Settings"), Custom String("Slow Motion Speed"), 25, 1, 100, 0);
+        Global.punchingBagTargetHealthProportio = Workshop Setting Real(Custom String("1. General"), Custom String("Punching Bag Target Health Proportion"), 0.8, 0, 1, 0.01);
         Global.nextSelectionEntityId = 1;
         Global.uniqueHeroSkinCombosRemaining = 12;
         Global.rainbowVector = Left - Left;
-        Global.allBotsReplayDuringRecording = Workshop Setting Toggle(Custom String("6. Replay Settings"), Custom String("All Bots Replay During Recording"), True, 0);
+        Global.BUTTON_SPAM_PERIOD = Workshop Setting Real(Custom String("6. Bot and Replay"), Custom String("Bot Button Spam Wait Time"), 1, 0.1, 30, -1);
+        Global.allBotsReplayDuringRecording = Workshop Setting Toggle(Custom String("6. Bot and Replay"), Custom String("All Bots Replay During Recording"), True, 0);
         Global.longestRecordingLength = 0;
-        Global.SHOULD_LOOP_CLIP = Workshop Setting Toggle(Custom String("6. Replay Settings"), Custom String("Loop Replay Playback"), True, 0);
+        Global.SHOULD_LOOP_CLIP = Workshop Setting Toggle(Custom String("6. Bot and Replay"), Custom String("Loop Replay Playback"), True, 0);
     }
 }
 
@@ -451,7 +458,7 @@ rule("[main.ostw] Skip assembling heroes")
     actions
     {
         If(Is True For All(All Players(All Teams), Current Array Element.toolsActionID != 10));
-            Set Match Time(Workshop Setting Integer(Custom String("1. Settings"), Custom String("Assembling Heroes Length"), 5, 0, 30, 0));
+            Set Match Time(Workshop Setting Integer(Custom String("1. General"), Custom String("Assembling Heroes Length"), 5, 0, 30, 0));
         End;
         If(Global.isTimePaused);
             Unpause Match Time;
@@ -474,7 +481,7 @@ rule("[main.ostw] pause match time on start of round")
     // Element Count: 16, Condition Count: 2
     conditions
     {
-        Workshop Setting Toggle(Custom String("1. Settings"), Custom String("Automatically Pause Match Time At Round Start"), True, 0) == True;
+        Workshop Setting Toggle(Custom String("1. General"), Custom String("Automatically Pause Match Time At Round Start"), True, 0) == True;
         !Is Assembling Heroes == True;
     }
 
@@ -498,7 +505,7 @@ rule("[main.ostw] Go back to lobby early, skipping victory poses and POTG")
     // Element Count: 15, Condition Count: 2
     conditions
     {
-        Workshop Setting Toggle(Custom String("1. Settings"), Custom String("Skip Post-Match Flow"), True, 0) == True;
+        Workshop Setting Toggle(Custom String("1. General"), Custom String("Skip Post-Match Flow"), True, 0) == True;
         Is Match Complete == True;
     }
 
@@ -548,7 +555,7 @@ rule("[main.ostw] Skip setup")
     // Element Count: 15, Condition Count: 2
     conditions
     {
-        Workshop Setting Toggle(Custom String("1. Settings"), Custom String("Automatically Skip Setup"), True, 0) == True;
+        Workshop Setting Toggle(Custom String("1. General"), Custom String("Automatically Skip Setup"), True, 0) == True;
         Is In Setup == True;
     }
 
@@ -580,7 +587,7 @@ rule("[main.ostw] self-damage on melee")
     // Element Count: 16, Condition Count: 2
     conditions
     {
-        Workshop Setting Toggle(Custom String("1. Settings"), Custom String("Self-Damage On Melee"), False, 0) == True;
+        Workshop Setting Toggle(Custom String("1. General"), Custom String("Self-Damage On Melee"), False, 0) == True;
         Is Meleeing(Event Player) == True;
     }
 
@@ -792,7 +799,7 @@ rule("[interface/menu.ostw] Initialize player and perform cleanup")
     }
 }
 
-// Rule Element Count: 35
+// Rule Element Count: 49
 rule("[interface/menu.ostw] When player holds Interact long enough, toggle menu")
 {
     event
@@ -810,11 +817,11 @@ rule("[interface/menu.ostw] When player holds Interact long enough, toggle menu"
         Is Button Held(Event Player, Button(Interact)) == True;
     }
 
-    // Element Count: 17, Action Count: 7
-    // Largest Action Index: 1 using 7 Elements
+    // Element Count: 31, Action Count: 7
+    // Largest Action Index: 0 using 16 Elements
     actions
     {
-        Wait(0.5, Abort When False);
+        Wait(Global.activeModifications[7] ? 0.5 * Global.SLOW_MOTION_SPEED / 100 : 0.5, Abort When False);
         If(Event Player.currentMenuState == 0);
             Event Player.currentMenuState = 1;
         Else;
@@ -842,7 +849,7 @@ rule("Handle confirm/cancel for ending game")
             Event Player.currentMenuState = 5;
         Else If(Event Player.menuXIndex == 0 && Event Player.menuYIndex == 0);
             Declare Match Draw;
-            Wait(0.25, Ignore Condition);
+            Wait Until(Is Match Complete, 3);
             If(Is Match Complete);
                 "Avoid having input count for something else by allowing other modules to read that an input was processed in the menu."
                 Wait(0.016, Ignore Condition);
@@ -1597,7 +1604,7 @@ rule("[interface/toolsMenu.ostw] Handle request for returning to assembling hero
     }
 }
 
-// Rule Element Count: 43
+// Rule Element Count: 49
 rule("[interface/toolsMenu.ostw] When fast-forward is requested, make it happen")
 {
     event
@@ -1613,15 +1620,15 @@ rule("[interface/toolsMenu.ostw] When fast-forward is requested, make it happen"
         Event Player.toolsActionID == 4;
     }
 
-    // Element Count: 35, Action Count: 22
-    // Largest Action Index: 3 using 5 Elements
+    // Element Count: 41, Action Count: 22
+    // Largest Action Index: 3 using 11 Elements
     actions
     {
         "Setup skip"
         If(Is In Setup);
             Set Match Time(0);
         Else If(Is Game In Progress);
-            If(Current Game Mode == Game Mode(Control));
+            If(Current Game Mode == Game Mode(Control) || Current Game Mode == Game Mode(Flashpoint));
                 Declare Round Victory(Team Of(Event Player));
             Else;
                 Set Match Time(0);
@@ -3981,7 +3988,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle slow motion")
     // Largest Action Index: 1 using 7 Elements
     actions
     {
-        Set Slow Motion(30);
+        Set Slow Motion(Global.SLOW_MOTION_SPEED);
         Wait Until(!Global.activeModifications[7], 99999);
         Set Slow Motion(100);
     }
@@ -4558,7 +4565,7 @@ rule("[interface/dummyBotsAndReplay/botsMenu.ostw] Initiator perspective for res
     }
 }
 
-// Rule Element Count: 184
+// Rule Element Count: 186
 rule("[interface/dummyBotsAndReplay/botEditPage.del] Handle resetting all bots to their reset points")
 {
     event
@@ -4575,14 +4582,15 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Handle resetting all bots t
         Is True For Any(Filtered Array(All Players(All Teams), !Is Dummy Bot(Current Array Element)), Current Array Element.selectedBotsReplayAction == 4) == True;
     }
 
-    // Element Count: 160, Action Count: 36
-    // Largest Action Index: 22 using 17 Elements
+    // Element Count: 162, Action Count: 37
+    // Largest Action Index: 23 using 17 Elements
     actions
     {
+        Event Player.tempHeroStorage = Hero Of(Event Player);
         Stop Forcing Player To Be Hero(Event Player);
         Respawn(Event Player);
-        Start Forcing Player To Be Hero(Event Player, Event Player.recordingHero);
         Wait Until(Is Alive(Event Player), 1);
+        Start Forcing Player To Be Hero(Event Player, Event Player.tempHeroStorage);
         If(First Of(Event Player.replayResetPoint) != Null);
             Teleport(Event Player, First Of(Event Player.replayResetPoint));
             Stop Facing(Event Player);
@@ -5461,7 +5469,7 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Handle pinning bot to curre
     }
 }
 
-// Rule Element Count: 109
+// Rule Element Count: 147
 rule("[SUB | interface/dummyBotsAndReplay/replay/replay.del] Restore selected bot to original state")
 {
     event
@@ -5470,10 +5478,15 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replay.del] Restore selected bo
         ReturnToPreRecordState;
     }
 
-    // Element Count: 108, Action Count: 27
-    // Largest Action Index: 11 using 18 Elements
+    // Element Count: 146, Action Count: 32
+    // Largest Action Index: 16 using 18 Elements
     actions
     {
+        If(Global.allBotsReplayDuringRecording);
+            Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0).waitingOnPlayer = Null;
+            Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0).recordingPlayStopFlag = 2;
+        End;
+        Destroy In-World Text(Event Player.recordingCountdownText[2]);
         "Restore bot to reset point and recording player to original hero"
         Start Forcing Player To Be Hero(Event Player, Event Player.originalHero);
         Stop Forcing Player To Be Hero(Event Player);
@@ -5557,7 +5570,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recordin
     }
 }
 
-// Rule Element Count: 8
+// Rule Element Count: 13
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording")
 {
     event
@@ -5566,18 +5579,19 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording
         StartRecording;
     }
 
-    // Element Count: 7, Action Count: 4
-    // Largest Action Index: 1 using 2 Elements
+    // Element Count: 12, Action Count: 4
+    // Largest Action Index: 1 using 7 Elements
     actions
     {
         Call Subroutine(DeleteRecording);
-        Event Player.frame = 0;
+        "If all bots are replaying, we need to start our recording one frame later to ensure we record at the same time as the bots"
+        Event Player.frame = Global.allBotsReplayDuringRecording ? -1 : 0;
         Event Player.recordingLength = 0;
         Event Player.replayState = 1;
     }
 }
 
-// Rule Element Count: 277
+// Rule Element Count: 390
 rule("[SUB | interface/dummyBotsAndReplay/replay/replay.del] Prep player to record for selectedBot")
 {
     event
@@ -5586,8 +5600,8 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replay.del] Prep player to reco
         PreparePlayerForRecording;
     }
 
-    // Element Count: 276, Action Count: 63
-    // Largest Action Index: 0 using 16 Elements
+    // Element Count: 389, Action Count: 71
+    // Largest Action Index: 38 using 56 Elements
     actions
     {
         Event Player.selectedBot.replayResetPoint = Array(Position Of(Event Player.selectedBot), Eye Position(Event Player.selectedBot), Facing Direction Of(Event Player.selectedBot));
@@ -5617,46 +5631,54 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replay.del] Prep player to reco
         Start Forcing Player To Be Hero(Event Player, Event Player.recordingHero);
         Start Forcing Player Position(Event Player, First Of(Event Player.selectedBot.replayResetPoint), True);
         Start Facing(Event Player, Event Player.selectedBot.replayResetPoint[2], 1000, To World, Direction And Turn Rate);
-        Wait Until(Is Dead(Event Player) || Event Player.currentMenuState != 0, 0.8);
-        If(Is Dead(Event Player) || Event Player.currentMenuState != 0);
-            Call Subroutine(ReturnToPreRecordState);
-            Small Message(Event Player, Custom String("  Recording aborted"));
-            Abort;
-        End;
-        Small Message(Event Player, Custom String("{0}  Recording starts in 3...", Icon String(Exclamation Mark)));
-        Wait Until(Is Dead(Event Player) || Event Player.currentMenuState != 0, 0.8);
-        If(Is Dead(Event Player) || Event Player.currentMenuState != 0);
-            Call Subroutine(ReturnToPreRecordState);
-            Small Message(Event Player, Custom String("  Recording aborted"));
-            Abort;
-        End;
-        Small Message(Event Player, Custom String("  2..."));
-        Wait Until(Is Dead(Event Player) || Event Player.currentMenuState != 0, 0.8);
-        If(Is Dead(Event Player) || Event Player.currentMenuState != 0);
-            Call Subroutine(ReturnToPreRecordState);
-            Small Message(Event Player, Custom String("  Recording aborted"));
-            Abort;
-        End;
-        Small Message(Event Player, Custom String("  1..."));
+        Event Player.buttonLocks = Mapped Array(Event Player.buttonLocks, Current Array Element + 1);
+        Global.player = Event Player;
+        Call Subroutine(UpdatePlayerButtonStatus);
         "If we should prompt all other bots to play their recordings,
 prompt them now."
         If(Global.allBotsReplayDuringRecording);
             Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0).waitingOnPlayer = Event Player;
             Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0).recordingPlayStopFlag = 1;
         End;
+        Event Player.recordingCountdownText = Array(3, Custom Color(200, 50, 50, 255), Null);
         Wait Until(Is Dead(Event Player) || Event Player.currentMenuState != 0, 0.8);
         If(Is Dead(Event Player) || Event Player.currentMenuState != 0);
             Call Subroutine(ReturnToPreRecordState);
-            If(Global.allBotsReplayDuringRecording);
-                Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0).waitingOnPlayer = Null;
-                Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0).recordingPlayStopFlag = 2;
-            End;
             Small Message(Event Player, Custom String("  Recording aborted"));
             Abort;
         End;
+        Create In-World Text(Event Player, Custom String("{0}{1}{2}", Custom String("Recording starts in "), First Of(Event Player.recordingCountdownText), Custom String("...")), Update Every Frame(True * Eye Position(Local Player) + Empty Array * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + -70 * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 2.5, Do Not Clip, Visible To Position String and Color, Event Player.recordingCountdownText[1], Default Visibility);
+        Event Player.recordingCountdownText[2] = Last Text ID;
+        Wait Until(Is Dead(Event Player) || Event Player.currentMenuState != 0, Global.activeModifications[7] ? 0.8 * Global.SLOW_MOTION_SPEED / 100 : 0.8);
+        If(Is Dead(Event Player) || Event Player.currentMenuState != 0);
+            Call Subroutine(ReturnToPreRecordState);
+            Small Message(Event Player, Custom String("  Recording aborted"));
+            Abort;
+        End;
+        Event Player.recordingCountdownText[0] = 2;
+        Event Player.recordingCountdownText[1] = Color(Yellow);
+        Wait Until(Is Dead(Event Player) || Event Player.currentMenuState != 0, Global.activeModifications[7] ? 0.8 * Global.SLOW_MOTION_SPEED / 100 : 0.8);
+        If(Is Dead(Event Player) || Event Player.currentMenuState != 0);
+            Call Subroutine(ReturnToPreRecordState);
+            Small Message(Event Player, Custom String("  Recording aborted"));
+            Abort;
+        End;
+        Event Player.recordingCountdownText[0] = 1;
+        Event Player.recordingCountdownText[1] = Color(Green);
+        Wait Until(Is Dead(Event Player) || Event Player.currentMenuState != 0, Global.activeModifications[7] ? 0.8 * Global.SLOW_MOTION_SPEED / 100 : 0.8);
+        If(Is Dead(Event Player) || Event Player.currentMenuState != 0);
+            Call Subroutine(ReturnToPreRecordState);
+            Small Message(Event Player, Custom String("  Recording aborted"));
+            Abort;
+        End;
+        Event Player.recordingCountdownText[0] = 0;
+        Destroy In-World Text(Event Player.recordingCountdownText[2]);
         "Release player to record"
         Stop Forcing Player Position(Event Player);
         Stop Facing(Event Player);
+        Event Player.buttonLocks = Mapped Array(Event Player.buttonLocks, 0);
+        Global.player = Event Player;
+        Call Subroutine(UpdatePlayerButtonStatus);
         "Start recording"
         Call Subroutine(StartRecording);
         Small Message(Event Player, Custom String("  Recording started"));
@@ -5755,152 +5777,6 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Delete replay")
     }
 }
 
-// Rule Element Count: 69
-rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Stop Clip")
-{
-    event
-    {
-        Subroutine;
-        StopClip;
-    }
-
-    // Element Count: 68, Action Count: 26
-    // Largest Action Index: 22 using 14 Elements
-    actions
-    {
-        Event Player.botReadyToReplay = False;
-        Event Player.frame = 0;
-        Event Player.currentEventFrames = Empty Array;
-        Event Player.currentEventIndices = Empty Array;
-        Stop Throttle In Direction(Event Player);
-        Stop Holding Button(Event Player, Button(Primary Fire));
-        Stop Holding Button(Event Player, Button(Secondary Fire));
-        Stop Holding Button(Event Player, Button(Ability 1));
-        Stop Holding Button(Event Player, Button(Ability 2));
-        Stop Holding Button(Event Player, Button(Ultimate));
-        Stop Holding Button(Event Player, Button(Jump));
-        Stop Holding Button(Event Player, Button(Crouch));
-        Stop Holding Button(Event Player, Button(Melee));
-        Stop Holding Button(Event Player, Button(Reload));
-        If(Is Alive(Event Player));
-            Teleport(Event Player, First Of(Event Player.replayResetPoint));
-            Stop Facing(Event Player);
-            Wait(0.016, Ignore Condition);
-            Set Facing(Event Player, Event Player.replayResetPoint[2], To World);
-            "Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT"
-            Wait(0.032, Ignore Condition);
-            Start Facing(Event Player, Event Player.replayResetPoint[2], 1000, To World, Direction And Turn Rate);
-            Wait(0.016, Ignore Condition);
-            Wait Until(Angle Between Vectors(Facing Direction Of(Event Player), Event Player.replayResetPoint[2]) < 0.1, 0.25);
-            Stop Facing(Event Player);
-        End;
-        Event Player.replayState = 0;
-    }
-}
-
-// Rule Element Count: 80
-rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip")
-{
-    event
-    {
-        Subroutine;
-        PlayClip;
-    }
-
-    // Element Count: 79, Action Count: 23
-    // Largest Action Index: 13 using 14 Elements
-    actions
-    {
-        Call Subroutine(StopClip);
-        Stop Forcing Player To Be Hero(Event Player);
-        Respawn(Event Player);
-        Wait Until(Hero Of(Event Player) != Event Player.recordingHero, 0.25);
-        Start Forcing Player To Be Hero(Event Player, Event Player.recordingHero);
-        Wait(0.064, Ignore Condition);
-        Teleport(Event Player, First Of(Event Player.replayResetPoint));
-        Stop Facing(Event Player);
-        Wait(0.016, Ignore Condition);
-        Set Facing(Event Player, Event Player.replayResetPoint[2], To World);
-        "Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT"
-        Wait(0.032, Ignore Condition);
-        Start Facing(Event Player, Event Player.replayResetPoint[2], 1000, To World, Direction And Turn Rate);
-        Wait(0.016, Ignore Condition);
-        Wait Until(Angle Between Vectors(Facing Direction Of(Event Player), Event Player.replayResetPoint[2]) < 0.1, 0.25);
-        Stop Facing(Event Player);
-        If(Event Player.waitingOnPlayer != Null);
-            Wait Until(Event Player.waitingOnPlayer.replayState == 1, 3);
-        Else;
-            Wait(1, Ignore Condition);
-        End;
-        Event Player.waitingOnPlayer = Null;
-        Event Player.botReadyToReplay = True;
-        Event Player.replayState = 2;
-    }
-}
-
-// Rule Element Count: 73
-rule("[interface/dummyBotsAndReplay/botEditPage.del] Handle when replay flag is set to true")
-{
-    event
-    {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-
-    // Element Count: 12, Condition Count: 2
-    conditions
-    {
-        Is Dummy Bot(Event Player) == True;
-        Event Player.recordingPlayStopFlag != 0;
-    }
-
-    // Element Count: 60, Action Count: 11
-    // Largest Action Index: 2 using 23 Elements
-    actions
-    {
-        If(Event Player.replayState == 2 && Event Player.recordingPlayStopFlag == 2);
-            Call Subroutine(StopClip);
-        Else If(Event Player.replayState == 0 && Event Player.recordingPlayStopFlag == 1 && Event Player.sampleCount > 0);
-            Call Subroutine(PlayClip);
-        Else If(Event Player.recordingPlayStopFlag == 3);
-            If(Event Player.replayState == 2);
-                Call Subroutine(StopClip);
-            End;
-            Call Subroutine(DeleteRecording);
-        End;
-        Event Player.recordingPlayStopFlag = 0;
-    }
-}
-
-// Rule Element Count: 20
-rule("[interface/dummyBotsAndReplay/botEditPage.del] Delete")
-{
-    event
-    {
-        Ongoing - Each Player;
-        All;
-        All;
-    }
-
-    // Element Count: 7, Condition Count: 1
-    conditions
-    {
-        Event Player.selectedBotEditAction == 3;
-    }
-
-    // Element Count: 12, Action Count: 4
-    // Largest Action Index: 0 using 7 Elements
-    actions
-    {
-        Destroy Dummy Bot(Team Of(Event Player.selectedBot), Slot Of(Event Player.selectedBot));
-        Event Player.selectedBot = Null;
-        "Avoid having input count for something else by allowing other modules to read that an input was processed in the menu."
-        Wait(0.016, Ignore Condition);
-        Event Player.currentMenuState = 0;
-    }
-}
-
 // Rule Element Count: 19
 rule("Initialize button control states array")
 {
@@ -5955,7 +5831,7 @@ rule("[interface/dummyBotsAndReplay/botEditPage_ButtonsControl] Primary fire con
             Start Holding Button(Event Player, Button(Primary Fire));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Primary Fire));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Primary Fire))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Primary Fire))]), 1000000);
         Loop If Condition Is True;
@@ -5991,7 +5867,7 @@ rule("If secondary fire button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Secondary Fire));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Secondary Fire));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Secondary Fire))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Secondary Fire))]), 1000000);
         Loop If Condition Is True;
@@ -6027,7 +5903,7 @@ rule("If Ability 1 button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Ability 1));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Ability 1));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Ability 1))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Ability 1))]), 1000000);
         Loop If Condition Is True;
@@ -6063,7 +5939,7 @@ rule("If Ability 2 button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Ability 2));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Ability 2));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Ability 2))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Ability 2))]), 1000000);
         Loop If Condition Is True;
@@ -6099,7 +5975,7 @@ rule("If Ultimate button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Ultimate));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Ultimate));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Ultimate))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Ultimate))]), 1000000);
         Loop If Condition Is True;
@@ -6135,7 +6011,7 @@ rule("If Interact button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Interact));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Interact));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Interact))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Interact))]), 1000000);
         Loop If Condition Is True;
@@ -6171,7 +6047,7 @@ rule("If Reload button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Reload));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Reload));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Reload))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Reload))]), 1000000);
         Loop If Condition Is True;
@@ -6207,7 +6083,7 @@ rule("If Jump button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Jump));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Jump));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Jump))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Jump))]), 1000000);
         Loop If Condition Is True;
@@ -6243,7 +6119,7 @@ rule("If Crouch button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Crouch));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Crouch));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Crouch))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Crouch))]), 1000000);
         Loop If Condition Is True;
@@ -6279,7 +6155,7 @@ rule("If Melee button is marked as being spammed, start spamming it")
             Start Holding Button(Event Player, Button(Melee));
             Wait(0.064, Ignore Condition);
             Stop Holding Button(Event Player, Button(Melee));
-            Wait(1, Abort When False);
+            Wait(Global.BUTTON_SPAM_PERIOD, Abort When False);
         End;
         Wait Until(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Melee))] != Evaluate Once(Event Player.buttonControlStates[Index Of Array Value(Global.AllButtons, Button(Melee))]), 1000000);
         Loop If Condition Is True;
@@ -6340,7 +6216,7 @@ rule("When player is holding Reload in the button control menu, start holding th
     }
 }
 
-// Rule Element Count: 75
+// Rule Element Count: 78
 rule("[UI] - HUD")
 {
     event
@@ -6348,12 +6224,12 @@ rule("[UI] - HUD")
         Ongoing - Global;
     }
 
-    // Element Count: 74, Action Count: 4
+    // Element Count: 77, Action Count: 4
     // Largest Action Index: 2 using 25 Elements
     actions
     {
         Create HUD Text(Filtered Array(Local Player, Current Array Element.replayState == 1), Icon String(Radioactive), Null, Custom String("Recording..."), Right, -9, Color(Red), Color(Red), Color(Red), Visible To And String, Default Visibility);
-        Create HUD Text(Filtered Array(Local Player, Current Array Element.replayState == 1), Null, Custom String("Clip: {0} Seconds", Local Player.frame / 62.5), Null, Right, -8, Color(Red), Color(Red), Color(Red), Visible To And String, Default Visibility);
+        Create HUD Text(Filtered Array(Local Player, Current Array Element.replayState == 1), Null, Custom String("Clip: {0} Seconds (FRAME {1})", Local Player.frame / 62.5, Local Player.frame), Null, Right, -8, Color(Red), Color(Red), Color(Red), Visible To And String, Default Visibility);
         Create HUD Text(Filtered Array(Local Player, Current Array Element.replayState == 1), Null, Custom String("{0} Size: {1}%", Icon String(Warning), Local Player.sampleCount / 999 * 100), Null, Right, -7, Color(Red), Color(Red), Color(Red), Visible To And String, Default Visibility);
         Create HUD Text(Filtered Array(Local Player, Current Array Element.replayState == 1), Null, Custom String("Hold Interact to Save"), Null, Right, -4, Color(Orange), Color(Orange), Color(Orange), Visible To And String, Default Visibility);
     }
@@ -6457,6 +6333,49 @@ rule("[interface/dummyBotsAndReplay/replay/replay.del] If player dies while reco
     }
 }
 
+// Rule Element Count: 69
+rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Stop Clip")
+{
+    event
+    {
+        Subroutine;
+        StopClip;
+    }
+
+    // Element Count: 68, Action Count: 26
+    // Largest Action Index: 22 using 14 Elements
+    actions
+    {
+        Event Player.botReadyToReplay = False;
+        Event Player.frame = 0;
+        Event Player.currentEventFrames = Empty Array;
+        Event Player.currentEventIndices = Empty Array;
+        Stop Throttle In Direction(Event Player);
+        Stop Holding Button(Event Player, Button(Primary Fire));
+        Stop Holding Button(Event Player, Button(Secondary Fire));
+        Stop Holding Button(Event Player, Button(Ability 1));
+        Stop Holding Button(Event Player, Button(Ability 2));
+        Stop Holding Button(Event Player, Button(Ultimate));
+        Stop Holding Button(Event Player, Button(Jump));
+        Stop Holding Button(Event Player, Button(Crouch));
+        Stop Holding Button(Event Player, Button(Melee));
+        Stop Holding Button(Event Player, Button(Reload));
+        If(Is Alive(Event Player));
+            Teleport(Event Player, First Of(Event Player.replayResetPoint));
+            Stop Facing(Event Player);
+            Wait(0.016, Ignore Condition);
+            Set Facing(Event Player, Event Player.replayResetPoint[2], To World);
+            "Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT"
+            Wait(0.032, Ignore Condition);
+            Start Facing(Event Player, Event Player.replayResetPoint[2], 1000, To World, Direction And Turn Rate);
+            Wait(0.016, Ignore Condition);
+            Wait Until(Angle Between Vectors(Facing Direction Of(Event Player), Event Player.replayResetPoint[2]) < 0.1, 0.25);
+            Stop Facing(Event Player);
+        End;
+        Event Player.replayState = 0;
+    }
+}
+
 // Rule Element Count: 9
 rule("[interface/dummyBotsAndReplay/replay/replay.del] If player dies while playing, stop playing")
 {
@@ -6477,6 +6396,145 @@ rule("[interface/dummyBotsAndReplay/replay/replay.del] If player dies while play
     actions
     {
         Call Subroutine(StopClip);
+    }
+}
+
+// Rule Element Count: 4
+rule("[interface/dummyBotsAndReplay/replay/replay.del] Update longest recording length when player joins")
+{
+    event
+    {
+        Player Joined Match;
+        All;
+        All;
+    }
+
+    // Element Count: 3, Action Count: 2
+    // Largest Action Index: 0 using 2 Elements
+    actions
+    {
+        "Wait for a bit to avoid overloading the server"
+        Wait(0.1, Ignore Condition);
+        Call Subroutine(UpdateLongestRecordingLength);
+    }
+}
+
+// Rule Element Count: 2
+rule("[interface/dummyBotsAndReplay/replay/replay.del] Update longest recording length when player leaves")
+{
+    event
+    {
+        Player Left Match;
+        All;
+        All;
+    }
+
+    // Element Count: 1, Action Count: 1
+    actions
+    {
+        Call Subroutine(UpdateLongestRecordingLength);
+    }
+}
+
+// Rule Element Count: 60
+rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip")
+{
+    event
+    {
+        Subroutine;
+        PlayClip;
+    }
+
+    // Element Count: 59, Action Count: 22
+    // Largest Action Index: 15 using 10 Elements
+    actions
+    {
+        Call Subroutine(StopClip);
+        Stop Forcing Player To Be Hero(Event Player);
+        Respawn(Event Player);
+        Wait(0.25, Ignore Condition);
+        Start Forcing Player To Be Hero(Event Player, Event Player.recordingHero);
+        Wait(0.064, Ignore Condition);
+        Teleport(Event Player, First Of(Event Player.replayResetPoint));
+        Stop Facing(Event Player);
+        Wait(0.016, Ignore Condition);
+        Set Facing(Event Player, Event Player.replayResetPoint[2], To World);
+        "Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT"
+        Wait(0.032, Ignore Condition);
+        Start Facing(Event Player, Event Player.replayResetPoint[2], 1000, To World, Direction And Turn Rate);
+        Wait(0.25, Ignore Condition);
+        Stop Facing(Event Player);
+        If(Event Player.waitingOnPlayer != Null);
+            Wait Until(Event Player.waitingOnPlayer.replayState == 1, 5);
+        Else;
+            Wait(1, Ignore Condition);
+        End;
+        Event Player.waitingOnPlayer = Null;
+        Event Player.botReadyToReplay = True;
+        Event Player.replayState = 2;
+    }
+}
+
+// Rule Element Count: 73
+rule("[interface/dummyBotsAndReplay/botEditPage.del] Handle when replay flag is set to true")
+{
+    event
+    {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+
+    // Element Count: 12, Condition Count: 2
+    conditions
+    {
+        Is Dummy Bot(Event Player) == True;
+        Event Player.recordingPlayStopFlag != 0;
+    }
+
+    // Element Count: 60, Action Count: 11
+    // Largest Action Index: 2 using 23 Elements
+    actions
+    {
+        If(Event Player.replayState == 2 && Event Player.recordingPlayStopFlag == 2);
+            Call Subroutine(StopClip);
+        Else If(Event Player.replayState == 0 && Event Player.recordingPlayStopFlag == 1 && Event Player.sampleCount > 0);
+            Call Subroutine(PlayClip);
+        Else If(Event Player.recordingPlayStopFlag == 3);
+            If(Event Player.replayState == 2);
+                Call Subroutine(StopClip);
+            End;
+            Call Subroutine(DeleteRecording);
+        End;
+        Event Player.recordingPlayStopFlag = 0;
+    }
+}
+
+// Rule Element Count: 20
+rule("[interface/dummyBotsAndReplay/botEditPage.del] Delete")
+{
+    event
+    {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+
+    // Element Count: 7, Condition Count: 1
+    conditions
+    {
+        Event Player.selectedBotEditAction == 3;
+    }
+
+    // Element Count: 12, Action Count: 4
+    // Largest Action Index: 0 using 7 Elements
+    actions
+    {
+        Destroy Dummy Bot(Team Of(Event Player.selectedBot), Slot Of(Event Player.selectedBot));
+        Event Player.selectedBot = Null;
+        "Avoid having input count for something else by allowing other modules to read that an input was processed in the menu."
+        Wait(0.016, Ignore Condition);
+        Event Player.currentMenuState = 0;
     }
 }
 
@@ -6984,7 +7042,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - 
     }
 }
 
-// Rule Element Count: 15
+// Rule Element Count: 23
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame")
 {
     event
@@ -6993,22 +7051,24 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame")
         RecordFrame;
     }
 
-    // Element Count: 14, Action Count: 13
-    // Largest Action Index: 12 using 2 Elements
+    // Element Count: 22, Action Count: 15
+    // Largest Action Index: 0 using 7 Elements
     actions
     {
-        Call Subroutine(RecordFramePrimaryFire);
-        Call Subroutine(RecordFrameSecondaryFire);
-        Call Subroutine(RecordFrameAbility1);
-        Call Subroutine(RecordFrameAbility2);
-        Call Subroutine(RecordFrameUltimate);
-        Call Subroutine(RecordFrameJump);
-        Call Subroutine(RecordFrameCrouch);
-        Call Subroutine(RecordFrameMelee);
-        Call Subroutine(RecordFrameReload);
-        Call Subroutine(RecordFrameThrottle);
-        Call Subroutine(RecordFrameFacing);
-        Call Subroutine(RecordFrameWeapon);
+        If(Event Player.frame >= 0);
+            Call Subroutine(RecordFramePrimaryFire);
+            Call Subroutine(RecordFrameSecondaryFire);
+            Call Subroutine(RecordFrameAbility1);
+            Call Subroutine(RecordFrameAbility2);
+            Call Subroutine(RecordFrameUltimate);
+            Call Subroutine(RecordFrameJump);
+            Call Subroutine(RecordFrameCrouch);
+            Call Subroutine(RecordFrameMelee);
+            Call Subroutine(RecordFrameReload);
+            Call Subroutine(RecordFrameThrottle);
+            Call Subroutine(RecordFrameFacing);
+            Call Subroutine(RecordFrameWeapon);
+        End;
         Event Player.frame += 1;
     }
 }
@@ -7423,7 +7483,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - We
     }
 }
 
-// Rule Element Count: 61
+// Rule Element Count: 41
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip")
 {
     event
@@ -7432,8 +7492,8 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip")
         LoopClip;
     }
 
-    // Element Count: 60, Action Count: 19
-    // Largest Action Index: 15 using 14 Elements
+    // Element Count: 40, Action Count: 18
+    // Largest Action Index: 13 using 7 Elements
     actions
     {
         Event Player.botReadyToReplay = False;
@@ -7442,7 +7502,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip")
         Event Player.currentEventFrames = Empty Array;
         Stop Forcing Player To Be Hero(Event Player);
         Respawn(Event Player);
-        Wait Until(Hero Of(Event Player) != Event Player.recordingHero, 0.25);
+        Wait(0.25, Ignore Condition);
         Start Forcing Player To Be Hero(Event Player, Event Player.recordingHero);
         Teleport(Event Player, First Of(Event Player.replayResetPoint));
         Stop Facing(Event Player);
@@ -7451,8 +7511,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip")
         "Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT"
         Wait(0.032, Ignore Condition);
         Start Facing(Event Player, Event Player.replayResetPoint[2], 1000, To World, Direction And Turn Rate);
-        Wait(0.016, Ignore Condition);
-        Wait Until(Angle Between Vectors(Facing Direction Of(Event Player), Event Player.replayResetPoint[2]) < 0.1, 0.25);
+        Wait(0.25, Ignore Condition);
         Stop Facing(Event Player);
         Wait(0.5, Ignore Condition);
         Event Player.botReadyToReplay = True;
