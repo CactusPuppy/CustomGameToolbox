@@ -204,7 +204,7 @@ if (IsDummyBot() == false)
 if (IsAlive())
 if (IsButtonHeld(EventPlayer(), Button.Interact))
 {
-  Wait(0.5, WaitBehavior.AbortWhenFalse);
+  SlowMoAgnosticWait(0.5, WaitBehavior.AbortWhenFalse);
   if (currentMenuState == MenuState.CLOSED) {
     OpenMenuToPage();
   } else {

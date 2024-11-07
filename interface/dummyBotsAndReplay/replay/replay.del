@@ -22,6 +22,12 @@ Event.OngoingGlobal
 
 void ReturnToPreRecordState() playervar "[SUB | interface/dummyBotsAndReplay/replay/replay.del] Restore selected bot to original state"
 {
+  if (allBotsReplayDuringRecording) {
+    AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).waitingOnPlayer = null;
+    AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.STOP;
+  }
+  DestroyInWorldText(recordingCountdownText.textID);
+
   # Restore bot to reset point and recording player to original hero
   ForcePlayerHero(EventPlayer(), originalHero);
   StopForcingHero(EventPlayer());
@@ -32,6 +38,16 @@ void ReturnToPreRecordState() playervar "[SUB | interface/dummyBotsAndReplay/rep
   Wait(0.032);
   StartEditingBots();
 }
+
+import "../../../lib/utils/SloMoAgnosticWait.del";
+
+single struct RecordingCountdownInfo {
+  public Number timerValue;
+  public Color textColor;
+  public Any textID;
+}
+
+playervar RecordingCountdownInfo recordingCountdownText;
 
 void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replay.del] Prep player to record for selectedBot"
 {
@@ -56,47 +72,56 @@ void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/
   StartFacing(EventPlayer(), selectedBot.replayResetPoint.facing, 1000, Relative.ToWorld);
   AddOneLockToAllButtons();
 
-  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
-  if (shouldAbortRecordingCountdown()) {
-    ReturnToPreRecordState();
-    SmallMessage(EventPlayer(), "  Recording aborted");
-    Abort();
-  }
-
-  SmallMessage(EventPlayer(), "{0}  Recording starts in 3...".Format([IconString(Icon.ExclamationMark)]));
-  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
-  if (shouldAbortRecordingCountdown()) {
-    ReturnToPreRecordState();
-    SmallMessage(EventPlayer(), "  Recording aborted");
-    Abort();
-  }
-  SmallMessage(EventPlayer(), "  2...");
-  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
-  if (shouldAbortRecordingCountdown()) {
-    ReturnToPreRecordState();
-    SmallMessage(EventPlayer(), "  Recording aborted");
-    Abort();
-  }
-  SmallMessage(EventPlayer(), "  1...");
-
   # If we should prompt all other bots to play their recordings,
   # prompt them now.
   if (allBotsReplayDuringRecording) {
     AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).waitingOnPlayer = EventPlayer();
     AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.PLAY;
   }
+  recordingCountdownText = { timerValue: 3, textColor: LighterRed, textID: null };
 
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
     ReturnToPreRecordState();
-    if (allBotsReplayDuringRecording) {
-      AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).waitingOnPlayer = null;
-      AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.STOP;
-    }
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
 
+  recordingCountdownText.textID = OnScreenText.CreateOnScreenText(
+    VisibleTo: EventPlayer(),
+    Header: $"Recording starts in {recordingCountdownText.timerValue}...",
+    Color: recordingCountdownText.textColor,
+    PositionY: -0.5,
+    Scale: 2.5,
+    Reevaluation: InworldTextRev.VisibleToPositionStringAndColor
+  );
+  // SmallMessage(EventPlayer(), "{0}  Recording starts in 3...".Format([IconString(Icon.ExclamationMark)]));
+  SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    ReturnToPreRecordState();
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+  // SmallMessage(EventPlayer(), "  2...");
+  recordingCountdownText.timerValue = 2;
+  recordingCountdownText.textColor = Color.Yellow;
+  SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    ReturnToPreRecordState();
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+  // SmallMessage(EventPlayer(), "  1...");
+  recordingCountdownText.timerValue = 1;
+  recordingCountdownText.textColor = Color.Green;
+  SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    ReturnToPreRecordState();
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+  recordingCountdownText.timerValue = 0;
+  DestroyInWorldText(recordingCountdownText.textID);
   # Release player to record
   StopForcingPlayerPosition(EventPlayer());
   StopFacing(EventPlayer());

@@ -377,7 +377,7 @@ void PlayClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   Wait(0.064);
   TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), EventPlayer().replayResetPoint);
   if (waitingOnPlayer != null) {
-    WaitUntil(waitingOnPlayer.replayState == ReplayState.RECORDING, 3);
+    WaitUntil(waitingOnPlayer.replayState == ReplayState.RECORDING, 5);
   } else {
     Wait(1);
   }

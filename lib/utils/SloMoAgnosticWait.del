@@ -1,0 +1,7 @@
+void SlowMoAgnosticWait(in Number duration, WaitBehavior behavior) {
+  Wait(IsModificationActive(Modification.SLOW_MOTION) ? duration * SLOW_MOTION_SPEED / 100 : duration, behavior);
+}
+
+void SlowMoAgnosticWaitUntil(in Boolean condition, in Number duration) {
+  WaitUntil(condition, IsModificationActive(Modification.SLOW_MOTION) ? duration * SLOW_MOTION_SPEED / 100 : duration);
+}
