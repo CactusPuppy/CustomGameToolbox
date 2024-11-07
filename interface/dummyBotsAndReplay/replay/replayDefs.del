@@ -292,18 +292,20 @@ void RecordFrameWeapon() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
 }
 
 void RecordFrame() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame" {
-  RecordFramePrimaryFire();
-  RecordFrameSecondaryFire();
-  RecordFrameAbility1();
-  RecordFrameAbility2();
-  RecordFrameUltimate();
-  RecordFrameJump();
-  RecordFrameCrouch();
-  RecordFrameMelee();
-  RecordFrameReload();
-  RecordFrameThrottle();
-  RecordFrameFacing();
-  RecordFrameWeapon();
+  if (frame >= 0) {
+    RecordFramePrimaryFire();
+    RecordFrameSecondaryFire();
+    RecordFrameAbility1();
+    RecordFrameAbility2();
+    RecordFrameUltimate();
+    RecordFrameJump();
+    RecordFrameCrouch();
+    RecordFrameMelee();
+    RecordFrameReload();
+    RecordFrameThrottle();
+    RecordFrameFacing();
+    RecordFrameWeapon();
+  }
   frame += 1;
 }
 
@@ -347,11 +349,9 @@ if (replayState == ReplayState.RECORDING)
     Recorder_StopRecording();
     Abort();
   }
-  if (frame >= 0) {
-    RecordFrame();
-    currentInputValues = [];
-    UpdateSampleCount();
-  }
+  RecordFrame();
+  currentInputValues = [];
+  UpdateSampleCount();
   Wait(0.016, WaitBehavior.AbortWhenFalse);
   LoopIfConditionIsTrue();
 }
