@@ -118,3 +118,17 @@ if (EventPlayer().replayState == ReplayState.PLAYING)
 {
   StopClip();
 }
+
+rule: "[interface/dummyBotsAndReplay/replay/replay.del] Update longest recording length when player joins"
+Event.OnPlayerJoin
+{
+  # Wait for a bit to avoid overloading the server
+  Wait(0.1);
+  UpdateLongestRecordingLength();
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replay.del] Update longest recording length when player leaves"
+Event.OnPlayerLeave
+{
+  UpdateLongestRecordingLength();
+}
