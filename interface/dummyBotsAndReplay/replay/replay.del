@@ -54,6 +54,7 @@ void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/
   ForcePlayerHero(EventPlayer(), recordingHero);
   StartForcingPlayerPosition(EventPlayer(), selectedBot.replayResetPoint.location, true);
   StartFacing(EventPlayer(), selectedBot.replayResetPoint.facing, 1000, Relative.ToWorld);
+  AddOneLockToAllButtons();
 
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
@@ -99,6 +100,7 @@ void PreparePlayerForRecording() playervar "[SUB | interface/dummyBotsAndReplay/
   # Release player to record
   StopForcingPlayerPosition(EventPlayer());
   StopFacing(EventPlayer());
+  UnlockAllButtons();
 
   # Start recording
   StartRecording();
