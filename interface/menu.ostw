@@ -59,7 +59,7 @@ String[] mainMenuButtonLabels: [
   "", "",            "",                   "",                  "",
   "", "Information", "",                   "Modifications",     "",
   "", "",            "",                   "",                  "",
-  "", "Tools",       "",                   "Dummy Bots",        "",
+  "", "Tools",       "",                   "Dummy Bots/Replay",        "",
   "", "",            "", "",                  ""
 ];
 Color[] mainMenuButtonColors: [
