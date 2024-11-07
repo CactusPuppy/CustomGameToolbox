@@ -372,10 +372,10 @@ void PlayClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   StopClip();
   StopForcingHero(EventPlayer());
   Respawn();
-  WaitUntil(HeroOf() != recordingHero, 0.25);
+  Wait(0.25);
   ForcePlayerHero(EventPlayer(), recordingHero);
   Wait(0.064);
-  TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().replayResetPoint);
+  TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), EventPlayer().replayResetPoint);
   if (waitingOnPlayer != null) {
     WaitUntil(waitingOnPlayer.replayState == ReplayState.RECORDING, 3);
   } else {
@@ -412,10 +412,10 @@ void LoopClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   currentEventFrames = [];
   StopForcingHero(EventPlayer());
   Respawn();
-  WaitUntil(HeroOf() != recordingHero, 0.25);
+  Wait(0.25);
   ForcePlayerHero(EventPlayer(), recordingHero);
   // Wait(0.064);
-  TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().replayResetPoint);
+  TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), EventPlayer().replayResetPoint);
   Wait(0.5);
   botReadyToReplay = true;
 }
