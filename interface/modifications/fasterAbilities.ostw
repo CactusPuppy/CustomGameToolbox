@@ -1,5 +1,5 @@
 import "modsMenu.ostw";
-Boolean isFasterAbilitiesActive: activeModifications[Modification.FASTER_ABILITIES];
+Boolean isFasterAbilitiesActive: IsModificationActive(Modification.FASTER_ABILITIES);
 // Boolean isFasterAbilitiesActive: true;
 Hero EffectiveHero(Player p = EventPlayer()): IsDuplicating(p) ? HeroBeingDuplicated(p) : HeroOf(p);
 Number fasterCooldownDuration: 1;
