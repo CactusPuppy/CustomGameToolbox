@@ -98,10 +98,10 @@ void UpdateLongestRecordingLength() playervar "[SUB | interface/dummyBotsAndRepl
 
 void StartRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording" {
   DeleteRecording();
-  frame = 0;
+  # If all bots are replaying, we need to start our recording one frame later to ensure we record at the same time as the bots
+  frame = allBotsReplayDuringRecording ? - 1 : 0;
   recordingLength = 0;
   replayState = ReplayState.RECORDING;
-
 }
 
 void StopRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Stop Recording" {
@@ -347,9 +347,11 @@ if (replayState == ReplayState.RECORDING)
     Recorder_StopRecording();
     Abort();
   }
-  RecordFrame();
-  currentInputValues = [];
-  UpdateSampleCount();
+  if (frame >= 0) {
+    RecordFrame();
+    currentInputValues = [];
+    UpdateSampleCount();
+  }
   Wait(0.016, WaitBehavior.AbortWhenFalse);
   LoopIfConditionIsTrue();
 }
