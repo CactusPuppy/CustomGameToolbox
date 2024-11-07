@@ -24,6 +24,7 @@ rule: "[interface/menu.ostw] Set up action grid" -100
   ButtonActionGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonActions;
   ButtonActionGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonActions;
   ButtonActionGrid[MenuState.EDITING_DUMMY_BOT_BUTTONS] = INTENTIONALLY_EMPTY_ACTION_GRID;
+  ButtonActionGrid[MenuState.EDITING_REPLAY] = BotEditReplayActions;
 }
 rule: "[interface/menu.ostw] Set up button label grid" -100
 Event.OngoingPlayer
@@ -35,6 +36,7 @@ Event.OngoingPlayer
   ButtonLabelGrid[MenuState.MODIFICATIONS] = modificationMenuButtonLabels;
   ButtonLabelGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonLabels;
   ButtonLabelGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonLabels;
+  ButtonLabelGrid[MenuState.EDITING_REPLAY] = BotEditReplayPageButtonLabels;
 }
 rule: "[interface/menu.ostw] Set up color grid" -100
 Event.OngoingPlayer
@@ -46,6 +48,7 @@ Event.OngoingPlayer
   ButtonColorGrid[MenuState.MODIFICATIONS] = modificationMenuButtonColors;
   ButtonColorGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonColors;
   ButtonColorGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonColors;
+  ButtonColorGrid[MenuState.EDITING_REPLAY] = BotEditReplayPageButtonColors;
 }
 
 MenuState[] mainMenuButtonActions: [
@@ -243,6 +246,9 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     case MenuState.EDITING_DUMMY_BOT_BUTTONS:
       BotButtonEdit_HandlePrimaryFire();
       break;
+    case MenuState.EDITING_REPLAY:
+      HandleBotEditReplayPrimaryFire();
+      break;
   }
 }
 
@@ -264,7 +270,7 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
     OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
     return;
   }
-  if (currentMenuState == MenuState.EDITING_DUMMY_BOT_BUTTONS) {
+  if ([MenuState.EDITING_DUMMY_BOT_BUTTONS, MenuState.EDITING_REPLAY].Contains(currentMenuState)) {
     OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
     return;
   }

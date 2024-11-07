@@ -33,6 +33,7 @@ playervar Number recordingLength;
 playervar Number frame;
 playervar Number sampleCount = 0;
 playervar Boolean botReadyToReplay;
+playervar Number playbackOffset;
 
 
 playervar Any sampleValue;
@@ -59,6 +60,7 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   frame = 0;
   recordingLength = 0;
   sampleCount = 0;
+  playbackOffset = 0;
   currentInputValues = [];
   currentEventIndices = [];
   currentEventFrames = [];
@@ -93,7 +95,8 @@ void UpdateSampleCount() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
 }
 
 void UpdateLongestRecordingLength() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Longest Recording Length" {
-  longestRecordingLength = AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).Sort(p => p.recordingLength).Last.recordingLength;
+  longestRecordingLength = AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).Sort(p => p.recordingLength + p.playbackOffset).Last;
+  longestRecordingLength = (<Player>longestRecordingLength).recordingLength + (<Player>longestRecordingLength).playbackOffset;
 }
 
 void StartRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording" {
@@ -383,6 +386,7 @@ void PlayClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   } else {
     Wait(1);
   }
+  frame = -playbackOffset;
   waitingOnPlayer = null;
   botReadyToReplay = true;
   replayState = ReplayState.PLAYING;
@@ -633,7 +637,7 @@ void PlayFrameWeapon() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
 globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Loop Replay Playback", true);
 
 void PlayFrame() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame (a very good YouTube channel btw)" {
-  if (frame < recordingLength) {
+  if (frame >= 0 && frame < recordingLength) {
     if (frame > 0) {
       PlayFramePrimaryFire();
       PlayFrameSecondaryFire();

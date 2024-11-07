@@ -1,0 +1,79 @@
+enum EditReplayAction {
+  NONE,
+  ADD_OFFSET,
+  SUBTRACT_OFFSET,
+  RESET_OFFSET
+}
+
+EditReplayAction[] BotEditReplayActions: [
+  EditReplayAction.NONE, EditReplayAction.NONE,            EditReplayAction.NONE,         EditReplayAction.NONE,       EditReplayAction.NONE,
+  EditReplayAction.NONE, EditReplayAction.NONE,            EditReplayAction.NONE,         EditReplayAction.NONE,       EditReplayAction.NONE,
+  EditReplayAction.NONE, EditReplayAction.SUBTRACT_OFFSET, EditReplayAction.NONE,         EditReplayAction.ADD_OFFSET, EditReplayAction.NONE,
+  EditReplayAction.NONE, EditReplayAction.NONE,            EditReplayAction.NONE,         EditReplayAction.NONE,       EditReplayAction.NONE,
+  EditReplayAction.NONE, EditReplayAction.NONE,            EditReplayAction.RESET_OFFSET, EditReplayAction.NONE,       EditReplayAction.NONE
+];
+
+String arrowNarrowSpacing: "                      ";
+
+String[] BotEditReplayPageButtonLabels: [
+  " ", " ", " ",                           " ", " ",
+  " ", " ", "DELAY PLAYBACK OF REPLAY BY", " ", " ",
+  " ", arrowNarrowSpacing + "▼",            "0",                "▲" + arrowNarrowSpacing, " ",
+  " ", " ",         "FRAMES",              " ", " ",
+  " ", " ",      "Reset Delay",            " ", " "
+];
+Color[] BotEditReplayPageButtonColors: [
+  null, null, null, null, null,
+  null, null, Color.White, null, null,
+  null, Color.Gray, Color.White, Color.Gray, null,
+  null, null, Color.White, null, null,
+  null, null, Color.Red, null, null
+];
+
+Boolean isCursorOnAdd: menuXIndex == 3 && menuYIndex == 2;
+
+Boolean isCursorOnSubtract: menuXIndex == 1 && menuYIndex == 2;
+Boolean isCursorOnReset: menuXIndex == 2 && menuYIndex == 4;
+
+void UpdateOffsetDisplay() {
+  UpdateButtonAppearance(MenuState.EDITING_REPLAY, 2, 2, <String>selectedBot.playbackOffset, Color.White);
+  if (selectedBot.playbackOffset == 1) {
+    UpdateButtonAppearance(MenuState.EDITING_REPLAY, 2, 3, "FRAME", Color.White);
+  } else {
+    UpdateButtonAppearance(MenuState.EDITING_REPLAY, 2, 3, "FRAMES", Color.White);
+  }
+}
+
+void HandleBotEditReplayPrimaryFire() {
+  if (isCursorOnAdd) {
+    selectedBot.playbackOffset += 1;
+    UpdateOffsetDisplay();
+  } else if (isCursorOnSubtract) {
+    if (selectedBot.playbackOffset <= 0) {
+      Abort();
+    }
+    selectedBot.playbackOffset -= 1;
+    UpdateOffsetDisplay();
+  } else if (isCursorOnReset) {
+    selectedBot.playbackOffset = 0;
+    UpdateOffsetDisplay();
+    Abort();
+  }
+  SlowMoAgnosticWait(0.5, WaitBehavior.AbortWhenFalse);
+  Number tempMenuXIndex = menuXIndex;
+  while (currentMenuState == MenuState.EDITING_REPLAY
+    && IsButtonHeld(EventPlayer(), Button.PrimaryFire)
+    && menuXIndex == tempMenuXIndex) {
+    if (isCursorOnAdd) {
+      selectedBot.playbackOffset += 1;
+      UpdateOffsetDisplay();
+    } else if (isCursorOnSubtract) {
+      if (selectedBot.playbackOffset <= 0) {
+        Abort();
+      }
+      selectedBot.playbackOffset -= 1;
+      UpdateOffsetDisplay();
+    }
+    SlowMoAgnosticWait(0.1, WaitBehavior.AbortWhenFalse);
+  }
+}
