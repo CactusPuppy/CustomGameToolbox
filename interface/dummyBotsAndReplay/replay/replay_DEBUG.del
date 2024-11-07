@@ -1,0 +1,12 @@
+rule: "[interface/dummyBotsAndReplay/replay/replay_DEBUG.del | DEBUG] Show frame count above bot head"
+Event.OngoingPlayer
+if (IsDummyBot())
+{
+  CreateInWorldText(AllPlayers(), frame, UpdateEveryFrame(EyePosition()) + Up(), 2, Clipping.ClipAgainstSurfaces, InworldTextRev.VisibleToPositionAndString, Color.White);
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replay_DEBUG.del | DEBUG] Show longest recording length"
+{
+  CreateHudText(AllPlayers(), "Longest recording: " + longestRecordingLength, null, null, Location.Left, 0, Color.White, null, null, HudTextRev.VisibleToAndString);
+}
+
