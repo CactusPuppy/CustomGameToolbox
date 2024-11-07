@@ -1,4 +1,5 @@
 import "botEditPage_ButtonsControl.del";
+import "botEditPage_ReplayEdit.del";
 import "replay/replay.del";
 
 enum BotEditAction {
@@ -10,6 +11,7 @@ enum BotEditAction {
   SET_RESPAWN_POINT,
   PIN_BOT_TO_POSITION,
   RECORD_REPLAY,
+  EDIT_REPLAY,
   DELETE_REPLAY
 }
 
@@ -19,25 +21,25 @@ playervar ResetPoint pinnedPosition;
 BotEditAction[] BotEditActionGrid: ButtonActionGrid[MenuState.EDITING_DUMMY_BOT];
 
 BotEditAction[] botEditPageButtonActions: [
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.EDIT_BUTTON_CONTROL, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.SET_RESPAWN_POINT, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.DELETE_REPLAY, BotEditAction.RECORD_REPLAY, BotEditAction.NONE, BotEditAction.CHANGE_HERO, BotEditAction.CHANGE_TEAM,
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.PIN_BOT_TO_POSITION, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE, BotEditAction.DELETE, BotEditAction.NONE, BotEditAction.NONE
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.EDIT_BUTTON_CONTROL, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.SET_RESPAWN_POINT, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.DELETE_REPLAY, BotEditAction.EDIT_REPLAY, BotEditAction.RECORD_REPLAY, BotEditAction.CHANGE_HERO, BotEditAction.CHANGE_TEAM,
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.PIN_BOT_TO_POSITION, BotEditAction.NONE, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.DELETE, BotEditAction.NONE, BotEditAction.NONE
 ];
 
 String[] botEditPageButtonLabels: [
   "", "", "Buttons", "", "",
   "", "", "Set Respawn Point", "", "",
-  "Delete Replay", "Record Replay", "", "Change Hero", "Switch Team",
+  "Delete Replay", "Edit Replay", "Record Replay", "Change Hero", "Switch Team",
   "", "", "Pin Bot To Position", "", "",
   "", "", "Delete", "", ""
 ];
 
 Color[] botEditPageButtonColors: [
-  null, null, Color.Gray, null, null,
+  null, null, Color.Aqua, null, null,
   null, null, Color.Yellow, null, null,
-  Color.Red, CustomColor(186, 70, 213, 255), null, Color.Green, Color.Blue,
+  Color.Gray, Color.Gray, CustomColor(186, 70, 213, 255), Color.Green, Color.Blue,
   null, null, Color.Orange, null, null,
   null, null, Color.Red, null, null
 ];
@@ -64,9 +66,13 @@ if (selectedBot != null)
     UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Orange);
   }
   if (hasRecordedClip(selectedBot)) {
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Play Replay", Color.LimeGreen);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 2, "Play Replay", Color.LimeGreen);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Edit Replay", Color.Turquoise);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 0, 2, "Delete Replay", Color.Red);
   } else {
-    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Record Replay", CustomColor(186, 70, 213, 255));
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 2, "Record Replay", CustomColor(186, 70, 213, 255));
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Edit Replay", Color.Gray);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 0, 2, "Delete Replay", Color.Gray);
   }
   WaitUntil(selectedBot != EvaluateOnce(selectedBot) || selectedBot.sampleCount != EvaluateOnce(selectedBot.sampleCount), 1000000);
   LoopIfConditionIsTrue();
@@ -275,6 +281,25 @@ if (selectedBotEditAction == BotEditAction.RECORD_REPLAY)
   }
 }
 
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Edit replay"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.EDIT_REPLAY)
+{
+  if (selectedBot == null) {
+    SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
+    Wait(0.25);
+    SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
+    Abort();
+  }
+  if (hasRecordedClip(selectedBot)) {
+    OpenMenuToPage(EventPlayer(), MenuState.EDITING_REPLAY);
+    UpdateOffsetDisplay();
+  } else {
+    SmallMessage(EventPlayer(), "  No replay recorded. Record a replay first!");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+  }
+}
+
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Delete replay"
 Event.OngoingPlayer
 if (selectedBotEditAction == BotEditAction.DELETE_REPLAY)
@@ -291,5 +316,6 @@ if (selectedBotEditAction == BotEditAction.DELETE_REPLAY)
     SmallMessage(EventPlayer(), "  Replay deleted");
   } else {
     SmallMessage(EventPlayer(), "  No replay to delete");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
   }
 }
