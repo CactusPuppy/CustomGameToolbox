@@ -414,7 +414,6 @@ void LoopClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   Respawn();
   Wait(0.25);
   ForcePlayerHero(EventPlayer(), recordingHero);
-  // Wait(0.064);
   TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), EventPlayer().replayResetPoint);
   Wait(0.5);
   botReadyToReplay = true;
