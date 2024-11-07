@@ -147,24 +147,26 @@ variables
         58: frame
         59: sampleCount
         60: botReadyToReplay
-        61: sampleValue
-        62: currentInputValues
-        63: currentEventIndices
-        64: currentEventFrames
-        65: primaryFireEvents
-        66: secondaryFireEvents
-        67: ability1Events
-        68: ability2Events
-        69: ultimateEvents
-        70: jumpEvents
-        71: crouchEvents
-        72: meleeEvents
-        73: reloadEvents
-        74: throttleEvents
-        75: facingEvents
-        76: weaponEvents
-        77: waitingOnPlayer
-        78: cacheMenuYIndex
+        61: playbackOffset
+        62: sampleValue
+        63: currentInputValues
+        64: currentEventIndices
+        65: currentEventFrames
+        66: primaryFireEvents
+        67: secondaryFireEvents
+        68: ability1Events
+        69: ability2Events
+        70: ultimateEvents
+        71: jumpEvents
+        72: crouchEvents
+        73: meleeEvents
+        74: reloadEvents
+        75: throttleEvents
+        76: facingEvents
+        77: weaponEvents
+        78: waitingOnPlayer
+        79: tempMenuXIndex
+        80: cacheMenuYIndex
 }
 
 // Extended collection variables:
@@ -263,7 +265,7 @@ rule("[main.ostw] Disable Inspector Recording")
     }
 }
 
-// Rule Element Count: 328
+// Rule Element Count: 381
 rule("[interface/menu.ostw] Set up action grid")
 {
     event
@@ -271,7 +273,7 @@ rule("[interface/menu.ostw] Set up action grid")
         Ongoing - Global;
     }
 
-    // Element Count: 327, Action Count: 9
+    // Element Count: 380, Action Count: 10
     // Largest Action Index: 1 using 53 Elements
     actions
     {
@@ -282,12 +284,13 @@ rule("[interface/menu.ostw] Set up action grid")
         Global.ButtonActionGrid[3] = Array(0, 15, 2, 14, 0, 0, 7, 17, 1, 0, 0, 9, 10, 11, 0, 0, 3, 13, 5, 0, 0, 4, 16, 6, 0);
         Global.ButtonActionGrid[4] = Array(0, 0, 0, 0, 0, 0, 1, 0, 3, 0, 0, 2, 7, 5, 0, 0, 4, 8, 6, 0, 0, 0, 0, 0, 0);
         Global.ButtonActionGrid[6] = Array(0, 0, 1, 0, 0, 0, 0, 2, 0, 0, 0, 6, 3, 7, 0, 0, 0, 4, 0, 0, 0, 0, 5, 0, 0);
-        Global.ButtonActionGrid[7] = Array(0, 0, 4, 0, 0, 0, 0, 5, 0, 0, 8, 7, 0, 2, 1, 0, 0, 6, 0, 0, 0, 0, 3, 0, 0);
-        Global.ButtonActionGrid[8] = 42;
+        Global.ButtonActionGrid[7] = Array(0, 0, 4, 0, 0, 0, 0, 5, 0, 0, 9, 8, 7, 2, 1, 0, 0, 6, 0, 0, 0, 0, 3, 0, 0);
+        Global.ButtonActionGrid[9] = 42;
+        Global.ButtonActionGrid[8] = Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0);
     }
 }
 
-// Rule Element Count: 320
+// Rule Element Count: 383
 rule("[interface/menu.ostw] Set up button label grid")
 {
     event
@@ -297,21 +300,22 @@ rule("[interface/menu.ostw] Set up button label grid")
         All;
     }
 
-    // Element Count: 319, Action Count: 7
-    // Largest Action Index: 1 using 53 Elements
+    // Element Count: 382, Action Count: 8
+    // Largest Action Index: 7 using 63 Elements
     actions
     {
         Event Player.ButtonLabelGrid = Empty Array;
-        Event Player.ButtonLabelGrid[1] = Array(Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Information"), Custom String(""), Custom String("Modifications"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Tools"), Custom String(""), Custom String("Dummy Bots"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""));
+        Event Player.ButtonLabelGrid[1] = Array(Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Information"), Custom String(""), Custom String("Modifications"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Tools"), Custom String(""), Custom String("Dummy Bots/Replay"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""));
         Event Player.ButtonLabelGrid[5] = Array(Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Set Respawn Point"), Custom String("Change Hero"), Custom String("Enable NoClip"), Custom String(""), Custom String(""), Custom String("Place Ruler"), Custom String("Back to Hero Select"), Custom String("Enable 3rd Person"), Custom String(""), Custom String(""), Custom String("Unpause Match Time"), Custom String("Skip Setup"), Custom String("End Match"), Custom String(""), Custom String(""), Custom String(""), Custom String("Unlock All Buttons"), Custom String(""), Custom String(""));
         Event Player.ButtonLabelGrid[3] = Array(Custom String(""), Custom String("Show Exact Health"), Custom String("Show Distance To Crosshair"), Custom String("Show Is On Objective"), Custom String(""), Custom String(""), Custom String("Show Position/Facing"), Custom String("Show Throttle"), Custom String("Show Move Speed"), Custom String(""), Custom String(""), Custom String("Show Altitude"), Custom String("Show If On Ground"), Custom String("Show If On Wall"), Custom String(""), Custom String(""), Custom String("Show HPS Dealt"), Custom String("Show Status Effects"), Custom String("Show DPS Dealt"), Custom String(""), Custom String(""), Custom String("Show HPS Received"), Custom String("Show Damage/Heal Numbers"), Custom String("Show DPS Received"), Custom String(""));
         Event Player.ButtonLabelGrid[4] = Array(Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Faster Abilities [OFF]"), Custom String(""), Custom String("Increased Damage Dealt [OFF]"), Custom String(""), Custom String(""), Custom String("Reduced Damage Taken [OFF]"), Custom String("Slow Motion [OFF]"), Custom String("Faster Respawn [OFF]"), Custom String(""), Custom String(""), Custom String("Auto-Regen Health [OFF]"), Custom String("Self-Heal Passive [ON]"), Custom String("Disable Mode Completion [OFF]"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""));
         Event Player.ButtonLabelGrid[6] = Array(Custom String(""), Custom String(""), Custom String("Create Dummy Bot"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Create Punching Bag"), Custom String(""), Custom String(""), Custom String(""), Custom String("Play All Replays"), Custom String("Edit Dummy Bots"), Custom String("Delete All Replays"), Custom String(""), Custom String(""), Custom String(""), Custom String("Reset Bot Positions"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Remove All Bots"), Custom String(""), Custom String(""));
-        Event Player.ButtonLabelGrid[7] = Array(Custom String(""), Custom String(""), Custom String("Buttons"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Set Respawn Point"), Custom String(""), Custom String(""), Custom String("Delete Replay"), Custom String("Record Replay"), Custom String(""), Custom String("Change Hero"), Custom String("Switch Team"), Custom String(""), Custom String(""), Custom String("Pin Bot To Position"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Delete"), Custom String(""), Custom String(""));
+        Event Player.ButtonLabelGrid[7] = Array(Custom String(""), Custom String(""), Custom String("Buttons"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Set Respawn Point"), Custom String(""), Custom String(""), Custom String("Delete Replay"), Custom String("Edit Replay"), Custom String("Record Replay"), Custom String("Change Hero"), Custom String("Switch Team"), Custom String(""), Custom String(""), Custom String("Pin Bot To Position"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Delete"), Custom String(""), Custom String(""));
+        Event Player.ButtonLabelGrid[8] = Array(Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("DELAY PLAYBACK OF REPLAY BY"), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("{0}{1}", Custom String("                      "), Custom String("▼")), Custom String("0"), Custom String("{0}{1}", Custom String("▲"), Custom String("                      ")), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("FRAMES"), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("Reset Delay"), Custom String(" "), Custom String(" "));
     }
 }
 
-// Rule Element Count: 412
+// Rule Element Count: 447
 rule("[interface/menu.ostw] Set up color grid")
 {
     event
@@ -321,7 +325,7 @@ rule("[interface/menu.ostw] Set up color grid")
         All;
     }
 
-    // Element Count: 411, Action Count: 7
+    // Element Count: 446, Action Count: 8
     // Largest Action Index: 2 using 186 Elements
     actions
     {
@@ -331,7 +335,8 @@ rule("[interface/menu.ostw] Set up color grid")
         Event Player.ButtonColorGrid[3] = Array(Null, Custom Color(200, 50, 50, 255), Color(Aqua), Color(Turquoise), Null, Null, Color(Green), Color(Rose), Color(Orange), Null, Null, Color(Sky Blue), Color(Purple), Color(Violet), Null, Null, Color(Yellow), Color(Lime Green), Color(Red), Null, Null, Custom Color(245, 200, 0, 255), Color(Blue), Custom Color(218, 76, 10, 255), Null);
         Event Player.ButtonColorGrid[4] = Array(Null, Null, Null, Null, Null, Null, Color(Gray), Null, Color(Gray), Null, Null, Color(Gray), Color(Gray), Color(Gray), Null, Null, Color(Gray), Color(Yellow), Color(Gray), Null, Null, Null, Null, Null, Null);
         Event Player.ButtonColorGrid[6] = Array(Null, Null, Color(Green), Null, Null, Null, Null, Color(Sky Blue), Null, Null, Null, Color(Lime Green), Color(Yellow), Custom Color(229, 100, 100, 255), Null, Null, Null, Color(Purple), Null, Null, Null, Null, Color(Red), Null, Null);
-        Event Player.ButtonColorGrid[7] = Array(Null, Null, Color(Gray), Null, Null, Null, Null, Color(Yellow), Null, Null, Color(Red), Custom Color(186, 70, 213, 255), Null, Color(Green), Color(Blue), Null, Null, Color(Orange), Null, Null, Null, Null, Color(Red), Null, Null);
+        Event Player.ButtonColorGrid[7] = Array(Null, Null, Color(Aqua), Null, Null, Null, Null, Color(Yellow), Null, Null, Color(Gray), Color(Gray), Custom Color(186, 70, 213, 255), Color(Green), Color(Blue), Null, Null, Color(Orange), Null, Null, Null, Null, Color(Red), Null, Null);
+        Event Player.ButtonColorGrid[8] = Array(Null, Null, Null, Null, Null, Null, Null, Color(White), Null, Null, Null, Color(Gray), Color(White), Color(Gray), Null, Null, Null, Color(White), Null, Null, Null, Null, Color(Red), Null, Null);
     }
 }
 
@@ -356,7 +361,7 @@ rule("[interface/menu.ostw] When menu state changes, find new first selection")
     actions
     {
         Wait(0.064, Abort When False);
-        If(Global.ButtonActionGrid[Event Player.currentMenuState] != 0 && !Array Contains(Array(2, 8), Event Player.currentMenuState));
+        If(Global.ButtonActionGrid[Event Player.currentMenuState] != 0 && !Array Contains(Array(2, 9), Event Player.currentMenuState));
             Event Player.menuXIndex = 0;
             Event Player.menuYIndex = 0;
             While(Event Player.menuYIndex < 6);
@@ -643,13 +648,13 @@ rule("[interface/menu.ostw] Global menu setup")
         "Create controls hints"
         Create In-World Text(Local Player.currentMenuState != 0 ? Local Player : Null, Custom String("{0} SELECT  |  {2} {1}", Input Binding String(Button(Primary Fire)), Local Player.currentMenuState == 1 ? Custom String("CLOSE") : Custom String("BACK"), Input Binding String(Button(Secondary Fire))), Update Every Frame(True * Eye Position(Local Player) + Empty Array * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + -168 * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 2, Do Not Clip, Visible To Position and String, Color(White), Visible Never);
         "Additional helper text"
-        Create In-World Text(Array Contains(Array(1, 8), Local Player.currentMenuState) ? Local Player : Null, Array(Custom String("Use WASD to Navigate"), Custom String("{0}{1}{2}", Custom String("Press/Hold "), Input Binding String(Button(Reload)), Custom String(" for Manual Control")))[Index Of Array Value(Array(1, 8), Local Player.currentMenuState)], Update Every Frame(True * Eye Position(Local Player) + Empty Array * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + -145 * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 2, Do Not Clip, Visible To Position and String, Color(White), Visible Never);
+        Create In-World Text(Array Contains(Array(1, 9), Local Player.currentMenuState) ? Local Player : Null, Array(Custom String("Use WASD to Navigate"), Custom String("{0}{1}{2}", Custom String("Press/Hold "), Input Binding String(Button(Reload)), Custom String(" for Manual Control")))[Index Of Array Value(Array(1, 9), Local Player.currentMenuState)], Update Every Frame(True * Eye Position(Local Player) + Empty Array * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + -145 * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 2, Do Not Clip, Visible To Position and String, Color(White), Visible Never);
         "Create grid menu items"
         Global.colIndex = 0;
         While(Global.colIndex < 5);
             Global.rowIndex = 0;
             While(Global.rowIndex < 6);
-                Create In-World Text(Array Contains(Array(0, 2, 8), Local Player.currentMenuState) ? Null : Local Player, Local Player.ButtonLabelGrid[Local Player.currentMenuState][Evaluate Once(Global.rowIndex) * 5 + Evaluate Once(Global.colIndex)], Update Every Frame(True * Eye Position(Local Player) + 100 * (-3 + 1.5 * Evaluate Once(Global.colIndex)) * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + 100 * (1.2 - 0.45 * Evaluate Once(Global.rowIndex) - 0.2) * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 2, Do Not Clip, Visible To Position String and Color, Local Player.menuXIndex == Evaluate Once(Global.colIndex) && Local Player.menuYIndex == Evaluate Once(Global.rowIndex) && Global.ButtonActionGrid[Local Player.currentMenuState][Local Player.menuYIndex * 5 + Local Player.menuXIndex] ? Custom Color(255, 255, 255, 155 + 100 * Sine From Degrees(Total Time Elapsed * 720 % 360)) : Local Player.ButtonColorGrid[Local Player.currentMenuState][Evaluate Once(Global.rowIndex) * 5 + Evaluate Once(Global.colIndex)], Visible Never);
+                Create In-World Text(Array Contains(Array(0, 2, 9), Local Player.currentMenuState) ? Null : Local Player, Local Player.ButtonLabelGrid[Local Player.currentMenuState][Evaluate Once(Global.rowIndex) * 5 + Evaluate Once(Global.colIndex)], Update Every Frame(True * Eye Position(Local Player) + 100 * (-3 + 1.5 * Evaluate Once(Global.colIndex)) * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + 100 * (1.2 - 0.45 * Evaluate Once(Global.rowIndex) - 0.2) * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 2, Do Not Clip, Visible To Position String and Color, Local Player.menuXIndex == Evaluate Once(Global.colIndex) && Local Player.menuYIndex == Evaluate Once(Global.rowIndex) && Global.ButtonActionGrid[Local Player.currentMenuState][Local Player.menuYIndex * 5 + Local Player.menuXIndex] ? Custom Color(255, 255, 255, 155 + 100 * Sine From Degrees(Total Time Elapsed * 720 % 360)) : Local Player.ButtonColorGrid[Local Player.currentMenuState][Evaluate Once(Global.rowIndex) * 5 + Evaluate Once(Global.colIndex)], Visible Never);
                 Global.rowIndex += 1;
             End;
             Global.colIndex += 1;
@@ -662,7 +667,7 @@ rule("[interface/menu.ostw] Global menu setup")
         "Create dummy bot editing screen"
         Global.i = 0;
         While(Global.i < Count Of(Global.AllButtons));
-            Create In-World Text(Local Player.currentMenuState == 8 ? Local Player : Null, Custom String("{0}: {1}", Global.AllButtons[Evaluate Once(Global.i)], Local Player.selectedBot.buttonControlStates[Evaluate Once(Global.i)]), Update Every Frame(True * Eye Position(Local Player) + 75 * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + 100 * (1 + Evaluate Once(Global.i) * -0.17 - 0.2) * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 1.25, Do Not Clip, Visible To Position String and Color, Local Player.menuXIndex == 0 && Local Player.menuYIndex == Evaluate Once(Global.i) ? Custom Color(255, 255, 255, 155 + 100 * Sine From Degrees(Total Time Elapsed * 720 % 360)) : Color(Gray), Visible Never);
+            Create In-World Text(Local Player.currentMenuState == 9 ? Local Player : Null, Custom String("{0}: {1}", Global.AllButtons[Evaluate Once(Global.i)], Local Player.selectedBot.buttonControlStates[Evaluate Once(Global.i)]), Update Every Frame(True * Eye Position(Local Player) + 75 * Cross Product(Facing Direction Of(Local Player), Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90)) + 100 * (1 + Evaluate Once(Global.i) * -0.17 - 0.2) * Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Local Player)), Vertical Angle From Direction(Facing Direction Of(Local Player)) - 90) + 300 * Facing Direction Of(Local Player)), 1.25, Do Not Clip, Visible To Position String and Color, Local Player.menuXIndex == 0 && Local Player.menuYIndex == Evaluate Once(Global.i) ? Custom Color(255, 255, 255, 155 + 100 * Sine From Degrees(Total Time Elapsed * 720 % 360)) : Color(Gray), Visible Never);
             Global.i += 1;
         End;
         "Create background orbie"
@@ -861,7 +866,7 @@ rule("Handle confirm/cancel for ending game")
     }
 }
 
-// Rule Element Count: 447
+// Rule Element Count: 1058
 rule("[interface/menu.ostw] Primary fire to select current item")
 {
     event
@@ -877,22 +882,22 @@ rule("[interface/menu.ostw] Primary fire to select current item")
         Is Button Held(Event Player, Button(Primary Fire)) == True;
     }
 
-    // Element Count: 439, Action Count: 49
-    // Largest Action Index: 2 using 37 Elements
+    // Element Count: 1050, Action Count: 179
+    // Largest Action Index: 2 using 40 Elements
     actions
     {
         Abort If(Event Player.currentMenuState == 0);
         Abort If(Global.ButtonActionGrid[Event Player.currentMenuState] != 42 && Global.ButtonActionGrid[Event Player.currentMenuState][Event Player.menuYIndex * 5 + Event Player.menuXIndex] == 0);
-        Skip(Array(46, 0, 2, 4, 9, 23, 26, 31, 36)[Index Of Array Value(Array(1, 2, 5, 3, 4, 6, 7, 8), Event Player.currentMenuState) + 1]);
+        Skip(Array(176, 0, 2, 4, 9, 23, 26, 31, 36, 47)[Index Of Array Value(Array(1, 2, 5, 3, 4, 6, 7, 9, 8), Event Player.currentMenuState) + 1]);
         Event Player.currentMenuState = Global.ButtonActionGrid[1][Event Player.menuYIndex * 5 + Event Player.menuXIndex];
-        Skip(44);
+        Skip(174);
         Call Subroutine(HandleConfirmEndGameClick);
-        Skip(42);
+        Skip(172);
         Abort If(Global.ButtonActionGrid[5][Event Player.menuYIndex * 5 + Event Player.menuXIndex] == 0);
         Event Player.toolsActionID = Global.ButtonActionGrid[5][Event Player.menuYIndex * 5 + Event Player.menuXIndex];
         Wait(0.016, Ignore Condition);
         Event Player.toolsActionID = Null;
-        Skip(37);
+        Skip(167);
         Abort If(Global.ButtonActionGrid[3][Event Player.menuYIndex * 5 + Event Player.menuXIndex] == 0);
         If(Count Of(Event Player.activeInfoDisplays) >= 5);
             Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 200);
@@ -906,20 +911,20 @@ rule("[interface/menu.ostw] Primary fire to select current item")
         Else;
             Modify Player Variable(Event Player, activeInfoDisplays, Append To Array, Global.ButtonActionGrid[3][Event Player.menuYIndex * 5 + Event Player.menuXIndex]);
         End;
-        Skip(23);
+        Skip(153);
         Abort If(Global.ButtonActionGrid[4][Event Player.menuYIndex * 5 + Event Player.menuXIndex] == 0);
         Global.activeModifications[Global.ButtonActionGrid[4][Event Player.menuYIndex * 5 + Event Player.menuXIndex]] = !Global.activeModifications[Global.ButtonActionGrid[4][Event Player.menuYIndex * 5 + Event Player.menuXIndex]];
-        Skip(20);
+        Skip(150);
         Abort If(Global.ButtonActionGrid[6][Event Player.menuYIndex * 5 + Event Player.menuXIndex] == 0);
         Event Player.selectedBotsReplayAction = Global.ButtonActionGrid[6][Event Player.menuYIndex * 5 + Event Player.menuXIndex];
         Wait(0.016, Ignore Condition);
         Event Player.selectedBotsReplayAction = 0;
-        Skip(15);
+        Skip(145);
         Abort If(Global.ButtonActionGrid[7][Event Player.menuYIndex * 5 + Event Player.menuXIndex] == 0);
         Event Player.selectedBotEditAction = Global.ButtonActionGrid[7][Event Player.menuYIndex * 5 + Event Player.menuXIndex];
         Wait(0.016, Ignore Condition);
         Event Player.selectedBotEditAction = 0;
-        Skip(10);
+        Skip(140);
         If(Count Of(Event Player.selectedBot.buttonControlStates) < Event Player.menuYIndex + 1);
             Event Player.selectedBot.buttonControlStates[Event Player.menuYIndex] = Custom String("None");
         End;
@@ -930,10 +935,140 @@ rule("[interface/menu.ostw] Primary fire to select current item")
         Else;
             Event Player.selectedBot.buttonControlStates[Event Player.menuYIndex] = Custom String("None");
         End;
+        Skip(129);
+        If(Event Player.menuXIndex == 3 && Event Player.menuYIndex == 2);
+            Event Player.selectedBot.playbackOffset += 1;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+            Global._arrayConstructor[12] = Event Player.selectedBot.playbackOffset;
+            Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+            Global._arrayConstructor[12] = Color(White);
+            Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            If(Event Player.selectedBot.playbackOffset == 1);
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAME");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            Else;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAMES");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            End;
+        Else If(Event Player.menuXIndex == 1 && Event Player.menuYIndex == 2);
+            If(Event Player.selectedBot.playbackOffset <= 0);
+                Abort;
+            End;
+            Event Player.selectedBot.playbackOffset -= 1;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+            Global._arrayConstructor[12] = Event Player.selectedBot.playbackOffset;
+            Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+            Global._arrayConstructor[12] = Color(White);
+            Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            If(Event Player.selectedBot.playbackOffset == 1);
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAME");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            Else;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAMES");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            End;
+        Else If(Event Player.menuXIndex == 2 && Event Player.menuYIndex == 4);
+            Event Player.selectedBot.playbackOffset = 0;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+            Global._arrayConstructor[12] = Event Player.selectedBot.playbackOffset;
+            Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+            Global._arrayConstructor[12] = Color(White);
+            Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            If(Event Player.selectedBot.playbackOffset == 1);
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAME");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            Else;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAMES");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            End;
+            Abort;
+        End;
+        Wait(Global.activeModifications[7] ? 0.5 * Global.SLOW_MOTION_SPEED / 100 : 0.5, Abort When False);
+        Event Player.tempMenuXIndex = Event Player.menuXIndex;
+        While(Event Player.currentMenuState == 8 && Is Button Held(Event Player, Button(Primary Fire)) && Event Player.menuXIndex == Event Player.tempMenuXIndex);
+            If(Event Player.menuXIndex == 3 && Event Player.menuYIndex == 2);
+                Event Player.selectedBot.playbackOffset += 1;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[12] = Event Player.selectedBot.playbackOffset;
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[12] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+                If(Event Player.selectedBot.playbackOffset == 1);
+                    Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                    Global._arrayConstructor[17] = Custom String("FRAME");
+                    Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                    Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                    Global._arrayConstructor[17] = Color(White);
+                    Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+                Else;
+                    Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                    Global._arrayConstructor[17] = Custom String("FRAMES");
+                    Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                    Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                    Global._arrayConstructor[17] = Color(White);
+                    Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+                End;
+            Else If(Event Player.menuXIndex == 1 && Event Player.menuYIndex == 2);
+                If(Event Player.selectedBot.playbackOffset <= 0);
+                    Abort;
+                End;
+                Event Player.selectedBot.playbackOffset -= 1;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[12] = Event Player.selectedBot.playbackOffset;
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[12] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+                If(Event Player.selectedBot.playbackOffset == 1);
+                    Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                    Global._arrayConstructor[17] = Custom String("FRAME");
+                    Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                    Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                    Global._arrayConstructor[17] = Color(White);
+                    Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+                Else;
+                    Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                    Global._arrayConstructor[17] = Custom String("FRAMES");
+                    Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                    Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                    Global._arrayConstructor[17] = Color(White);
+                    Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+                End;
+            End;
+            Wait(Global.activeModifications[7] ? 0.1 * Global.SLOW_MOTION_SPEED / 100 : 0.1, Abort When False);
+        End;
     }
 }
 
-// Rule Element Count: 82
+// Rule Element Count: 85
 rule("[interface/menu.ostw] Secondary fire to go back")
 {
     event
@@ -949,7 +1084,7 @@ rule("[interface/menu.ostw] Secondary fire to go back")
         Is Button Held(Event Player, Button(Secondary Fire)) == True;
     }
 
-    // Element Count: 74, Action Count: 24
+    // Element Count: 77, Action Count: 24
     // Largest Action Index: 6 using 14 Elements
     actions
     {
@@ -968,7 +1103,7 @@ rule("[interface/menu.ostw] Secondary fire to go back")
             Event Player.currentMenuState = 5;
             Abort;
         End;
-        If(Event Player.currentMenuState == 8);
+        If(Array Contains(Array(9, 8), Event Player.currentMenuState));
             Event Player.currentMenuState = 7;
             Abort;
         End;
@@ -1104,7 +1239,7 @@ rule("[interface/menu.ostw] Menu left-right")
     // Largest Action Index: 0 using 7 Elements
     actions
     {
-        If(Event Player.currentMenuState == 8);
+        If(Event Player.currentMenuState == 9);
             "The left-right function does nothing in this menu page"
             Abort;
         End;
@@ -1201,7 +1336,7 @@ rule("[interface/menu.ostw] Menu up-down")
     // Largest Action Index: 8 using 8 Elements
     actions
     {
-        If(Event Player.currentMenuState == 8);
+        If(Event Player.currentMenuState == 9);
             If(Z Component Of(Throttle Of(Event Player)) > 0.5);
                 Event Player.menuYIndex -= 1;
                 If(Event Player.menuYIndex < 0);
@@ -5072,7 +5207,7 @@ rule("Initialize the gay (Patriq made me name it this, it actually just initiali
     }
 }
 
-// Rule Element Count: 221
+// Rule Element Count: 317
 rule("[interface/dummyBotsAndReplay/botEditPage.del] When a bot becomes selected, initialize display options")
 {
     event
@@ -5088,8 +5223,8 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] When a bot becomes selected
         Event Player.selectedBot != Null;
     }
 
-    // Element Count: 214, Action Count: 47
-    // Largest Action Index: 45 using 26 Elements
+    // Element Count: 310, Action Count: 71
+    // Largest Action Index: 69 using 26 Elements
     actions
     {
         If(First Of(Event Player.selectedBot._extendedPlayerCollection[2]) != Null);
@@ -5124,17 +5259,41 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] When a bot becomes selected
         End;
         If(Event Player.selectedBot.sampleCount > 0);
             Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
-            Global._arrayConstructor[11] = Custom String("Play Replay");
+            Global._arrayConstructor[12] = Custom String("Play Replay");
             Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
             Global._arrayConstructor = Event Player.ButtonColorGrid[7];
-            Global._arrayConstructor[11] = Color(Lime Green);
+            Global._arrayConstructor[12] = Color(Lime Green);
+            Event Player.ButtonColorGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
+            Global._arrayConstructor[11] = Custom String("Edit Replay");
+            Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[7];
+            Global._arrayConstructor[11] = Color(Turquoise);
+            Event Player.ButtonColorGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
+            Global._arrayConstructor[10] = Custom String("Delete Replay");
+            Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[7];
+            Global._arrayConstructor[10] = Color(Red);
             Event Player.ButtonColorGrid[7] = Global._arrayConstructor;
         Else;
             Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
-            Global._arrayConstructor[11] = Custom String("Record Replay");
+            Global._arrayConstructor[12] = Custom String("Record Replay");
             Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
             Global._arrayConstructor = Event Player.ButtonColorGrid[7];
-            Global._arrayConstructor[11] = Custom Color(186, 70, 213, 255);
+            Global._arrayConstructor[12] = Custom Color(186, 70, 213, 255);
+            Event Player.ButtonColorGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
+            Global._arrayConstructor[11] = Custom String("Edit Replay");
+            Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[7];
+            Global._arrayConstructor[11] = Color(Gray);
+            Event Player.ButtonColorGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
+            Global._arrayConstructor[10] = Custom String("Delete Replay");
+            Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[7];
+            Global._arrayConstructor[10] = Color(Gray);
             Event Player.ButtonColorGrid[7] = Global._arrayConstructor;
         End;
         Wait Until(Event Player.selectedBot != Evaluate Once(Event Player.selectedBot) || Event Player.selectedBot.sampleCount != Evaluate Once(Event Player.selectedBot.sampleCount), 1000000);
@@ -5390,7 +5549,7 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Switch to button control pa
     // Element Count: 2, Action Count: 1
     actions
     {
-        Event Player.currentMenuState = 8;
+        Event Player.currentMenuState = 9;
     }
 }
 
@@ -5520,7 +5679,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replay.del] Restore selected bo
     }
 }
 
-// Rule Element Count: 22
+// Rule Element Count: 33
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Longest Recording Length")
 {
     event
@@ -5529,14 +5688,16 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Longest 
         UpdateLongestRecordingLength;
     }
 
-    // Element Count: 21, Action Count: 1
+    // Element Count: 32, Action Count: 2
+    // Largest Action Index: 0 using 23 Elements
     actions
     {
-        Global.longestRecordingLength = Last Of(Sorted Array(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0), Current Array Element.recordingLength)).recordingLength;
+        Global.longestRecordingLength = Last Of(Sorted Array(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.sampleCount > 0), Current Array Element.recordingLength + Current Array Element.playbackOffset));
+        Global.longestRecordingLength = Global.longestRecordingLength.recordingLength + Global.longestRecordingLength.playbackOffset;
     }
 }
 
-// Rule Element Count: 22
+// Rule Element Count: 24
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recording")
 {
     event
@@ -5545,13 +5706,14 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recordin
         DeleteRecording;
     }
 
-    // Element Count: 21, Action Count: 18
+    // Element Count: 23, Action Count: 19
     // Largest Action Index: 0 using 2 Elements
     actions
     {
         Event Player.frame = 0;
         Event Player.recordingLength = 0;
         Event Player.sampleCount = 0;
+        Event Player.playbackOffset = 0;
         Event Player.currentInputValues = Empty Array;
         Event Player.currentEventIndices = Empty Array;
         Event Player.currentEventFrames = Empty Array;
@@ -5741,8 +5903,8 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Record actions")
     }
 }
 
-// Rule Element Count: 43
-rule("[interface/dummyBotsAndReplay/botEditPage.del] Delete replay")
+// Rule Element Count: 125
+rule("[interface/dummyBotsAndReplay/botEditPage.del] Edit replay")
 {
     event
     {
@@ -5757,7 +5919,63 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Delete replay")
         Event Player.selectedBotEditAction == 8;
     }
 
-    // Element Count: 35, Action Count: 13
+    // Element Count: 117, Action Count: 33
+    // Largest Action Index: 6 using 9 Elements
+    actions
+    {
+        If(Event Player.selectedBot == Null);
+            Small Message(Event Player, Custom String("  No bot selected, this is a bug!"));
+            Wait(0.25, Ignore Condition);
+            Small Message(Event Player, Custom String("  Please report this to CactusPuppy."));
+            Abort;
+        End;
+        If(Event Player.selectedBot.sampleCount > 0);
+            Event Player.currentMenuState = 8;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+            Global._arrayConstructor[12] = Event Player.selectedBot.playbackOffset;
+            Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+            Global._arrayConstructor[12] = Color(White);
+            Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            If(Event Player.selectedBot.playbackOffset == 1);
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAME");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            Else;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[8];
+                Global._arrayConstructor[17] = Custom String("FRAMES");
+                Event Player.ButtonLabelGrid[8] = Global._arrayConstructor;
+                Global._arrayConstructor = Event Player.ButtonColorGrid[8];
+                Global._arrayConstructor[17] = Color(White);
+                Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
+            End;
+        Else;
+            Small Message(Event Player, Custom String("  No replay recorded. Record a replay first!"));
+            Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 100);
+        End;
+    }
+}
+
+// Rule Element Count: 45
+rule("[interface/dummyBotsAndReplay/botEditPage.del] Delete replay")
+{
+    event
+    {
+        Ongoing - Each Player;
+        All;
+        All;
+    }
+
+    // Element Count: 7, Condition Count: 1
+    conditions
+    {
+        Event Player.selectedBotEditAction == 9;
+    }
+
+    // Element Count: 37, Action Count: 14
     // Largest Action Index: 6 using 9 Elements
     actions
     {
@@ -5773,6 +5991,7 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Delete replay")
             Small Message(Event Player, Custom String("  Replay deleted"));
         Else;
             Small Message(Event Player, Custom String("  No replay to delete"));
+            Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 100);
         End;
     }
 }
@@ -6175,7 +6394,7 @@ rule("When player enters this menu, set menuXIndex and menuYIndex to 0")
     // Element Count: 7, Condition Count: 1
     conditions
     {
-        Event Player.currentMenuState == 8;
+        Event Player.currentMenuState == 9;
     }
 
     // Element Count: 4, Action Count: 2
@@ -6200,7 +6419,7 @@ rule("When player is holding Reload in the button control menu, start holding th
     // Element Count: 14, Condition Count: 2
     conditions
     {
-        Event Player.currentMenuState == 8;
+        Event Player.currentMenuState == 9;
         Is Button Held(Event Player, Button(Reload)) == True;
     }
 
@@ -6436,7 +6655,7 @@ rule("[interface/dummyBotsAndReplay/replay/replay.del] Update longest recording 
     }
 }
 
-// Rule Element Count: 60
+// Rule Element Count: 66
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip")
 {
     event
@@ -6445,7 +6664,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip")
         PlayClip;
     }
 
-    // Element Count: 59, Action Count: 22
+    // Element Count: 65, Action Count: 23
     // Largest Action Index: 15 using 10 Elements
     actions
     {
@@ -6469,6 +6688,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip")
         Else;
             Wait(1, Ignore Condition);
         End;
+        Event Player.frame = Event Player.playbackOffset * -1;
         Event Player.waitingOnPlayer = Null;
         Event Player.botReadyToReplay = True;
         Event Player.replayState = 2;
@@ -7518,7 +7738,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip")
     }
 }
 
-// Rule Element Count: 44
+// Rule Element Count: 52
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame (a very good YouTube channel btw)")
 {
     event
@@ -7527,11 +7747,11 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame (a v
         PlayFrame;
     }
 
-    // Element Count: 43, Action Count: 20
-    // Largest Action Index: 17 using 10 Elements
+    // Element Count: 51, Action Count: 20
+    // Largest Action Index: 0 using 16 Elements
     actions
     {
-        If(Event Player.frame < Event Player.recordingLength);
+        If(Event Player.frame >= 0 && Event Player.frame < Event Player.recordingLength);
             If(Event Player.frame > 0);
                 Call Subroutine(PlayFramePrimaryFire);
                 Call Subroutine(PlayFrameSecondaryFire);
