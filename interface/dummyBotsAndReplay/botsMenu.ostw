@@ -121,11 +121,8 @@ Event.OngoingPlayer
 if (IsControllable(EventPlayer()))
 if (IsTrueForAny(AllPlayers().Filter((p) => !IsControllable(p)), ArrayElement().selectedBotsReplayAction == BotsReplayAction.RESET_BOTS))
 {
-  tempHeroStorage = HeroOf();
-  StopForcingHero();
   Respawn();
   WaitUntil(IsAlive(), 1);
-  ForcePlayerHero(EventPlayer(), tempHeroStorage);
   if (replayResetPoint.location != null) {
     TeleportPlayerToResetPoint(EventPlayer(), replayResetPoint);
   } else if (respawnPoint.location != null) {

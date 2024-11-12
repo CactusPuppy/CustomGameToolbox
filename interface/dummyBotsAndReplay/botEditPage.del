@@ -162,16 +162,6 @@ if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
   LoadTempDataToSelectedBot();
 }
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] BUGFIX: When dummy bot respawns, force it back onto the right hero"
-Event.OnDeath
-if (IsDummyBot())
-{
-  tempHeroStorage = HeroOf();
-  StopForcingHero(EventPlayer());
-  WaitUntil(IsAlive(), 10000000);
-  WaitUntil(HeroOf() != tempHeroStorage, 1);
-  ForcePlayerHero(EventPlayer(), tempHeroStorage);
-}
 
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change team"
 Event.OngoingPlayer
