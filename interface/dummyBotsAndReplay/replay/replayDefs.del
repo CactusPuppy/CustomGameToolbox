@@ -75,6 +75,8 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   reloadEvents = [];
   throttleEvents = [];
   facingEvents = [];
+  replayResetPoint.location = null;
+  recordingHero = null;
   UpdateLongestRecordingLength();
 }
 
