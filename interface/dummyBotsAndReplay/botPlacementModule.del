@@ -111,7 +111,7 @@ if (HasSpawned())
   };
   # Create the facing location control orb
   CreateEffect(
-    VisibleTo: playersWhoShouldSeeControls(positionControl),
+    VisibleTo: IsAlive(EventPlayer()) && playersWhoShouldSeeControls(positionControl),
     Type: Effect.Sphere,
     Color: getClosestSelectionEntity(LocalPlayer()).Id == EvaluateOnce(nextSelectionEntityId + 1) ? Color.Orange : Color.Yellow,
     Position: UpdateEveryFrame(desiredFacingControlPosition(EventPlayer())),
@@ -119,9 +119,9 @@ if (HasSpawned())
     Reevaluation: EffectRev.VisibleToPositionAndRadius
   );
   CreateBeamEffect(
-    VisibleTo: playersWhoShouldSeeControls(facingControl),
+    VisibleTo: IsAlive(EventPlayer()) && playersWhoShouldSeeControls(facingControl),
     BeamType: BeamType.GrappleBeam,
-    StartPosition: EventPlayer().EyePosition(),
+    StartPosition: UpdateEveryFrame(EventPlayer().EyePosition()),
     EndPosition: UpdateEveryFrame(desiredFacingControlPosition(EventPlayer())),
     Color: null,
     EffectRev.VisibleToPositionAndRadius
