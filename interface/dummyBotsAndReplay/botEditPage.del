@@ -78,60 +78,26 @@ if (selectedBot != null)
   LoopIfConditionIsTrue();
 }
 
-playervar Hero tempHeroStorage;
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change hero"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
-{
-  tempHeroStorage = HeroOf();
-  SetAllowedHeroes(EventPlayer(), AllHeroes().Remove(tempHeroStorage));
-  WaitUntil(!HasSpawned(), 1);
-  ResetHeroAvailability(EventPlayer());
-  WaitUntil(HasSpawned(), 1000000);
-  ForcePlayerHero(selectedBot, HeroOf());
-  selectedBot.tempHeroStorage = HeroOf();
-  MinWait();
-  StopForcingHero(selectedBot);
-  ForcePlayerHero(EventPlayer(), tempHeroStorage);
-  MinWait();
-  StopForcingHero(EventPlayer());
-  StopForcingPlayerPosition();
-  StartForcingPlayerPosition(EventPlayer(), EventPlayer().menuActivationPoint.location, true);
-  Wait(0.064);
-  WaitUntil(DistanceBetween(EventPlayer(), EventPlayer().menuActivationPoint.location) < 0.05
-    && AngleBetweenVectors(EventPlayer().FacingDirection(), menuActivationPoint.facing) < 0.1, 1);
-  selectedControl = null;
-  CloseMenu(EventPlayer());
-}
+playervar Boolean wasPunchingBag!;
+playervar ResetPoint tempPinnedPosition!;
+playervar ResetPoint tempRespawnPoint!;
+playervar ResetPoint tempResetPoint!;
+playervar Team tempTeamStorage!;
+playervar ResetPoint tempCurrentPosition!;
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] BUGFIX: When dummy bot respawns, force it back onto the right hero"
-Event.OnDeath
-if (IsDummyBot())
-{
-  tempHeroStorage = HeroOf();
-  StopForcingHero(EventPlayer());
-  WaitUntil(IsAlive(), 10000000);
-  WaitUntil(HeroOf() != tempHeroStorage, 1);
-  ForcePlayerHero(EventPlayer(), tempHeroStorage);
-}
-
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change team"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
-{
-  // LogToInspector("Changing team of {0}".Format([selectedBot]));
+void StoreTempDataFromBot() playervar "[SUB | interface/dummyBotsAndReplay/botEditPage.del] Store data from bot onto player" {
   tempHeroStorage = HeroOf(selectedBot);
-  Boolean wasPunchingBag! = selectedBot.isPunchingBag;
-  ResetPoint tempPinnedPosition! = selectedBot.pinnedPosition;
-  ResetPoint tempRespawnPoint! = selectedBot.respawnPoint;
-  ResetPoint tempResetPoint! = selectedBot.replayResetPoint;
-  Team tempTeamStorage! = TeamOf(selectedBot);
-  Vector tempPositionStorage! = PositionOf(selectedBot);
-  Vector tempFacingStorage! = FacingDirectionOf(selectedBot);
+  tempCurrentPosition = NewResetFromPlayer(selectedBot);
+  wasPunchingBag = selectedBot.isPunchingBag;
+  tempPinnedPosition = selectedBot.pinnedPosition;
+  tempRespawnPoint = selectedBot.respawnPoint;
+  tempResetPoint = selectedBot.replayResetPoint;
+  tempTeamStorage = TeamOf(selectedBot);
   # Temporarily store recording on player who is performing the action
-  TransferRecording(selectedBot, EventPlayer());
-  DestroyDummyBot(selectedBot.Team(), SlotOf(selectedBot));
-  selectedBot = CreateDummyBot(tempHeroStorage, OppositeTeamOf(tempTeamStorage), -1, tempPositionStorage, tempFacingStorage);
+  if (hasRecordedClip(selectedBot)) TransferRecording(selectedBot, EventPlayer());
+}
+
+void LoadTempDataToSelectedBot() playervar "[SUB | interface/dummyBotsAndReplay/botEditPage.del] Load data from player onto bot" {
   if (wasPunchingBag) {
     MarkLastCreatedBotAsPunchingBag();
   }
@@ -162,10 +128,49 @@ if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
   }
   Wait(0.064);
   # We wait to transfer the recording to the new bot to avoid overloading the server
-  TransferRecording(EventPlayer(), selectedBot);
-  StartFacing(selectedBot, tempFacingStorage, 1000, Relative.ToWorld, FacingRev.None);
-  WaitUntil(AngleBetweenVectors(FacingDirectionOf(selectedBot), tempFacingStorage) < 0.1, 1);
-  StopFacing(selectedBot);
+  if (hasRecordedClip(EventPlayer())) TransferRecording(EventPlayer(), selectedBot);
+  Wait(0.064);
+  TeleportPlayerToResetPoint(selectedBot, tempCurrentPosition);
+}
+
+playervar Hero tempHeroStorage;
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change hero"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
+{
+  # We don't want to transfer recordings between heroes
+  if (hasRecordedClip(selectedBot)) {
+    selectedBot.recordingPlayStopFlag = RecordingAction.DELETE;
+    MinWait();
+  }
+  StoreTempDataFromBot();
+  tempHeroStorage = HeroOf();
+  SetAllowedHeroes(EventPlayer(), AllHeroes().Remove(tempHeroStorage));
+  WaitUntil(!HasSpawned(), 1);
+  ResetHeroAvailability(EventPlayer());
+  WaitUntil(HasSpawned(), 1000000);
+  DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
+  MinWait();
+  selectedBot = CreateDummyBot(HeroOf(), tempTeamStorage, -1, tempCurrentPosition.location, tempCurrentPosition.facing);
+  ForcePlayerHero(EventPlayer(), tempHeroStorage);
+  MinWait();
+  StopForcingHero(EventPlayer());
+  Wait(0.064);
+  TeleportPlayerToResetPoint(EventPlayer(), menuActivationPoint);
+  selectedControl = null;
+  CloseMenu(EventPlayer());
+  LoadTempDataToSelectedBot();
+}
+
+
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change team"
+Event.OngoingPlayer
+if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
+{
+  StoreTempDataFromBot();
+  DestroyDummyBot(selectedBot.Team(), SlotOf(selectedBot));
+  selectedBot = CreateDummyBot(tempHeroStorage, OppositeTeamOf(tempTeamStorage), -1, tempCurrentPosition.location, tempCurrentPosition.facing);
+  LoadTempDataToSelectedBot();
 }
 
 playervar Any botRespawnPoint_FX_Loc!;

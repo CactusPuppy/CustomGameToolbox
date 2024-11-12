@@ -75,6 +75,8 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   reloadEvents = [];
   throttleEvents = [];
   facingEvents = [];
+  replayResetPoint.location = null;
+  recordingHero = null;
   UpdateLongestRecordingLength();
 }
 
@@ -101,6 +103,7 @@ void UpdateLongestRecordingLength() playervar "[SUB | interface/dummyBotsAndRepl
 
 void StartRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording" {
   DeleteRecording();
+  recordingHero = HeroOf();
   # If all bots are replaying, we need to start our recording one frame later to ensure we record at the same time as the bots
   frame = allBotsReplayDuringRecording ? - 1 : 0;
   recordingLength = 0;
@@ -375,10 +378,8 @@ playervar Player waitingOnPlayer;
 
 void PlayClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip" {
   StopClip();
-  StopForcingHero(EventPlayer());
   Respawn();
   Wait(0.25);
-  ForcePlayerHero(EventPlayer(), recordingHero);
   Wait(0.064);
   TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), EventPlayer().replayResetPoint);
   if (waitingOnPlayer != null) {
@@ -416,10 +417,8 @@ void LoopClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   frame = 0;
   currentEventIndices = [];
   currentEventFrames = [];
-  StopForcingHero(EventPlayer());
   Respawn();
   Wait(0.25);
-  ForcePlayerHero(EventPlayer(), recordingHero);
   TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), EventPlayer().replayResetPoint);
   Wait(0.5);
   botReadyToReplay = true;
