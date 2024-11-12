@@ -1,3 +1,5 @@
+import "../../../lib/utils/BigArray.del";
+
 enum ReplayState {
   NONE,
   RECORDING,
@@ -50,7 +52,8 @@ playervar InputEvent[] crouchEvents;
 playervar InputEvent[] meleeEvents;
 playervar InputEvent[] reloadEvents;
 playervar InputEvent[] throttleEvents;
-playervar InputEvent[] facingEvents;
+playervar BigArray<Vector> facingDirections;
+playervar BigArray<Number> facingDurations;
 playervar InputEvent[] weaponEvents;
 Boolean hasRecordedClip(Player p = EventPlayer()): p.sampleCount > 0;
 
@@ -74,7 +77,8 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   meleeEvents = [];
   reloadEvents = [];
   throttleEvents = [];
-  facingEvents = [];
+  facingDirections = new BigArray<Vector>();
+  facingDurations = new BigArray<Number>();
   replayResetPoint.location = null;
   recordingHero = null;
   UpdateLongestRecordingLength();
@@ -92,7 +96,7 @@ void UpdateSampleCount() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
   sampleCount = Max(sampleCount, meleeEvents.Length);
   sampleCount = Max(sampleCount, reloadEvents.Length);
   sampleCount = Max(sampleCount, throttleEvents.Length);
-  sampleCount = Max(sampleCount, facingEvents.Length);
+  sampleCount = Max(sampleCount, RoundToInteger(facingDirections.Length / 1000, Rounding.Down));
   sampleCount = Max(sampleCount, weaponEvents.Length);
 }
 
@@ -281,11 +285,12 @@ void RecordFrameThrottle() playervar "[SUB | interface/dummyBotsAndReplay/replay
 
 void RecordFrameFacing() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Facing" {
   sampleValue = FacingDirectionOf(EventPlayer());
-  if (facingEvents[currentEventIndices[InputType.FACING]].value != sampleValue) {
+  if (facingDirections.Get(currentEventIndices[InputType.FACING]) != sampleValue) {
     currentEventIndices[InputType.FACING] += frame == 0 ? 0 : 1;
-    facingEvents[currentEventIndices[InputType.FACING]] = InputEvent.New(sampleValue, 0);
+    facingDirections.Append(sampleValue);
+    facingDurations.Append(0);
   }
-  facingEvents[currentEventIndices[InputType.FACING]].duration += 1;
+  facingDurations.Set(currentEventIndices[InputType.FACING], facingDurations.Get(currentEventIndices[InputType.FACING]) + 1);
 }
 
 void RecordFrameWeapon() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Weapon" {
@@ -326,7 +331,8 @@ void TransferRecording(Player SourcePlayer = EventPlayer(), Player TargetPlayer)
   TargetPlayer.meleeEvents = SourcePlayer.meleeEvents;
   TargetPlayer.reloadEvents = SourcePlayer.reloadEvents;
   TargetPlayer.throttleEvents = SourcePlayer.throttleEvents;
-  TargetPlayer.facingEvents = SourcePlayer.facingEvents;
+  TargetPlayer.facingDirections = SourcePlayer.facingDirections;
+  TargetPlayer.facingDurations = SourcePlayer.facingDurations;
   TargetPlayer.weaponEvents = SourcePlayer.weaponEvents;
 
   TargetPlayer.recordingLength = SourcePlayer.recordingLength;
@@ -350,7 +356,7 @@ Event.OngoingPlayer
 if (replayState == ReplayState.RECORDING)
 {
   # End the recording if the player opens the menu, switches heroes, or exceeds the maximum sample count
-  if (currentMenuState != MenuState.CLOSED || HeroOf() != recordingHero || sampleCount >= MAX_SAMPLES)
+  if (currentMenuState != MenuState.CLOSED || HeroOf() != recordingHero || sampleCount > MAX_SAMPLES)
   {
     Recorder_StopRecording();
     Abort();
@@ -610,12 +616,12 @@ void PlayFrameThrottle() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
 }
 
 void PlayFrameFacing() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Facing" {
-  sampleValue = facingEvents[currentEventIndices[InputType.FACING]].value;
+  sampleValue = facingDirections.Get(currentEventIndices[InputType.FACING]);
   if (FacingDirectionOf(EventPlayer()) != sampleValue) {
     SetFacing(EventPlayer(), sampleValue, Relative.ToWorld);
   }
   currentEventFrames[InputType.FACING] += 1;
-  if (currentEventFrames[InputType.FACING] >= facingEvents[currentEventIndices[InputType.FACING]].duration) {
+  if (currentEventFrames[InputType.FACING] >= facingDurations.Get(currentEventIndices[InputType.FACING])) {
     currentEventIndices[InputType.FACING] += 1;
     currentEventFrames[InputType.FACING] = 0;
   }

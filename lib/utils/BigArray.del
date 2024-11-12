@@ -1,0 +1,89 @@
+/*
+ * Big Array struct courtesy of PatPatPatriq (@PatrickSzela | GitHub)
+*/
+struct BigArray<T> {
+  static public Number MAX_ARRAY_SIZE: 1000;
+  public T[][] multiArray;
+  public Number Length;
+
+  private Number FirstIdx(in Number idx): RoundToInteger(idx / MAX_ARRAY_SIZE, Rounding.Down);
+  private Number SecondIdx(in Number idx): idx % MAX_ARRAY_SIZE;
+
+  public constructor(in T[] arr) {
+    multiArray = [arr];
+    Length = arr.Length;
+  }
+
+  public T Get(in Number idx): multiArray[FirstIdx(idx)][SecondIdx(idx)];
+
+  public ref void Set(in Number idx, in T value) {
+    multiArray[FirstIdx(idx)][SecondIdx(idx)] = value;
+  }
+
+  private ref void RecalculateLength() {
+    Length = 0;
+    foreach (T[] i in multiArray)
+      Length += i.Length;
+  }
+
+  public ref void Clear() {
+    multiArray = [];
+    Length = 0;
+  }
+
+  public T First(): multiArray[0][0];
+
+  public T Last(): Get(Length - 1);
+
+  public ref void Append(in T value) {
+    Set(Length, value);
+    Length++;
+  }
+
+  public ref void Concat(in T[] value) {
+    Number count! = Length;
+
+    if(!multiArray[FirstIdx(count)].Length) {
+      multiArray[FirstIdx(count)] = [];
+    }
+
+    Number availableSpace! = MAX_ARRAY_SIZE - multiArray[FirstIdx(count)].Length;
+
+    T[][] split = [value.Slice(0, availableSpace), value.Length > availableSpace ? value.Slice(availableSpace, value.Length - availableSpace) : []];
+
+    if(value.Length >= availableSpace) {
+      multiArray[FirstIdx(count)] += split[0].Slice(0, split[0].Length - 1);
+      // workaround for broken Append() when resulting array would end up having 1000 elements
+      multiArray[FirstIdx(count)][multiArray[FirstIdx(count)].Length] = split[0].Last;
+    } else {
+      multiArray[FirstIdx(count)] += split[0];
+    }
+
+    if(split[1].Length) multiArray[FirstIdx(count) + 1] = split[1];
+
+    RecalculateLength();
+  }
+
+  public ref void ConcatBigArray(in BigArray<T> value) {
+    foreach(T[] arr in value.multiArray) {
+      Concat(arr);
+    }
+  }
+
+  public ref BigArray<T> Reverse() {
+    T[][] copy = multiArray.SortedArray((_, idx) => -idx);
+
+    for(Number i! = 0; i < copy.Length; i++) {
+      copy[i] = copy[i].SortedArray((_, idx) => -idx);
+    }
+
+    BigArray<T> arr = { multiArray: copy, Length: 0 };
+    arr.RecalculateLength();
+    return arr;
+  }
+
+  public ref Boolean Contains(in T value) {
+    return multiArray.IsTrueForAny((t) => t.Contains(value));
+  }
+}
+
