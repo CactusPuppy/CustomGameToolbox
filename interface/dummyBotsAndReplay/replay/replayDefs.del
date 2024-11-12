@@ -103,6 +103,7 @@ void UpdateLongestRecordingLength() playervar "[SUB | interface/dummyBotsAndRepl
 
 void StartRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording" {
   DeleteRecording();
+  recordingHero = HeroOf();
   # If all bots are replaying, we need to start our recording one frame later to ensure we record at the same time as the bots
   frame = allBotsReplayDuringRecording ? - 1 : 0;
   recordingLength = 0;
