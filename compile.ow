@@ -162,11 +162,14 @@ variables
         73: meleeEvents
         74: reloadEvents
         75: throttleEvents
-        76: facingEvents
-        77: weaponEvents
-        78: waitingOnPlayer
-        79: tempMenuXIndex
-        80: cacheMenuYIndex
+        76: facingDirections_multiArray
+        77: facingDirections_Length
+        78: facingDurations_multiArray
+        79: facingDurations_Length
+        80: weaponEvents
+        81: waitingOnPlayer
+        82: tempMenuXIndex
+        83: cacheMenuYIndex
 }
 
 // Extended collection variables:
@@ -189,15 +192,14 @@ variables
 // player [15]: cumulativeHealing
 // player [16]: lastHealInstanceAmount
 // player [17]: lastHealInstancePosition
-// player [18]: botRespawnPoint_FX_Loc
-// player [19]: botRespawnPoint_FX_Fac
-// player [20]: wasPunchingBag
-// player [21]: tempPinnedPosition
-// player [22]: tempRespawnPoint
-// player [23]: tempResetPoint
-// player [24]: tempTeamStorage
-// player [25]: tempPositionStorage
-// player [26]: tempFacingStorage
+// player [18]: wasPunchingBag
+// player [19]: tempPinnedPosition
+// player [20]: tempRespawnPoint
+// player [21]: tempResetPoint
+// player [22]: tempTeamStorage
+// player [23]: tempCurrentPosition
+// player [24]: botRespawnPoint_FX_Loc
+// player [25]: botRespawnPoint_FX_Fac
 
 subroutines
 {
@@ -209,45 +211,47 @@ subroutines
     5: findRight
     6: findUp
     7: findDown
-    8: TransferRecording
-    9: PreparePlayerForRecording
-    10: ReturnToPreRecordState
-    11: StartRecording
-    12: DeleteRecording
-    13: UpdateLongestRecordingLength
-    14: Recorder_StopRecording
-    15: StopRecording
-    16: UpdateSampleCount
-    17: StopClip
-    18: PlayClip
-    19: RecordFrame
-    20: RecordFramePrimaryFire
-    21: RecordFrameSecondaryFire
-    22: RecordFrameAbility1
-    23: RecordFrameAbility2
-    24: RecordFrameUltimate
-    25: RecordFrameJump
-    26: RecordFrameCrouch
-    27: RecordFrameMelee
-    28: RecordFrameReload
-    29: RecordFrameThrottle
-    30: RecordFrameFacing
-    31: RecordFrameWeapon
-    32: PlayFrame
-    33: PlayFramePrimaryFire
-    34: PlayFrameSecondaryFire
-    35: PlayFrameAbility1
-    36: Rein_Ability1Handling
-    37: PlayFrameAbility2
-    38: PlayFrameUltimate
-    39: PlayFrameMelee
-    40: PlayFrameReload
-    41: PlayFrameJump
-    42: PlayFrameCrouch
-    43: PlayFrameThrottle
-    44: PlayFrameFacing
-    45: PlayFrameWeapon
-    46: LoopClip
+    8: StoreTempDataFromBot
+    9: TransferRecording
+    10: LoadTempDataToSelectedBot
+    11: PreparePlayerForRecording
+    12: ReturnToPreRecordState
+    13: StartRecording
+    14: DeleteRecording
+    15: UpdateLongestRecordingLength
+    16: Recorder_StopRecording
+    17: StopRecording
+    18: UpdateSampleCount
+    19: StopClip
+    20: PlayClip
+    21: RecordFrame
+    22: RecordFramePrimaryFire
+    23: RecordFrameSecondaryFire
+    24: RecordFrameAbility1
+    25: RecordFrameAbility2
+    26: RecordFrameUltimate
+    27: RecordFrameJump
+    28: RecordFrameCrouch
+    29: RecordFrameMelee
+    30: RecordFrameReload
+    31: RecordFrameThrottle
+    32: RecordFrameFacing
+    33: RecordFrameWeapon
+    34: PlayFrame
+    35: PlayFramePrimaryFire
+    36: PlayFrameSecondaryFire
+    37: PlayFrameAbility1
+    38: Rein_Ability1Handling
+    39: PlayFrameAbility2
+    40: PlayFrameUltimate
+    41: PlayFrameMelee
+    42: PlayFrameReload
+    43: PlayFrameJump
+    44: PlayFrameCrouch
+    45: PlayFrameThrottle
+    46: PlayFrameFacing
+    47: PlayFrameWeapon
+    48: LoopClip
 }
 
 // Rule Element Count: 2
@@ -866,7 +870,7 @@ rule("Handle confirm/cancel for ending game")
     }
 }
 
-// Rule Element Count: 1058
+// Rule Element Count: 1044
 rule("[interface/menu.ostw] Primary fire to select current item")
 {
     event
@@ -882,7 +886,7 @@ rule("[interface/menu.ostw] Primary fire to select current item")
         Is Button Held(Event Player, Button(Primary Fire)) == True;
     }
 
-    // Element Count: 1050, Action Count: 179
+    // Element Count: 1036, Action Count: 179
     // Largest Action Index: 2 using 40 Elements
     actions
     {
@@ -1010,7 +1014,7 @@ rule("[interface/menu.ostw] Primary fire to select current item")
             End;
             Abort;
         End;
-        Wait(Global.activeModifications[7] ? 0.5 * Global.SLOW_MOTION_SPEED / 100 : 0.5, Abort When False);
+        Wait(Global.activeModifications[7] ? 0.25 * Global.SLOW_MOTION_SPEED / 100 : 0.25, Abort When False);
         Event Player.tempMenuXIndex = Event Player.menuXIndex;
         While(Event Player.currentMenuState == 8 && Is Button Held(Event Player, Button(Primary Fire)) && Event Player.menuXIndex == Event Player.tempMenuXIndex);
             If(Event Player.menuXIndex == 3 && Event Player.menuYIndex == 2);
@@ -1063,7 +1067,7 @@ rule("[interface/menu.ostw] Primary fire to select current item")
                     Event Player.ButtonColorGrid[8] = Global._arrayConstructor;
                 End;
             End;
-            Wait(Global.activeModifications[7] ? 0.1 * Global.SLOW_MOTION_SPEED / 100 : 0.1, Abort When False);
+            Wait(0.016, Abort When False);
         End;
     }
 }
@@ -4700,7 +4704,7 @@ rule("[interface/dummyBotsAndReplay/botsMenu.ostw] Initiator perspective for res
     }
 }
 
-// Rule Element Count: 186
+// Rule Element Count: 180
 rule("[interface/dummyBotsAndReplay/botEditPage.del] Handle resetting all bots to their reset points")
 {
     event
@@ -4717,15 +4721,12 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Handle resetting all bots t
         Is True For Any(Filtered Array(All Players(All Teams), !Is Dummy Bot(Current Array Element)), Current Array Element.selectedBotsReplayAction == 4) == True;
     }
 
-    // Element Count: 162, Action Count: 37
-    // Largest Action Index: 23 using 17 Elements
+    // Element Count: 156, Action Count: 34
+    // Largest Action Index: 20 using 17 Elements
     actions
     {
-        Event Player.tempHeroStorage = Hero Of(Event Player);
-        Stop Forcing Player To Be Hero(Event Player);
         Respawn(Event Player);
         Wait Until(Is Alive(Event Player), 1);
-        Start Forcing Player To Be Hero(Event Player, Event Player.tempHeroStorage);
         If(First Of(Event Player.replayResetPoint) != Null);
             Teleport(Event Player, First Of(Event Player.replayResetPoint));
             Stop Facing(Event Player);
@@ -5088,7 +5089,7 @@ rule("[interface/dummyBotsAndReplay/botPlacementModule.ostw] When a player leave
     }
 }
 
-// Rule Element Count: 247
+// Rule Element Count: 260
 rule("[interface/dummyBotsAndReplay/botPlacementModule.ostw] Initialize selection entities for dummy bots")
 {
     event
@@ -5105,15 +5106,15 @@ rule("[interface/dummyBotsAndReplay/botPlacementModule.ostw] Initialize selectio
         Has Spawned(Event Player) == True;
     }
 
-    // Element Count: 236, Action Count: 5
-    // Largest Action Index: 2 using 157 Elements
+    // Element Count: 249, Action Count: 5
+    // Largest Action Index: 2 using 163 Elements
     actions
     {
         Event Player.positionControl = Array(Event Player, Global.nextSelectionEntityId, Position Of(Event Player) + Up, 1);
         Event Player.facingControl = Array(Event Player, Global.nextSelectionEntityId + 1, Eye Position(Event Player) + Facing Direction Of(Event Player) * 5, 2);
         "Create the facing location control orb"
-        Create Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.positionControl)) && First Of(Event Player.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Sphere, First Of(Sorted Array(Filtered Array(Append To Array(Mapped Array(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.replayState == 0), Current Array Element.positionControl), Mapped Array(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.replayState == 0), Current Array Element.facingControl)), Distance Between(Eye Position(Local Player) + Facing Direction Of(Local Player) * Distance Between(Eye Position(Local Player), Current Array Element[2]), Current Array Element[2]) <= 1.25), -1 * Dot Product(Facing Direction Of(Local Player), Direction Towards(Eye Position(Local Player), Current Array Element[2]))))[1] == Evaluate Once(Global.nextSelectionEntityId + 1) ? Color(Orange) : Color(Yellow), Update Every Frame(Ray Cast Hit Position(Eye Position(Event Player), Eye Position(Event Player) + Facing Direction Of(Event Player) * 5, Null, Null, False)), Local Player.selectedControl[1] == Evaluate Once(Global.nextSelectionEntityId + 1) ? 0.1 : 0.25, Visible To Position and Radius);
-        Create Beam Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.facingControl)) && First Of(Event Player.facingControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Grapple Beam, Eye Position(Event Player), Update Every Frame(Ray Cast Hit Position(Eye Position(Event Player), Eye Position(Event Player) + Facing Direction Of(Event Player) * 5, Null, Null, False)), Null, Visible To Position and Radius);
+        Create Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.positionControl)) && Is Alive(First Of(Event Player.positionControl)) && First Of(Event Player.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Sphere, First Of(Sorted Array(Filtered Array(Append To Array(Mapped Array(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.replayState == 0), Current Array Element.positionControl), Mapped Array(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.replayState == 0), Current Array Element.facingControl)), Distance Between(Eye Position(Local Player) + Facing Direction Of(Local Player) * Distance Between(Eye Position(Local Player), Current Array Element[2]), Current Array Element[2]) <= 1.25), -1 * Dot Product(Facing Direction Of(Local Player), Direction Towards(Eye Position(Local Player), Current Array Element[2]))))[1] == Evaluate Once(Global.nextSelectionEntityId + 1) ? Color(Orange) : Color(Yellow), Update Every Frame(Ray Cast Hit Position(Eye Position(Event Player), Eye Position(Event Player) + Facing Direction Of(Event Player) * 5, Null, Null, False)), Local Player.selectedControl[1] == Evaluate Once(Global.nextSelectionEntityId + 1) ? 0.1 : 0.25, Visible To Position and Radius);
+        Create Beam Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.facingControl)) && Is Alive(First Of(Event Player.facingControl)) && First Of(Event Player.facingControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Grapple Beam, Update Every Frame(Eye Position(Event Player)), Update Every Frame(Ray Cast Hit Position(Eye Position(Event Player), Eye Position(Event Player) + Facing Direction Of(Event Player) * 5, Null, Null, False)), Null, Visible To Position and Radius);
         Global.nextSelectionEntityId += 2;
     }
 }
@@ -5301,7 +5302,121 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] When a bot becomes selected
     }
 }
 
-// Rule Element Count: 79
+// Rule Element Count: 86
+rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Transfer Recording")
+{
+    event
+    {
+        Subroutine;
+        TransferRecording;
+    }
+
+    // Element Count: 85, Action Count: 17
+    // Largest Action Index: 0 using 5 Elements
+    actions
+    {
+        Global.TargetPlayer.primaryFireEvents = Global.SourcePlayer.primaryFireEvents;
+        Global.TargetPlayer.secondaryFireEvents = Global.SourcePlayer.secondaryFireEvents;
+        Global.TargetPlayer.ability1Events = Global.SourcePlayer.ability1Events;
+        Global.TargetPlayer.ability2Events = Global.SourcePlayer.ability2Events;
+        Global.TargetPlayer.ultimateEvents = Global.SourcePlayer.ultimateEvents;
+        Global.TargetPlayer.jumpEvents = Global.SourcePlayer.jumpEvents;
+        Global.TargetPlayer.crouchEvents = Global.SourcePlayer.crouchEvents;
+        Global.TargetPlayer.meleeEvents = Global.SourcePlayer.meleeEvents;
+        Global.TargetPlayer.reloadEvents = Global.SourcePlayer.reloadEvents;
+        Global.TargetPlayer.throttleEvents = Global.SourcePlayer.throttleEvents;
+        Global.TargetPlayer.facingDirections_multiArray = Global.SourcePlayer.facingDirections_multiArray;
+        Global.TargetPlayer.facingDirections_Length = Global.SourcePlayer.facingDirections_Length;
+        Global.TargetPlayer.facingDurations_multiArray = Global.SourcePlayer.facingDurations_multiArray;
+        Global.TargetPlayer.facingDurations_Length = Global.SourcePlayer.facingDurations_Length;
+        Global.TargetPlayer.weaponEvents = Global.SourcePlayer.weaponEvents;
+        Global.TargetPlayer.recordingLength = Global.SourcePlayer.recordingLength;
+        Global.TargetPlayer.sampleCount = Global.SourcePlayer.sampleCount;
+    }
+}
+
+// Rule Element Count: 67
+rule("[SUB | interface/dummyBotsAndReplay/botEditPage.del] Store data from bot onto player")
+{
+    event
+    {
+        Subroutine;
+        StoreTempDataFromBot;
+    }
+
+    // Element Count: 66, Action Count: 12
+    // Largest Action Index: 1 using 15 Elements
+    actions
+    {
+        Event Player.tempHeroStorage = Hero Of(Event Player.selectedBot);
+        Event Player._extendedPlayerCollection[23] = Array(Position Of(Event Player.selectedBot), Eye Position(Event Player.selectedBot), Facing Direction Of(Event Player.selectedBot));
+        Event Player._extendedPlayerCollection[18] = Event Player.selectedBot.isPunchingBag;
+        Event Player._extendedPlayerCollection[19] = Event Player.selectedBot.pinnedPosition;
+        Event Player._extendedPlayerCollection[20] = Event Player.selectedBot._extendedPlayerCollection[2];
+        Event Player._extendedPlayerCollection[21] = Event Player.selectedBot.replayResetPoint;
+        Event Player._extendedPlayerCollection[22] = Team Of(Event Player.selectedBot);
+        "Temporarily store recording on player who is performing the action"
+        If(Event Player.selectedBot.sampleCount > 0);
+            Global.SourcePlayer = Event Player.selectedBot;
+            Global.TargetPlayer = Event Player;
+            Call Subroutine(TransferRecording);
+        End;
+    }
+}
+
+// Rule Element Count: 302
+rule("[SUB | interface/dummyBotsAndReplay/botEditPage.del] Load data from player onto bot")
+{
+    event
+    {
+        Subroutine;
+        LoadTempDataToSelectedBot;
+    }
+
+    // Element Count: 301, Action Count: 34
+    // Largest Action Index: 15 using 92 Elements
+    actions
+    {
+        If(Event Player._extendedPlayerCollection[18]);
+            Last Created Entity.isPunchingBag = True;
+            Add Health Pool To Player(Last Created Entity, Health, 1250, True, False);
+            Start Forcing Dummy Bot Name(Last Created Entity, Custom String("Punching Bag"));
+        End;
+        If(First Of(Event Player._extendedPlayerCollection[19]) != Null);
+            Event Player.selectedBot.pinnedPosition = Event Player._extendedPlayerCollection[19];
+        End;
+        If(First Of(Event Player._extendedPlayerCollection[21]) != Null);
+            Event Player.selectedBot.replayResetPoint = Event Player._extendedPlayerCollection[21];
+        End;
+        If(First Of(Event Player._extendedPlayerCollection[20]) != Null);
+            Event Player.selectedBot._extendedPlayerCollection[2] = Event Player._extendedPlayerCollection[20];
+            Create Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && Is Alive(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Sphere, Color(Green), First Of(Event Player.selectedBot._extendedPlayerCollection[2]), 0.5, Visible To Position and Radius);
+            Event Player._extendedPlayerCollection[24] = Last Created Entity;
+            Create Beam Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && Is Alive(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Good Beam, First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Vector(0, 0.25, 0), First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Event Player.selectedBot._extendedPlayerCollection[2][2] + Vector(0, 0.25, 0), Team Of(Event Player.selectedBot), Visible To Position and Radius);
+            Event Player._extendedPlayerCollection[25] = Last Created Entity;
+        End;
+        Wait(0.064, Ignore Condition);
+        "We wait to transfer the recording to the new bot to avoid overloading the server"
+        If(Event Player.sampleCount > 0);
+            Global.SourcePlayer = Event Player;
+            Global.TargetPlayer = Event Player.selectedBot;
+            Call Subroutine(TransferRecording);
+        End;
+        Wait(0.064, Ignore Condition);
+        Teleport(Event Player.selectedBot, First Of(Event Player._extendedPlayerCollection[23]));
+        Stop Facing(Event Player.selectedBot);
+        Wait(0.016, Ignore Condition);
+        Set Facing(Event Player.selectedBot, Event Player._extendedPlayerCollection[23][2], To World);
+        "Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT"
+        Wait(0.032, Ignore Condition);
+        Start Facing(Event Player.selectedBot, Event Player._extendedPlayerCollection[23][2], 1000, To World, Direction And Turn Rate);
+        Wait(0.016, Ignore Condition);
+        Wait Until(Angle Between Vectors(Facing Direction Of(Event Player.selectedBot), Event Player._extendedPlayerCollection[23][2]) < 0.1, 0.25);
+        Stop Facing(Event Player.selectedBot);
+    }
+}
+
+// Rule Element Count: 125
 rule("[interface/dummyBotsAndReplay/botEditPage.del] Change hero")
 {
     event
@@ -5317,104 +5432,48 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Change hero")
         Event Player.selectedBotEditAction == 2;
     }
 
-    // Element Count: 71, Action Count: 19
-    // Largest Action Index: 15 using 25 Elements
+    // Element Count: 117, Action Count: 31
+    // Largest Action Index: 12 using 22 Elements
     actions
     {
+        "We don't want to transfer recordings between heroes"
+        If(Event Player.selectedBot.sampleCount > 0);
+            Event Player.selectedBot.recordingPlayStopFlag = 3;
+            Wait(0.016, Ignore Condition);
+        End;
+        Call Subroutine(StoreTempDataFromBot);
         Event Player.tempHeroStorage = Hero Of(Event Player);
         Set Player Allowed Heroes(Event Player, Remove From Array(All Heroes, Event Player.tempHeroStorage));
         Wait Until(!Has Spawned(Event Player), 1);
         Reset Player Hero Availability(Event Player);
         Wait Until(Has Spawned(Event Player), 1000000);
-        Start Forcing Player To Be Hero(Event Player.selectedBot, Hero Of(Event Player));
-        Event Player.selectedBot.tempHeroStorage = Hero Of(Event Player);
+        Destroy Dummy Bot(Team Of(Event Player.selectedBot), Slot Of(Event Player.selectedBot));
         Wait(0.016, Ignore Condition);
-        Stop Forcing Player To Be Hero(Event Player.selectedBot);
+        Create Dummy Bot(Hero Of(Event Player), Event Player._extendedPlayerCollection[22], -1, First Of(Event Player._extendedPlayerCollection[23]), Event Player._extendedPlayerCollection[23][2]);
+        Event Player.selectedBot = Last Created Entity;
         Start Forcing Player To Be Hero(Event Player, Event Player.tempHeroStorage);
         Wait(0.016, Ignore Condition);
         Stop Forcing Player To Be Hero(Event Player);
-        Stop Forcing Player Position(Event Player);
-        Start Forcing Player Position(Event Player, First Of(Event Player.menuActivationPoint), True);
         Wait(0.064, Ignore Condition);
-        Wait Until(Distance Between(Event Player, First Of(Event Player.menuActivationPoint)) < 0.05 && Angle Between Vectors(Facing Direction Of(Event Player), Event Player.menuActivationPoint[2]) < 0.1, 1);
+        Teleport(Event Player, First Of(Event Player.menuActivationPoint));
+        Stop Facing(Event Player);
+        Wait(0.016, Ignore Condition);
+        Set Facing(Event Player, Event Player.menuActivationPoint[2], To World);
+        "Because for SOME REASON setting FACING and TELEPORTING in the SAME FRAME cancels the TELEPORT"
+        Wait(0.032, Ignore Condition);
+        Start Facing(Event Player, Event Player.menuActivationPoint[2], 1000, To World, Direction And Turn Rate);
+        Wait(0.016, Ignore Condition);
+        Wait Until(Angle Between Vectors(Facing Direction Of(Event Player), Event Player.menuActivationPoint[2]) < 0.1, 0.25);
+        Stop Facing(Event Player);
         Event Player.selectedControl = Null;
         "Avoid having input count for something else by allowing other modules to read that an input was processed in the menu."
         Wait(0.016, Ignore Condition);
         Event Player.currentMenuState = 0;
+        Call Subroutine(LoadTempDataToSelectedBot);
     }
 }
 
-// Rule Element Count: 23
-rule("[interface/dummyBotsAndReplay/botEditPage.del] BUGFIX: When dummy bot respawns, force it back onto the right hero")
-{
-    event
-    {
-        Player Died;
-        All;
-        All;
-    }
-
-    // Element Count: 5, Condition Count: 1
-    conditions
-    {
-        Is Dummy Bot(Event Player) == True;
-    }
-
-    // Element Count: 17, Action Count: 5
-    // Largest Action Index: 3 using 8 Elements
-    actions
-    {
-        Event Player.tempHeroStorage = Hero Of(Event Player);
-        Stop Forcing Player To Be Hero(Event Player);
-        Wait Until(Is Alive(Event Player), 10000000);
-        Wait Until(Hero Of(Event Player) != Event Player.tempHeroStorage, 1);
-        Start Forcing Player To Be Hero(Event Player, Event Player.tempHeroStorage);
-    }
-}
-
-// Rule Element Count: 201
-rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Transfer Recording")
-{
-    event
-    {
-        Subroutine;
-        TransferRecording;
-    }
-
-    // Element Count: 200, Action Count: 26
-    // Largest Action Index: 14 using 11 Elements
-    actions
-    {
-        Global.TargetPlayer.primaryFireEvents = Global.SourcePlayer.primaryFireEvents;
-        Global.TargetPlayer.secondaryFireEvents = Global.SourcePlayer.secondaryFireEvents;
-        Global.TargetPlayer.ability1Events = Global.SourcePlayer.ability1Events;
-        Global.TargetPlayer.ability2Events = Global.SourcePlayer.ability2Events;
-        Global.TargetPlayer.ultimateEvents = Global.SourcePlayer.ultimateEvents;
-        Global.TargetPlayer.jumpEvents = Global.SourcePlayer.jumpEvents;
-        Global.TargetPlayer.crouchEvents = Global.SourcePlayer.crouchEvents;
-        Global.TargetPlayer.meleeEvents = Global.SourcePlayer.meleeEvents;
-        Global.TargetPlayer.reloadEvents = Global.SourcePlayer.reloadEvents;
-        Global.TargetPlayer.throttleEvents = Global.SourcePlayer.throttleEvents;
-        Global.TargetPlayer.facingEvents = Global.SourcePlayer.facingEvents;
-        Global.TargetPlayer.weaponEvents = Global.SourcePlayer.weaponEvents;
-        Global.TargetPlayer.recordingLength = Global.SourcePlayer.recordingLength;
-        Global.TargetPlayer.sampleCount = 0;
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.primaryFireEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.secondaryFireEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.ability1Events));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.ability2Events));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.ultimateEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.jumpEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.crouchEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.meleeEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.reloadEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.throttleEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.facingEvents));
-        Global.TargetPlayer.sampleCount = Max(Global.TargetPlayer.sampleCount, Count Of(Global.TargetPlayer.weaponEvents));
-    }
-}
-
-// Rule Element Count: 327
+// Rule Element Count: 42
 rule("[interface/dummyBotsAndReplay/botEditPage.del] Change team")
 {
     event
@@ -5430,55 +5489,19 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Change team")
         Event Player.selectedBotEditAction == 1;
     }
 
-    // Element Count: 319, Action Count: 39
-    // Largest Action Index: 29 using 84 Elements
+    // Element Count: 34, Action Count: 5
+    // Largest Action Index: 2 using 24 Elements
     actions
     {
-        Event Player.tempHeroStorage = Hero Of(Event Player.selectedBot);
-        Event Player._extendedPlayerCollection[20] = Event Player.selectedBot.isPunchingBag;
-        Event Player._extendedPlayerCollection[21] = Event Player.selectedBot.pinnedPosition;
-        Event Player._extendedPlayerCollection[22] = Event Player.selectedBot._extendedPlayerCollection[2];
-        Event Player._extendedPlayerCollection[23] = Event Player.selectedBot.replayResetPoint;
-        Event Player._extendedPlayerCollection[24] = Team Of(Event Player.selectedBot);
-        Event Player._extendedPlayerCollection[25] = Position Of(Event Player.selectedBot);
-        Event Player._extendedPlayerCollection[26] = Facing Direction Of(Event Player.selectedBot);
-        "Temporarily store recording on player who is performing the action"
-        Global.SourcePlayer = Event Player.selectedBot;
-        Global.TargetPlayer = Event Player;
-        Call Subroutine(TransferRecording);
+        Call Subroutine(StoreTempDataFromBot);
         Destroy Dummy Bot(Team Of(Event Player.selectedBot), Slot Of(Event Player.selectedBot));
-        Create Dummy Bot(Event Player.tempHeroStorage, Opposite Team Of(Event Player._extendedPlayerCollection[24]), -1, Event Player._extendedPlayerCollection[25], Event Player._extendedPlayerCollection[26]);
+        Create Dummy Bot(Event Player.tempHeroStorage, Opposite Team Of(Event Player._extendedPlayerCollection[22]), -1, First Of(Event Player._extendedPlayerCollection[23]), Event Player._extendedPlayerCollection[23][2]);
         Event Player.selectedBot = Last Created Entity;
-        If(Event Player._extendedPlayerCollection[20]);
-            Last Created Entity.isPunchingBag = True;
-            Add Health Pool To Player(Last Created Entity, Health, 1250, True, False);
-            Start Forcing Dummy Bot Name(Last Created Entity, Custom String("Punching Bag"));
-        End;
-        If(First Of(Event Player._extendedPlayerCollection[21]) != Null);
-            Event Player.selectedBot.pinnedPosition = Event Player._extendedPlayerCollection[21];
-        End;
-        If(First Of(Event Player._extendedPlayerCollection[23]) != Null);
-            Event Player.selectedBot.replayResetPoint = Event Player._extendedPlayerCollection[23];
-        End;
-        If(First Of(Event Player._extendedPlayerCollection[22]) != Null);
-            Event Player.selectedBot._extendedPlayerCollection[2] = Event Player._extendedPlayerCollection[22];
-            Create Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Sphere, Color(Green), First Of(Event Player.selectedBot._extendedPlayerCollection[2]), 0.5, Visible To Position and Radius);
-            Event Player._extendedPlayerCollection[18] = Last Created Entity;
-            Create Beam Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Good Beam, First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Vector(0, 0.25, 0), First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Event Player.selectedBot._extendedPlayerCollection[2][2] + Vector(0, 0.25, 0), Team Of(Event Player.selectedBot), Visible To Position and Radius);
-            Event Player._extendedPlayerCollection[19] = Last Created Entity;
-        End;
-        Wait(0.064, Ignore Condition);
-        "We wait to transfer the recording to the new bot to avoid overloading the server"
-        Global.SourcePlayer = Event Player;
-        Global.TargetPlayer = Event Player.selectedBot;
-        Call Subroutine(TransferRecording);
-        Start Facing(Event Player.selectedBot, Event Player._extendedPlayerCollection[26], 1000, To World, None);
-        Wait Until(Angle Between Vectors(Facing Direction Of(Event Player.selectedBot), Event Player._extendedPlayerCollection[26]) < 0.1, 1);
-        Stop Facing(Event Player.selectedBot);
+        Call Subroutine(LoadTempDataToSelectedBot);
     }
 }
 
-// Rule Element Count: 257
+// Rule Element Count: 273
 rule("[interface/dummyBotsAndReplay/botEditPage.del] Set respawn point")
 {
     event
@@ -5494,18 +5517,18 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Set respawn point")
         Event Player.selectedBotEditAction == 5;
     }
 
-    // Element Count: 249, Action Count: 29
-    // Largest Action Index: 6 using 84 Elements
+    // Element Count: 265, Action Count: 29
+    // Largest Action Index: 6 using 92 Elements
     actions
     {
         If(First Of(Event Player.selectedBot._extendedPlayerCollection[2]) == Null);
             Event Player.selectedBot._extendedPlayerCollection[2] = Array(Position Of(Event Player.selectedBot), Eye Position(Event Player.selectedBot), Facing Direction Of(Event Player.selectedBot));
             Play Effect(Event Player, Buff Impact Sound, Null, Event Player, 100);
             Small Message(Event Player, Custom String("Respawn point set!"));
-            Create Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Sphere, Color(Green), First Of(Event Player.selectedBot._extendedPlayerCollection[2]), 0.5, Visible To Position and Radius);
-            Event Player._extendedPlayerCollection[18] = Last Created Entity;
-            Create Beam Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Good Beam, First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Vector(0, 0.25, 0), First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Event Player.selectedBot._extendedPlayerCollection[2][2] + Vector(0, 0.25, 0), Team Of(Event Player.selectedBot), Visible To Position and Radius);
-            Event Player._extendedPlayerCollection[19] = Last Created Entity;
+            Create Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && Is Alive(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Sphere, Color(Green), First Of(Event Player.selectedBot._extendedPlayerCollection[2]), 0.5, Visible To Position and Radius);
+            Event Player._extendedPlayerCollection[24] = Last Created Entity;
+            Create Beam Effect(Array Contains(All Players(All Teams), Local Player) && Is Dummy Bot(First Of(Event Player.selectedBot.positionControl)) && Is Alive(First Of(Event Player.selectedBot.positionControl)) && First Of(Event Player.selectedBot.positionControl).replayState == 0 && Local Player.botControlMode == 1 ? Local Player : Null, Good Beam, First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Vector(0, 0.25, 0), First Of(Event Player.selectedBot._extendedPlayerCollection[2]) + Event Player.selectedBot._extendedPlayerCollection[2][2] + Vector(0, 0.25, 0), Team Of(Event Player.selectedBot), Visible To Position and Radius);
+            Event Player._extendedPlayerCollection[25] = Last Created Entity;
             Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
             Global._arrayConstructor[7] = Custom String("Clear Respawn Point");
             Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
@@ -5518,8 +5541,8 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Set respawn point")
             Event Player.selectedBot._extendedPlayerCollection[2] = Global._arrayConstructor;
             Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 100);
             Small Message(Event Player, Custom String("Respawn point cleared"));
-            Destroy Effect(Event Player._extendedPlayerCollection[18]);
-            Destroy Effect(Event Player._extendedPlayerCollection[19]);
+            Destroy Effect(Event Player._extendedPlayerCollection[24]);
+            Destroy Effect(Event Player._extendedPlayerCollection[25]);
             Global._arrayConstructor = Event Player.ButtonLabelGrid[7];
             Global._arrayConstructor[7] = Custom String("Set Respawn Point");
             Event Player.ButtonLabelGrid[7] = Global._arrayConstructor;
@@ -5697,7 +5720,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Longest 
     }
 }
 
-// Rule Element Count: 24
+// Rule Element Count: 34
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recording")
 {
     event
@@ -5706,7 +5729,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recordin
         DeleteRecording;
     }
 
-    // Element Count: 23, Action Count: 19
+    // Element Count: 33, Action Count: 24
     // Largest Action Index: 0 using 2 Elements
     actions
     {
@@ -5727,12 +5750,17 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recordin
         Event Player.meleeEvents = Empty Array;
         Event Player.reloadEvents = Empty Array;
         Event Player.throttleEvents = Empty Array;
-        Event Player.facingEvents = Empty Array;
+        Event Player.facingDirections_multiArray = 0;
+        Event Player.facingDirections_Length = 0;
+        Event Player.facingDurations_multiArray = 0;
+        Event Player.facingDurations_Length = 0;
+        Event Player.replayResetPoint[0] = Null;
+        Event Player.recordingHero = Null;
         Call Subroutine(UpdateLongestRecordingLength);
     }
 }
 
-// Rule Element Count: 13
+// Rule Element Count: 15
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording")
 {
     event
@@ -5741,11 +5769,12 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Start Recording
         StartRecording;
     }
 
-    // Element Count: 12, Action Count: 4
-    // Largest Action Index: 1 using 7 Elements
+    // Element Count: 14, Action Count: 5
+    // Largest Action Index: 2 using 7 Elements
     actions
     {
         Call Subroutine(DeleteRecording);
+        Event Player.recordingHero = Hero Of(Event Player);
         "If all bots are replaying, we need to start our recording one frame later to ensure we record at the same time as the bots"
         Event Player.frame = Global.allBotsReplayDuringRecording ? -1 : 0;
         Event Player.recordingLength = 0;
@@ -6454,7 +6483,7 @@ rule("[UI] - HUD")
     }
 }
 
-// Rule Element Count: 99
+// Rule Element Count: 103
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Sample Count")
 {
     event
@@ -6463,8 +6492,8 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Sample C
         UpdateSampleCount;
     }
 
-    // Element Count: 98, Action Count: 13
-    // Largest Action Index: 1 using 8 Elements
+    // Element Count: 102, Action Count: 13
+    // Largest Action Index: 11 using 12 Elements
     actions
     {
         Event Player.sampleCount = 0;
@@ -6478,7 +6507,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Sample C
         Event Player.sampleCount = Max(Event Player.sampleCount, Count Of(Event Player.meleeEvents));
         Event Player.sampleCount = Max(Event Player.sampleCount, Count Of(Event Player.reloadEvents));
         Event Player.sampleCount = Max(Event Player.sampleCount, Count Of(Event Player.throttleEvents));
-        Event Player.sampleCount = Max(Event Player.sampleCount, Count Of(Event Player.facingEvents));
+        Event Player.sampleCount = Max(Event Player.sampleCount, Round To Integer(Event Player.facingDirections_Length / 1000, Down));
         Event Player.sampleCount = Max(Event Player.sampleCount, Count Of(Event Player.weaponEvents));
     }
 }
@@ -6655,7 +6684,7 @@ rule("[interface/dummyBotsAndReplay/replay/replay.del] Update longest recording 
     }
 }
 
-// Rule Element Count: 66
+// Rule Element Count: 62
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip")
 {
     event
@@ -6664,15 +6693,13 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Clip")
         PlayClip;
     }
 
-    // Element Count: 65, Action Count: 23
-    // Largest Action Index: 15 using 10 Elements
+    // Element Count: 61, Action Count: 21
+    // Largest Action Index: 13 using 10 Elements
     actions
     {
         Call Subroutine(StopClip);
-        Stop Forcing Player To Be Hero(Event Player);
         Respawn(Event Player);
         Wait(0.25, Ignore Condition);
-        Start Forcing Player To Be Hero(Event Player, Event Player.recordingHero);
         Wait(0.064, Ignore Condition);
         Teleport(Event Player, First Of(Event Player.replayResetPoint));
         Stop Facing(Event Player);
@@ -7214,7 +7241,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - 
     }
 }
 
-// Rule Element Count: 65
+// Rule Element Count: 171
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Facing")
 {
     event
@@ -7223,18 +7250,25 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - 
         RecordFrameFacing;
     }
 
-    // Element Count: 64, Action Count: 8
-    // Largest Action Index: 1 using 16 Elements
+    // Element Count: 170, Action Count: 15
+    // Largest Action Index: 13 using 36 Elements
     actions
     {
         Event Player.sampleValue = Facing Direction Of(Event Player);
-        If(First Of(Event Player.facingEvents[Event Player.currentEventIndices[10]]) != Event Player.sampleValue);
+        If(Event Player.facingDirections_multiArray[Round To Integer(Event Player.currentEventIndices[10] / 1000, Down)][Event Player.currentEventIndices[10] % 1000] != Event Player.sampleValue);
             Event Player.currentEventIndices[10] += Event Player.frame == 0 ? 0 : 1;
-            Event Player.facingEvents[Event Player.currentEventIndices[10]] = Array(Event Player.sampleValue, 0);
+            Global._arrayConstructor = Event Player.facingDirections_multiArray[Round To Integer(Event Player.facingDirections_Length / 1000, Down)];
+            Global._arrayConstructor[Event Player.facingDirections_Length % 1000] = Event Player.sampleValue;
+            Event Player.facingDirections_multiArray[Round To Integer(Event Player.facingDirections_Length / 1000, Down)] = Global._arrayConstructor;
+            Event Player.facingDirections_Length += 1;
+            Global._arrayConstructor = Event Player.facingDurations_multiArray[Round To Integer(Event Player.facingDurations_Length / 1000, Down)];
+            Global._arrayConstructor[Event Player.facingDurations_Length % 1000] = 0;
+            Event Player.facingDurations_multiArray[Round To Integer(Event Player.facingDurations_Length / 1000, Down)] = Global._arrayConstructor;
+            Event Player.facingDurations_Length += 1;
         End;
-        Global._arrayConstructor = Event Player.facingEvents[Event Player.currentEventIndices[10]];
-        Global._arrayConstructor[1] += 1;
-        Event Player.facingEvents[Event Player.currentEventIndices[10]] = Global._arrayConstructor;
+        Global._arrayConstructor = Event Player.facingDurations_multiArray[Round To Integer(Event Player.currentEventIndices[10] / 1000, Down)];
+        Global._arrayConstructor[Event Player.currentEventIndices[10] % 1000] = Event Player.facingDurations_multiArray[Round To Integer(Event Player.currentEventIndices[10] / 1000, Down)][Event Player.currentEventIndices[10] % 1000] + 1;
+        Event Player.facingDurations_multiArray[Round To Integer(Event Player.currentEventIndices[10] / 1000, Down)] = Global._arrayConstructor;
     }
 }
 
@@ -7314,7 +7348,7 @@ rule("[interface/dummyBotsAndReplay/replay/replayDefs.del] Recording Loop")
     actions
     {
         "End the recording if the player opens the menu, switches heroes, or exceeds the maximum sample count"
-        If(Event Player.currentMenuState != 0 || Hero Of(Event Player) != Event Player.recordingHero || Event Player.sampleCount >= 999);
+        If(Event Player.currentMenuState != 0 || Hero Of(Event Player) != Event Player.recordingHero || Event Player.sampleCount > 999);
             Call Subroutine(Recorder_StopRecording);
             Abort;
         End;
@@ -7653,7 +7687,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Th
     }
 }
 
-// Rule Element Count: 54
+// Rule Element Count: 80
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Facing")
 {
     event
@@ -7662,16 +7696,16 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Fa
         PlayFrameFacing;
     }
 
-    // Element Count: 53, Action Count: 9
-    // Largest Action Index: 5 using 21 Elements
+    // Element Count: 79, Action Count: 9
+    // Largest Action Index: 5 using 33 Elements
     actions
     {
-        Event Player.sampleValue = First Of(Event Player.facingEvents[Event Player.currentEventIndices[10]]);
+        Event Player.sampleValue = Event Player.facingDirections_multiArray[Round To Integer(Event Player.currentEventIndices[10] / 1000, Down)][Event Player.currentEventIndices[10] % 1000];
         If(Facing Direction Of(Event Player) != Event Player.sampleValue);
             Set Facing(Event Player, Event Player.sampleValue, To World);
         End;
         Event Player.currentEventFrames[10] += 1;
-        If(Event Player.currentEventFrames[10] >= Event Player.facingEvents[Event Player.currentEventIndices[10]][1]);
+        If(Event Player.currentEventFrames[10] >= Event Player.facingDurations_multiArray[Round To Integer(Event Player.currentEventIndices[10] / 1000, Down)][Event Player.currentEventIndices[10] % 1000]);
             Event Player.currentEventIndices[10] += 1;
             Event Player.currentEventFrames[10] = 0;
         End;
@@ -7703,7 +7737,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - We
     }
 }
 
-// Rule Element Count: 41
+// Rule Element Count: 37
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip")
 {
     event
@@ -7712,18 +7746,16 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Loop Clip")
         LoopClip;
     }
 
-    // Element Count: 40, Action Count: 18
-    // Largest Action Index: 13 using 7 Elements
+    // Element Count: 36, Action Count: 16
+    // Largest Action Index: 11 using 7 Elements
     actions
     {
         Event Player.botReadyToReplay = False;
         Event Player.frame = 0;
         Event Player.currentEventIndices = Empty Array;
         Event Player.currentEventFrames = Empty Array;
-        Stop Forcing Player To Be Hero(Event Player);
         Respawn(Event Player);
         Wait(0.25, Ignore Condition);
-        Start Forcing Player To Be Hero(Event Player, Event Player.recordingHero);
         Teleport(Event Player, First Of(Event Player.replayResetPoint));
         Stop Facing(Event Player);
         Wait(0.016, Ignore Condition);
