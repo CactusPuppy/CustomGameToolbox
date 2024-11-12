@@ -336,19 +336,7 @@ void TransferRecording(Player SourcePlayer = EventPlayer(), Player TargetPlayer)
   TargetPlayer.weaponEvents = SourcePlayer.weaponEvents;
 
   TargetPlayer.recordingLength = SourcePlayer.recordingLength;
-  TargetPlayer.sampleCount = 0;
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.primaryFireEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.secondaryFireEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.ability1Events.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.ability2Events.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.ultimateEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.jumpEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.crouchEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.meleeEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.reloadEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.throttleEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.facingEvents.Length);
-  TargetPlayer.sampleCount = Max(TargetPlayer.sampleCount, TargetPlayer.weaponEvents.Length);
+  TargetPlayer.sampleCount = SourcePlayer.sampleCount;
 }
 
 rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Recording Loop"
