@@ -59,7 +59,7 @@ void HandleBotEditReplayPrimaryFire() {
     UpdateOffsetDisplay();
     Abort();
   }
-  SlowMoAgnosticWait(0.5, WaitBehavior.AbortWhenFalse);
+  SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
   Number tempMenuXIndex = menuXIndex;
   while (currentMenuState == MenuState.EDITING_REPLAY
     && IsButtonHeld(EventPlayer(), Button.PrimaryFire)
@@ -74,6 +74,6 @@ void HandleBotEditReplayPrimaryFire() {
       selectedBot.playbackOffset -= 1;
       UpdateOffsetDisplay();
     }
-    SlowMoAgnosticWait(0.1, WaitBehavior.AbortWhenFalse);
+    Wait(0.016, WaitBehavior.AbortWhenFalse);
   }
 }
