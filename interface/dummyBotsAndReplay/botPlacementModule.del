@@ -121,7 +121,7 @@ if (HasSpawned())
   CreateBeamEffect(
     VisibleTo: IsAlive(EventPlayer()) && playersWhoShouldSeeControls(facingControl),
     BeamType: BeamType.GrappleBeam,
-    StartPosition: EventPlayer().EyePosition(),
+    StartPosition: UpdateEveryFrame(EventPlayer().EyePosition()),
     EndPosition: UpdateEveryFrame(desiredFacingControlPosition(EventPlayer())),
     Color: null,
     EffectRev.VisibleToPositionAndRadius
