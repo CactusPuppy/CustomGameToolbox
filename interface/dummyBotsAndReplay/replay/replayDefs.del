@@ -16,6 +16,7 @@ enum InputType {
   CROUCH,
   MELEE,
   RELOAD,
+  INTERACT,
   THROTTLE,
   FACING,
   WEAPON
@@ -51,6 +52,7 @@ playervar InputEvent[] jumpEvents;
 playervar InputEvent[] crouchEvents;
 playervar InputEvent[] meleeEvents;
 playervar InputEvent[] reloadEvents;
+playervar InputEvent[] interactEvents;
 playervar InputEvent[] throttleEvents;
 playervar BigArray<Vector> facingDirections;
 playervar BigArray<Number> facingDurations;
@@ -76,6 +78,7 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   crouchEvents = [];
   meleeEvents = [];
   reloadEvents = [];
+  interactEvents = [];
   throttleEvents = [];
   facingDirections = new BigArray<Vector>();
   facingDurations = new BigArray<Number>();
@@ -95,6 +98,7 @@ void UpdateSampleCount() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
   sampleCount = Max(sampleCount, crouchEvents.Length);
   sampleCount = Max(sampleCount, meleeEvents.Length);
   sampleCount = Max(sampleCount, reloadEvents.Length);
+  sampleCount = Max(sampleCount, interactEvents.Length);
   sampleCount = Max(sampleCount, throttleEvents.Length);
   sampleCount = Max(sampleCount, RoundToInteger(facingDirections.Length / 1000, Rounding.Down));
   sampleCount = Max(sampleCount, weaponEvents.Length);
@@ -115,6 +119,11 @@ void StartRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/repl
 }
 
 void StopRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Stop Recording" {
+  # Check if the last Interact input was what ended the recording
+  # If so, set it to false so it doesn't get replayed
+  if (interactEvents.Length > 0 && interactEvents[interactEvents.Length - 1].value == true) {
+    interactEvents[interactEvents.Length - 1].value = false;
+  }
   replayState = ReplayState.NONE;
   recordingLength = frame;
   UpdateSampleCount();
@@ -191,6 +200,14 @@ if (replayState == ReplayState.RECORDING)
 if (EventPlayer().IsButtonHeld(Button.Reload))
 {
   currentInputValues[InputType.RELOAD] = true;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Input Event - Interact"
+Event.OngoingPlayer
+if (replayState == ReplayState.RECORDING)
+if (EventPlayer().IsButtonHeld(Button.Interact))
+{
+  currentInputValues[InputType.INTERACT] = true;
 }
 
 void RecordFramePrimaryFire() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Primary Fire" {
@@ -274,6 +291,15 @@ void RecordFrameReload() playervar "[SUB | interface/dummyBotsAndReplay/replay/r
   reloadEvents[currentEventIndices[InputType.RELOAD]].duration += 1;
 }
 
+void RecordFrameInteract() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Interact" {
+  sampleValue = IsButtonHeld(EventPlayer(), Button.Interact) || currentInputValues[InputType.INTERACT];
+  if (interactEvents[currentEventIndices[InputType.INTERACT]].value != sampleValue) {
+    currentEventIndices[InputType.INTERACT] += frame == 0 ? 0 : 1;
+    interactEvents[currentEventIndices[InputType.INTERACT]] = InputEvent.New(sampleValue, 0);
+  }
+  interactEvents[currentEventIndices[InputType.INTERACT]].duration += 1;
+}
+
 void RecordFrameThrottle() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Record Frame - Throttle" {
   sampleValue = ThrottleOf(EventPlayer());
   if (throttleEvents[currentEventIndices[InputType.THROTTLE]].value != sampleValue) {
@@ -313,6 +339,7 @@ void RecordFrame() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayD
     RecordFrameCrouch();
     RecordFrameMelee();
     RecordFrameReload();
+    RecordFrameInteract();
     RecordFrameThrottle();
     RecordFrameFacing();
     RecordFrameWeapon();
@@ -330,6 +357,7 @@ void TransferRecording(Player SourcePlayer = EventPlayer(), Player TargetPlayer)
   TargetPlayer.crouchEvents = SourcePlayer.crouchEvents;
   TargetPlayer.meleeEvents = SourcePlayer.meleeEvents;
   TargetPlayer.reloadEvents = SourcePlayer.reloadEvents;
+  TargetPlayer.interactEvents = SourcePlayer.interactEvents;
   TargetPlayer.throttleEvents = SourcePlayer.throttleEvents;
   TargetPlayer.facingDirections = SourcePlayer.facingDirections;
   TargetPlayer.facingDurations = SourcePlayer.facingDurations;
@@ -402,6 +430,7 @@ void StopClip() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs
   StopHoldingButton(EventPlayer(), Button.Crouch);
   StopHoldingButton(EventPlayer(), Button.Melee);
   StopHoldingButton(EventPlayer(), Button.Reload);
+  StopHoldingButton(EventPlayer(), Button.Interact);
   if (IsAlive()) TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().replayResetPoint);
   replayState = ReplayState.NONE;
 }
@@ -590,6 +619,24 @@ void PlayFrameReload() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   }
 }
 
+void PlayFrameInteract() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Interact" {
+  sampleValue = EventPlayer().interactEvents[currentEventIndices[InputType.INTERACT]].value;
+  if (sampleValue == true) {
+    if (!IsButtonHeld(EventPlayer(), Button.Interact)) {
+      StartHoldingButton(EventPlayer(), Button.Interact);
+    }
+  } else {
+    if (IsButtonHeld(EventPlayer(), Button.Interact)) {
+      StopHoldingButton(EventPlayer(), Button.Interact);
+    }
+  }
+  currentEventFrames[InputType.INTERACT] += 1;
+  if (currentEventFrames[InputType.INTERACT] >= interactEvents[currentEventIndices[InputType.INTERACT]].duration) {
+    currentEventIndices[InputType.INTERACT] += 1;
+    currentEventFrames[InputType.INTERACT] = 0;
+  }
+}
+
 void PlayFrameThrottle() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Throttle" {
   sampleValue = throttleEvents[currentEventIndices[InputType.THROTTLE]].value;
   if (ThrottleOf(EventPlayer()) != sampleValue) {
@@ -639,6 +686,7 @@ void PlayFrame() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDef
       PlayFrameUltimate();
       PlayFrameMelee();
       PlayFrameReload();
+      PlayFrameInteract();
     }
     PlayFrameJump();
     PlayFrameCrouch();
