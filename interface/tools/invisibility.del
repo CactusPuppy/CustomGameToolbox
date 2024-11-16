@@ -1,0 +1,40 @@
+playervar Number invisibilityLockCount;
+playervar Number phasedOutLockCount;
+
+rule: "[interface/tools/invisibility.del] If invisibility locks greater than 0, make player invisible"
+Event.OngoingPlayer
+if (invisibilityLockCount > 0)
+{
+  SetInvisible(EventPlayer(), InvisibleTo.All);
+  WaitUntil(invisibilityLockCount == 0, 1000000);
+  SetInvisible(EventPlayer(), InvisibleTo.None);
+}
+
+rule: "[interface/tools/invisibility.del] If phased out locks greater than 0, make player phased out"
+Event.OngoingPlayer
+if (phasedOutLockCount > 0)
+{
+  SetStatus(EventPlayer(), null, Status.PhasedOut, 1000000);
+  WaitUntil(phasedOutLockCount == 0, 1000000);
+  ClearStatus(EventPlayer(), Status.PhasedOut);
+}
+
+void AddOneInvisibilityLock()
+{
+  invisibilityLockCount += 1;
+}
+
+void AddOnePhasedOutLock()
+{
+  phasedOutLockCount += 1;
+}
+
+void RemoveOneInvisibilityLock()
+{
+  invisibilityLockCount = Max(0, invisibilityLockCount - 1);
+}
+
+void RemoveOnePhasedOutLock()
+{
+  phasedOutLockCount = Max(0, phasedOutLockCount - 1);
+}
