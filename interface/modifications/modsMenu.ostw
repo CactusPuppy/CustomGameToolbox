@@ -152,7 +152,7 @@ if (IsModificationActive(Modification.SLOW_MOTION))
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 2, "Slow Motion [OFF]", Color.Gray);
 }
 
-globalvar Number SLOW_MOTION_SPEED = WorkshopSettingInteger(ModSettingsCategory, "Slow Motion Speed", 25, 1, 100);
+globalvar Number SLOW_MOTION_SPEED = WorkshopSettingInteger(ModSettingsCategory, "Slow Motion Speed", 25, 10, 100);
 
 rule: "[interface/modifications/modsMenu.ostw] Handle slow motion"
 if (IsModificationActive(Modification.SLOW_MOTION))
