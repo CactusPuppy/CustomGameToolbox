@@ -9,6 +9,7 @@ import "modifications/modsMenu.ostw";
 import "dummyBotsAndReplay/botsMenu.ostw";
 import "dummyBotsAndReplay/botEditPage.del";
 import "tools/invisibility.del";
+import "config/configMenu.del";
 
 playervar ResetPoint menuActivationPoint;
 
@@ -26,6 +27,7 @@ rule: "[interface/menu.ostw] Set up action grid" -100
   ButtonActionGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonActions;
   ButtonActionGrid[MenuState.EDITING_DUMMY_BOT_BUTTONS] = INTENTIONALLY_EMPTY_ACTION_GRID;
   ButtonActionGrid[MenuState.EDITING_REPLAY] = BotEditReplayActions;
+  ButtonActionGrid[MenuState.CONFIG] = INTENTIONALLY_EMPTY_ACTION_GRID;
 }
 rule: "[interface/menu.ostw] Set up button label grid" -100
 Event.OngoingPlayer
@@ -38,6 +40,7 @@ Event.OngoingPlayer
   ButtonLabelGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonLabels;
   ButtonLabelGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonLabels;
   ButtonLabelGrid[MenuState.EDITING_REPLAY] = BotEditReplayPageButtonLabels;
+  ButtonLabelGrid[MenuState.CONFIG] = configMenuButtonLabels;
 }
 rule: "[interface/menu.ostw] Set up color grid" -100
 Event.OngoingPlayer
@@ -50,28 +53,29 @@ Event.OngoingPlayer
   ButtonColorGrid[MenuState.DUMMY_BOTS_AND_REPLAY] = botsReplayMenuButtonColors;
   ButtonColorGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonColors;
   ButtonColorGrid[MenuState.EDITING_REPLAY] = BotEditReplayPageButtonColors;
+  ButtonColorGrid[MenuState.CONFIG] = configMenuButtonColors;
 }
 
 MenuState[] mainMenuButtonActions: [
-  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED,      MenuState.CLOSED,                MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.INFORMATION, MenuState.CLOSED,      MenuState.MODIFICATIONS,         MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED,      MenuState.CLOSED,                MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.TOOLS,       MenuState.CLOSED,      MenuState.DUMMY_BOTS_AND_REPLAY, MenuState.CLOSED,
-  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CLOSED,      MenuState.CLOSED,                MenuState.CLOSED
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.INFORMATION,                MenuState.CLOSED,                MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.MODIFICATIONS,              MenuState.CLOSED,         MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.TOOLS,                      MenuState.CLOSED,                MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.DUMMY_BOTS_AND_REPLAY,      MenuState.CLOSED,              MenuState.CLOSED,
+  MenuState.CLOSED, MenuState.CLOSED,      MenuState.CONFIG,                     MenuState.CLOSED,                MenuState.CLOSED
 ];
 String[] mainMenuButtonLabels: [
-  "", "",            "",                   "",                  "",
-  "", "Information", "",                   "Modifications",     "",
-  "", "",            "",                   "",                  "",
-  "", "Tools",       "",                   "Dummy Bots/Replay",        "",
-  "", "",            "", "",                  ""
+  "", "",            "Information",        "",     "",
+  "", "",            "Modifications",      "",     "",
+  "", "",            "Tools",              "",     "",
+  "", "",            "Dummy Bots/Replay",  "",     "",
+  "", "",            "Config",             "",     ""
 ];
 Color[] mainMenuButtonColors: [
-  null, null,               null,       null,         null,
-  null, LighterRed,         null,       Color.Green,  null,
-  null, null,               null,       null,         null,
-  null, Color.SkyBlue,      null,       Color.Yellow, null,
-  null, null,               null,       null,         null
+  null, null,        LighterRed,       null,         null,
+  null, null,        Color.Green,      null,         null,
+  null, null,        Color.SkyBlue,    null,         null,
+  null, null,        Color.Yellow,     null,         null,
+  null, null,        Color.Violet,       null,         null
 ];
 
 rule: "[interface/menu.ostw] Global menu setup"
@@ -99,14 +103,22 @@ rule: "[interface/menu.ostw] Global menu setup"
     Spectators:    Spectators.VisibleNever);
   # Additional helper text
   OnScreenText.CreateOnScreenText(
-    VisibleTo:     [MenuState.MAIN_MENU, MenuState.EDITING_DUMMY_BOT_BUTTONS].Contains(LocalPlayer().currentMenuState) ? LocalPlayer() : null,
-    Header:        ["Use WASD to Navigate", $"Press/Hold {InputBindingString(Button.Reload)} for Manual Control"][[MenuState.MAIN_MENU, MenuState.EDITING_DUMMY_BOT_BUTTONS].IndexOf(LocalPlayer().currentMenuState)],
-    PositionX:     0,
-    PositionY:     -1.25,
-    Scale:         2,
-    Color:         Color.White,
-    Reevaluation:  InworldTextRev.VisibleToPositionAndString,
-    Spectators:    Spectators.VisibleNever);
+    VisibleTo:      [MenuState.MAIN_MENU, MenuState.EDITING_DUMMY_BOT_BUTTONS, MenuState.CONFIG].Contains(LocalPlayer().currentMenuState) ? LocalPlayer() : null,
+    Header:         [
+                      "Use WASD to Navigate",
+                      $"Press/Hold {InputBindingString(Button.Reload)} for Manual Control",
+                      $"Hold {InputBindingString(Button.Ability1)} for faster adjustments (if applicable)"
+                    ][[
+                      MenuState.MAIN_MENU,
+                      MenuState.EDITING_DUMMY_BOT_BUTTONS,
+                      MenuState.CONFIG
+                    ].IndexOf(LocalPlayer().currentMenuState)],
+    PositionX:      0,
+    PositionY:      -1.25,
+    Scale:          2,
+    Color:          Color.White,
+    Reevaluation:   InworldTextRev.VisibleToPositionAndString,
+    Spectators:     Spectators.VisibleNever);
   // # DEBUG: grid params
   // printMenuValues();
   # Create grid menu items
@@ -263,8 +275,8 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
     return;
   }
   if (ArrayContains([MenuState.INFORMATION, MenuState.MODIFICATIONS, MenuState.TOOLS,
-      MenuState.DUMMY_BOTS_AND_REPLAY], currentMenuState)) {
-    OpenMenuToPage();
+      MenuState.DUMMY_BOTS_AND_REPLAY, MenuState.CONFIG], currentMenuState)) {
+    OpenMenuToPage(EventPlayer(), MenuState.MAIN_MENU);
     return;
   }
   if (currentMenuState == MenuState.CONFIRMING_END_GAME) {
@@ -292,6 +304,10 @@ if (AbsoluteValue(XOf(ThrottleOf(EventPlayer()))) > 0.5)
     # The left-right function does nothing in this menu page
     Abort();
   }
+  if (currentMenuState == MenuState.CONFIG) {
+    ConfigMenu_ThrottleLeftRight();
+    Abort();
+  }
   if (XOf(ThrottleOf(EventPlayer())) > 0) {
     findLeft();
   } else {
@@ -307,6 +323,10 @@ if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
     BotButtonEdit_HandleUpDown();
     return;
   }
+  if (currentMenuState == MenuState.CONFIG) {
+    ConfigMenu_ThrottleUpDown();
+    return;
+  }
   if (ZOf(ThrottleOf()) > 0) {
     findUp();
   } else {
@@ -314,7 +334,7 @@ if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
   }
 }
 
-MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMING_END_GAME, MenuState.EDITING_DUMMY_BOT_BUTTONS];
+MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMING_END_GAME, MenuState.EDITING_DUMMY_BOT_BUTTONS, MenuState.CONFIG];
 rule: "[interface/menu.ostw] When menu state changes, find new first selection" -1
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)
@@ -322,6 +342,10 @@ if (currentMenuState != MenuState.CLOSED)
   Wait(0.064, WaitBehavior.AbortWhenFalse);
   // # DEBUG
   // LogToInspector($"Current action grid element count: {CountOf(currentActionGrid())}");
+  if (currentMenuState == MenuState.CONFIG) {
+    menuXIndex = 2;
+    menuYIndex = 1;
+  }
   if (currentActionGrid() != 0 && !ArrayContains(NO_AUTO_SET_INDICES_MENUS, currentMenuState)) {
     AutoSetMenuIndices();
   }

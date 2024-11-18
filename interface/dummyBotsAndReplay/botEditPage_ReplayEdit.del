@@ -18,7 +18,7 @@ String arrowNarrowSpacing: "                 �
 String[] BotEditReplayPageButtonLabels: [
   " ", " ", " ",                           " ", " ",
   " ", " ", "DELAY PLAYBACK OF REPLAY BY", " ", " ",
-  " ", arrowNarrowSpacing + "▼",            "0",                "▲" + arrowNarrowSpacing, " ",
+  " ", arrowNarrowSpacing + "◀",            "0",                "▶" + arrowNarrowSpacing, " ",
   " ", " ",         "FRAMES",              " ", " ",
   " ", " ",      "Reset Delay",            " ", " "
 ];
@@ -59,8 +59,8 @@ void HandleBotEditReplayPrimaryFire() {
     UpdateOffsetDisplay();
     Abort();
   }
+  tempMenuXIndex = menuXIndex;
   SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
-  Number tempMenuXIndex = menuXIndex;
   while (currentMenuState == MenuState.EDITING_REPLAY
     && IsButtonHeld(EventPlayer(), Button.PrimaryFire)
     && menuXIndex == tempMenuXIndex) {

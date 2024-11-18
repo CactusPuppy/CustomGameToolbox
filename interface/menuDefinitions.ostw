@@ -13,7 +13,8 @@ enum MenuState
   DUMMY_BOTS_AND_REPLAY,
   EDITING_DUMMY_BOT,
   EDITING_REPLAY,
-  EDITING_DUMMY_BOT_BUTTONS
+  EDITING_DUMMY_BOT_BUTTONS,
+  CONFIG
 }
 
 globalvar Any[][] ButtonActionGrid;
@@ -23,7 +24,9 @@ playervar Color[][] ButtonColorGrid; // Player variable so that the display may 
 playervar MenuState currentMenuState = MenuState.CLOSED;
 // playervar Cursor | Number cursor = -1;
 playervar Number menuXIndex; // Positive to the right
+playervar Number tempMenuXIndex;
 playervar Number menuYIndex; // Positive downwards
+playervar Number tempMenuYIndex;
 playervar Boolean hideMenuOpenTooltip = WorkshopSettingToggle(MenuSettingsCategory, "Hide Before-First-Use Menu Open/Close Tooltip", true);
 
 // Index is rowIndex * numCols + colIndex
@@ -79,7 +82,7 @@ Any menuButton(in Number colIndex, in Number rowIndex):
     PositionY: rowIndexToY(rowIndex),
     Scale: 2,
     Reevaluation: InworldTextRev.VisibleToPositionStringAndColor,
-    Color: isSelectingGridIndex(LocalPlayer(), colIndex, rowIndex) && ButtonActionGrid[LocalPlayer().currentMenuState][currentGridIndex(LocalPlayer())]
+    Color: isSelectingGridIndex(LocalPlayer(), colIndex, rowIndex)
       ? selectedColor
       : currentColorGrid()[gridIndex(colIndex, rowIndex)],
     Spectators: Spectators.VisibleNever

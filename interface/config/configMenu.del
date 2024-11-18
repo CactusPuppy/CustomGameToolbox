@@ -1,0 +1,184 @@
+enum ConfigItem {
+  METERS_OPTIMIZED_FOR_OVER_TIME,
+  BUTTON_SPAM_PERIOD,
+  SLOW_MOTION_SPEED,
+  END_SENTINEL
+}
+
+String currentConfigItem: [
+  "HPS/DPS Meter Optimization",
+  "Button Spam Period",
+  "Slow Motion Speed"
+][currentConfigSelection];
+
+playervar ConfigItem currentConfigSelection;
+
+String leftArrow: "◀";
+String rightArrow: "▶";
+
+String[] configMenuButtonLabels: [
+  "", "", "", "", "",
+  "", leftArrow, currentConfigItem, rightArrow, "",
+  "", "", $"{OptimizeMetricsForOverTime}", "", "",
+  "", "", "", "", "",
+  "", "", "", "", ""
+];
+
+Color[] configMenuButtonColors: [
+  null, null, null, null, null,
+  null, Color.White, Color.White, Color.White, null,
+  null, Color.White, Color.White, Color.White, null,
+  null, null, null, null, null,
+  null, null, null, null, null
+];
+
+void ConfigMenu_ThrottleUpDown() {
+  if (ZOf(ThrottleOf()) > 0 && menuYIndex == 2) {
+    menuYIndex = 1;
+    UpdateButtonLabel(MenuState.CONFIG, 1, 1, leftArrow);
+    UpdateButtonLabel(MenuState.CONFIG, 3, 1, rightArrow);
+    UpdateButtonLabel(MenuState.CONFIG, 1, 2, "");
+    UpdateButtonLabel(MenuState.CONFIG, 3, 2, "");
+  } else {
+    menuYIndex = 2;
+    UpdateButtonLabel(MenuState.CONFIG, 1, 1, "");
+    UpdateButtonLabel(MenuState.CONFIG, 3, 1, "");
+    UpdateButtonLabel(MenuState.CONFIG, 1, 2, arrowNarrowSpacing + leftArrow);
+    UpdateButtonLabel(MenuState.CONFIG, 3, 2, rightArrow + arrowNarrowSpacing);
+  }
+}
+
+void ConfigMenu_ThrottleLeftRight() {
+  # Set the current config item
+  if (menuYIndex == 1) {
+    if (XOf(ThrottleOf(EventPlayer())) > 0) {
+      currentConfigSelection = currentConfigSelection - 1;
+      if (currentConfigSelection < 0) {
+        currentConfigSelection = ConfigItem.END_SENTINEL - 1;
+      }
+    } else {
+      currentConfigSelection = currentConfigSelection + 1;
+      if (currentConfigSelection >= ConfigItem.END_SENTINEL) {
+        currentConfigSelection = 0;
+      }
+    }
+    UpdateButtonLabel(MenuState.CONFIG, 2, 1, currentConfigItem);
+    switch (currentConfigSelection) {
+      case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime}");
+        break;
+      case ConfigItem.BUTTON_SPAM_PERIOD:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
+        break;
+      case ConfigItem.SLOW_MOTION_SPEED:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
+        break;
+    }
+    return;
+  }
+  # Modify the current config item
+  if (XOf(ThrottleOf(EventPlayer())) > 0) {
+    ConfigMenu_Left();
+  } else {
+    // Decrease the value
+    ConfigMenu_Right();
+  }
+}
+
+void ConfigMenu_Left() {
+  switch (currentConfigSelection) {
+    case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
+      OptimizeMetricsForOverTime = !OptimizeMetricsForOverTime;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime}");
+      break;
+    case ConfigItem.BUTTON_SPAM_PERIOD:
+      if (BUTTON_SPAM_PERIOD <= 0.1) return;
+      BUTTON_SPAM_PERIOD -= IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+      BUTTON_SPAM_PERIOD = Max(BUTTON_SPAM_PERIOD, 0.1);
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) > 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (BUTTON_SPAM_PERIOD <= 0.1) {
+          Abort();
+        }
+        BUTTON_SPAM_PERIOD -= IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+        BUTTON_SPAM_PERIOD = Max(BUTTON_SPAM_PERIOD, 0.1);
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
+        Wait(0.064, WaitBehavior.AbortWhenFalse);
+      }
+      break;
+    case ConfigItem.SLOW_MOTION_SPEED:
+      if (SLOW_MOTION_SPEED <= 10) return;
+      SLOW_MOTION_SPEED -= 5;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) > 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (SLOW_MOTION_SPEED <= 10) {
+          Abort();
+        }
+        SLOW_MOTION_SPEED -= 5;
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
+        Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
+      }
+      break;
+  }
+}
+
+void ConfigMenu_Right() {
+  switch (currentConfigSelection) {
+    case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
+      OptimizeMetricsForOverTime = !OptimizeMetricsForOverTime;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime}");
+      break;
+    case ConfigItem.BUTTON_SPAM_PERIOD:
+      if (BUTTON_SPAM_PERIOD >= 30) return;
+      BUTTON_SPAM_PERIOD += IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+      BUTTON_SPAM_PERIOD = Min(BUTTON_SPAM_PERIOD, 30);
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) < 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (BUTTON_SPAM_PERIOD >= 30) {
+          Abort();
+        }
+        BUTTON_SPAM_PERIOD += IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+        BUTTON_SPAM_PERIOD = Min(BUTTON_SPAM_PERIOD, 30);
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
+        Wait(0.064, WaitBehavior.AbortWhenFalse);
+      }
+      break;
+    case ConfigItem.SLOW_MOTION_SPEED:
+      if (SLOW_MOTION_SPEED >= 100) return;
+      SLOW_MOTION_SPEED += 5;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) < 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (SLOW_MOTION_SPEED >= 100) {
+          Abort();
+        }
+        SLOW_MOTION_SPEED += 5;
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
+        Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
+      }
+      break;
+  }
+}
