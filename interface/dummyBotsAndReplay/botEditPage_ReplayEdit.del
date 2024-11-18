@@ -18,7 +18,7 @@ String arrowNarrowSpacing: "                 �
 String[] BotEditReplayPageButtonLabels: [
   " ", " ", " ",                           " ", " ",
   " ", " ", "DELAY PLAYBACK OF REPLAY BY", " ", " ",
-  " ", arrowNarrowSpacing + "▼",            "0",                "▲" + arrowNarrowSpacing, " ",
+  " ", arrowNarrowSpacing + "◀",            "0",                "▶" + arrowNarrowSpacing, " ",
   " ", " ",         "FRAMES",              " ", " ",
   " ", " ",      "Reset Delay",            " ", " "
 ];
