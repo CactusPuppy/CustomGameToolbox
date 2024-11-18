@@ -24,7 +24,9 @@ playervar Color[][] ButtonColorGrid; // Player variable so that the display may 
 playervar MenuState currentMenuState = MenuState.CLOSED;
 // playervar Cursor | Number cursor = -1;
 playervar Number menuXIndex; // Positive to the right
+playervar Number tempMenuXIndex;
 playervar Number menuYIndex; // Positive downwards
+playervar Number tempMenuYIndex;
 playervar Boolean hideMenuOpenTooltip = WorkshopSettingToggle(MenuSettingsCategory, "Hide Before-First-Use Menu Open/Close Tooltip", true);
 
 // Index is rowIndex * numCols + colIndex
