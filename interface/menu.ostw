@@ -345,6 +345,10 @@ if (currentMenuState != MenuState.CLOSED)
   if (currentMenuState == MenuState.CONFIG) {
     menuXIndex = 2;
     menuYIndex = 1;
+    UpdateButtonLabel(MenuState.CONFIG, 1, 1, leftArrow);
+    UpdateButtonLabel(MenuState.CONFIG, 3, 1, rightArrow);
+    UpdateButtonLabel(MenuState.CONFIG, 1, 2, "");
+    UpdateButtonLabel(MenuState.CONFIG, 3, 2, "");
   }
   if (currentActionGrid() != 0 && !ArrayContains(NO_AUTO_SET_INDICES_MENUS, currentMenuState)) {
     AutoSetMenuIndices();
