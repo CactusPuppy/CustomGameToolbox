@@ -19,7 +19,7 @@ String rightArrow: "▶";
 String[] configMenuButtonLabels: [
   "", "", "", "", "",
   "", leftArrow, currentConfigItem, rightArrow, "",
-  "", "", $"{OptimizeMetricsForOverTime}", "", "",
+  "", "", $"{OptimizeMetricsForOverTime ? 'Over Time' : 'Normal'}", "", "",
   "", "", "", "", "",
   "", "", "", "", ""
 ];
@@ -65,7 +65,7 @@ void ConfigMenu_ThrottleLeftRight() {
     UpdateButtonLabel(MenuState.CONFIG, 2, 1, currentConfigItem);
     switch (currentConfigSelection) {
       case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
-        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime}");
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime ? 'Over Time' : 'Normal'}");
         break;
       case ConfigItem.BUTTON_SPAM_PERIOD:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
@@ -89,7 +89,7 @@ void ConfigMenu_Left() {
   switch (currentConfigSelection) {
     case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
       OptimizeMetricsForOverTime = !OptimizeMetricsForOverTime;
-      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime}");
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime ? 'Over Time' : 'Normal'}");
       break;
     case ConfigItem.BUTTON_SPAM_PERIOD:
       if (BUTTON_SPAM_PERIOD <= 0.1) return;
@@ -138,7 +138,7 @@ void ConfigMenu_Right() {
   switch (currentConfigSelection) {
     case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
       OptimizeMetricsForOverTime = !OptimizeMetricsForOverTime;
-      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime}");
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime ? 'Over Time' : 'Normal'}");
       break;
     case ConfigItem.BUTTON_SPAM_PERIOD:
       if (BUTTON_SPAM_PERIOD >= 30) return;
