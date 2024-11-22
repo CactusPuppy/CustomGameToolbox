@@ -56,14 +56,15 @@ variables
         19: BUTTON_SPAM_PERIOD
         20: allBotsReplayDuringRecording
         21: longestRecordingLength
-        22: SHOULD_LOOP_CLIP
-        23: colIndex
-        24: rowIndex
-        25: player
-        26: button
-        27: _arrayConstructor
-        28: SourcePlayer
-        29: TargetPlayer
+        22: interactDestroysDeployableCompen
+        23: SHOULD_LOOP_CLIP
+        24: colIndex
+        25: rowIndex
+        26: player
+        27: button
+        28: _arrayConstructor
+        29: SourcePlayer
+        30: TargetPlayer
     player:
         0: menuActivationPoint
         1: ButtonLabelGrid
@@ -281,7 +282,7 @@ rule("[interface/menu.ostw] Set up action grid")
     }
 }
 
-// Rule Element Count: 451
+// Rule Element Count: 453
 rule("[interface/menu.ostw] Set up button label grid")
 {
     event
@@ -291,8 +292,8 @@ rule("[interface/menu.ostw] Set up button label grid")
         All;
     }
 
-    // Element Count: 450, Action Count: 9
-    // Largest Action Index: 8 using 68 Elements
+    // Element Count: 452, Action Count: 9
+    // Largest Action Index: 8 using 70 Elements
     actions
     {
         Event Player.ButtonLabelGrid = Empty Array;
@@ -303,7 +304,7 @@ rule("[interface/menu.ostw] Set up button label grid")
         Event Player.ButtonLabelGrid[6] = Array(Custom String(""), Custom String(""), Custom String("Create Dummy Bot"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Create Punching Bag"), Custom String(""), Custom String(""), Custom String(""), Custom String("Play All Replays"), Custom String("Edit Dummy Bots"), Custom String("Delete All Replays"), Custom String(""), Custom String(""), Custom String(""), Custom String("Reset Bot Positions"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Remove All Bots"), Custom String(""), Custom String(""));
         Event Player.ButtonLabelGrid[7] = Array(Custom String(""), Custom String(""), Custom String("Buttons"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Set Respawn Point"), Custom String(""), Custom String(""), Custom String("Delete Replay"), Custom String("Edit Replay"), Custom String("Record Replay"), Custom String("Change Hero"), Custom String("Switch Team"), Custom String(""), Custom String(""), Custom String("Pin Bot To Position"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("Delete"), Custom String(""), Custom String(""));
         Event Player.ButtonLabelGrid[8] = Array(Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("DELAY PLAYBACK OF REPLAY BY"), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("{0}{1}", Custom String("                      "), Custom String("◀")), Custom String("0"), Custom String("{0}{1}", Custom String("▶"), Custom String("                      ")), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("FRAMES"), Custom String(" "), Custom String(" "), Custom String(" "), Custom String(" "), Custom String("Reset Delay"), Custom String(" "), Custom String(" "));
-        Event Player.ButtonLabelGrid[10] = Array(Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("◀"), Array(Custom String("HPS/DPS Meter Optimization"), Custom String("Button Spam Period"), Custom String("Slow Motion Speed"))[Event Player.currentConfigSelection], Custom String("▶"), Custom String(""), Custom String(""), Custom String(""), Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""));
+        Event Player.ButtonLabelGrid[10] = Array(Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String("◀"), Array(Custom String("HPS/DPS Meter Optimization"), Custom String("Button Spam Period"), Custom String("Slow Motion Speed"), Custom String("Interact Destroys Deployables In Replay"))[Event Player.currentConfigSelection], Custom String("▶"), Custom String(""), Custom String(""), Custom String(""), Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal"), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""));
     }
 }
 
@@ -333,7 +334,7 @@ rule("[interface/menu.ostw] Set up color grid")
     }
 }
 
-// Rule Element Count: 116
+// Rule Element Count: 164
 rule("[interface/menu.ostw] When menu state changes, find new first selection")
 {
     event
@@ -349,14 +350,26 @@ rule("[interface/menu.ostw] When menu state changes, find new first selection")
         Event Player.currentMenuState != 0;
     }
 
-    // Element Count: 108, Action Count: 21
-    // Largest Action Index: 5 using 24 Elements
+    // Element Count: 156, Action Count: 33
+    // Largest Action Index: 17 using 24 Elements
     actions
     {
         Wait(0.064, Abort When False);
         If(Event Player.currentMenuState == 10);
             Event Player.menuXIndex = 2;
             Event Player.menuYIndex = 1;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+            Global._arrayConstructor[6] = Custom String("◀");
+            Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+            Global._arrayConstructor[8] = Custom String("▶");
+            Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+            Global._arrayConstructor[11] = Custom String("");
+            Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+            Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+            Global._arrayConstructor[13] = Custom String("");
+            Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
         End;
         If(Global.ButtonActionGrid[Event Player.currentMenuState] != 0 && !Array Contains(Array(2, 9, 10), Event Player.currentMenuState));
             Event Player.menuXIndex = 0;
@@ -377,7 +390,7 @@ rule("[interface/menu.ostw] When menu state changes, find new first selection")
     }
 }
 
-// Rule Element Count: 113
+// Rule Element Count: 131
 rule("Initial Global")
 {
     event
@@ -385,14 +398,14 @@ rule("Initial Global")
         Ongoing - Global;
     }
 
-    // Element Count: 112, Action Count: 13
+    // Element Count: 130, Action Count: 14
     // Largest Action Index: 2 using 22 Elements
     actions
     {
         Global.UseRoleQueueHealth = Workshop Setting Toggle(Custom String("2. Hero Settings"), Custom String("Use Role Queue Tank Health"), True, 0);
         Global._extendedGlobalCollection[0] = Workshop Setting Combo(Custom String("1. General"), Custom String("Log Level"), 0, Array(Custom String("Debug"), Custom String("Info"), Custom String("Warning"), Custom String("Error")), 0);
         Global.AllButtons = Array(Button(Primary Fire), Button(Secondary Fire), Button(Ability 1), Button(Ability 2), Button(Crouch), Button(Jump), Button(Melee), Button(Reload), Button(Ultimate), Button(Interact));
-        Global.OptimizeMetricsForOverTime = Workshop Setting Toggle(Custom String("5. Information"), Custom String("Optimize DPS/HPS Meters for Over Time Effects"), False, 0);
+        Global.OptimizeMetricsForOverTime = Workshop Setting Combo(Custom String("5. Information"), Custom String("HPS/DPS Meter Optimization"), 0, Array(Custom String("Normal"), Custom String("Over Time")), 0) == 1;
         Global.SLOW_MOTION_SPEED = Workshop Setting Integer(Custom String("4. Mod Settings"), Custom String("Slow Motion Speed"), 25, 10, 100, 0);
         Global.punchingBagTargetHealthProportio = Workshop Setting Real(Custom String("1. General"), Custom String("Punching Bag Target Health Proportion"), 0.8, 0, 1, 0.01);
         Global.nextSelectionEntityId = 1;
@@ -401,6 +414,7 @@ rule("Initial Global")
         Global.BUTTON_SPAM_PERIOD = Workshop Setting Real(Custom String("6. Bot and Replay"), Custom String("Bot Button Spam Wait Time"), 1, 0.1, 30, -1);
         Global.allBotsReplayDuringRecording = Workshop Setting Toggle(Custom String("6. Bot and Replay"), Custom String("All Bots Replay During Recording"), True, 0);
         Global.longestRecordingLength = 0;
+        Global.interactDestroysDeployableCompen = Workshop Setting Toggle(Custom String("6. Bot and Replay"), Custom String("Interact Destroys Deployables In Replay"), False, 0);
         Global.SHOULD_LOOP_CLIP = Workshop Setting Toggle(Custom String("6. Bot and Replay"), Custom String("Loop Replay Playback"), True, 0);
     }
 }
@@ -1215,7 +1229,7 @@ rule("[interface/menuDefinitions.ostw | SUB] Find first item to the right")
     }
 }
 
-// Rule Element Count: 749
+// Rule Element Count: 805
 rule("[interface/menu.ostw] Menu left-right")
 {
     event
@@ -1232,8 +1246,8 @@ rule("[interface/menu.ostw] Menu left-right")
         Absolute Value(X Component Of(Throttle Of(Event Player))) > 0.5;
     }
 
-    // Element Count: 733, Action Count: 141
-    // Largest Action Index: 51 using 33 Elements
+    // Element Count: 789, Action Count: 155
+    // Largest Action Index: 55 using 33 Elements
     actions
     {
         If(Event Player.currentMenuState == 9);
@@ -1246,41 +1260,45 @@ rule("[interface/menu.ostw] Menu left-right")
                 If(X Component Of(Throttle Of(Event Player)) > 0);
                     Event Player.currentConfigSelection = Event Player.currentConfigSelection - 1;
                     If(Event Player.currentConfigSelection < 0);
-                        Event Player.currentConfigSelection = 2;
+                        Event Player.currentConfigSelection = 3;
                     End;
                 Else;
                     Event Player.currentConfigSelection = Event Player.currentConfigSelection + 1;
-                    If(Event Player.currentConfigSelection >= 3);
+                    If(Event Player.currentConfigSelection >= 4);
                         Event Player.currentConfigSelection = 0;
                     End;
                 End;
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
-                Global._arrayConstructor[7] = Array(Custom String("HPS/DPS Meter Optimization"), Custom String("Button Spam Period"), Custom String("Slow Motion Speed"))[Event Player.currentConfigSelection];
+                Global._arrayConstructor[7] = Array(Custom String("HPS/DPS Meter Optimization"), Custom String("Button Spam Period"), Custom String("Slow Motion Speed"), Custom String("Interact Destroys Deployables In Replay"))[Event Player.currentConfigSelection];
                 Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-                Skip(Array(11, 0, 4, 8)[Index Of Array Value(Array(0, 1, 2), Event Player.currentConfigSelection) + 1]);
+                Skip(Array(15, 0, 4, 8, 12)[Index Of Array Value(Array(0, 1, 2, 3), Event Player.currentConfigSelection) + 1]);
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
                 Global._arrayConstructor[12] = Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal");
                 Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-                Skip(7);
+                Skip(11);
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
                 Global._arrayConstructor[12] = Global.BUTTON_SPAM_PERIOD;
                 Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-                Skip(3);
+                Skip(7);
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
                 Global._arrayConstructor[12] = Global.SLOW_MOTION_SPEED;
                 Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-                Skip(102);
+                Skip(3);
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+                Global._arrayConstructor[12] = Global.interactDestroysDeployableCompen;
+                Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+                Skip(112);
             End;
             "Modify the current config item"
             If(X Component Of(Throttle Of(Event Player)) > 0);
-                Skip(Array(48, 0, 5, 28)[Index Of Array Value(Array(0, 1, 2), Event Player.currentConfigSelection) + 1]);
+                Skip(Array(53, 0, 5, 28, 49)[Index Of Array Value(Array(0, 1, 2, 3), Event Player.currentConfigSelection) + 1]);
                 Global.OptimizeMetricsForOverTime = !Global.OptimizeMetricsForOverTime;
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
                 Global._arrayConstructor[12] = Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal");
                 Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-                Skip(43);
+                Skip(48);
                 If(Global.BUTTON_SPAM_PERIOD <= 0.1);
-                    Skip(41);
+                    Skip(46);
                 End;
                 Global.BUTTON_SPAM_PERIOD -= Is Button Held(Event Player, Button(Ability 1)) ? 1 : 0.1;
                 Global.BUTTON_SPAM_PERIOD = Max(Global.BUTTON_SPAM_PERIOD, 0.1);
@@ -1301,9 +1319,9 @@ rule("[interface/menu.ostw] Menu left-right")
                     Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
                     Wait(0.064, Abort When False);
                 End;
-                Skip(20);
+                Skip(25);
                 If(Global.SLOW_MOTION_SPEED <= 10);
-                    Skip(18);
+                    Skip(23);
                 End;
                 Global.SLOW_MOTION_SPEED -= 5;
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
@@ -1322,15 +1340,20 @@ rule("[interface/menu.ostw] Menu left-right")
                     Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
                     Wait(Is Button Held(Event Player, Button(Ability 1)) ? 0.064 : 0.1, Abort When False);
                 End;
+                Skip(4);
+                Global.interactDestroysDeployableCompen = !Global.interactDestroysDeployableCompen;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+                Global._arrayConstructor[12] = Global.interactDestroysDeployableCompen;
+                Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
             Else;
-                Skip(Array(48, 0, 5, 28)[Index Of Array Value(Array(0, 1, 2), Event Player.currentConfigSelection) + 1]);
+                Skip(Array(53, 0, 5, 28, 49)[Index Of Array Value(Array(0, 1, 2, 3), Event Player.currentConfigSelection) + 1]);
                 Global.OptimizeMetricsForOverTime = !Global.OptimizeMetricsForOverTime;
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
                 Global._arrayConstructor[12] = Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal");
                 Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-                Skip(43);
+                Skip(48);
                 If(Global.BUTTON_SPAM_PERIOD >= 30);
-                    Skip(41);
+                    Skip(46);
                 End;
                 Global.BUTTON_SPAM_PERIOD += Is Button Held(Event Player, Button(Ability 1)) ? 1 : 0.1;
                 Global.BUTTON_SPAM_PERIOD = Min(Global.BUTTON_SPAM_PERIOD, 30);
@@ -1351,9 +1374,9 @@ rule("[interface/menu.ostw] Menu left-right")
                     Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
                     Wait(0.064, Abort When False);
                 End;
-                Skip(20);
+                Skip(25);
                 If(Global.SLOW_MOTION_SPEED >= 100);
-                    Skip(18);
+                    Skip(23);
                 End;
                 Global.SLOW_MOTION_SPEED += 5;
                 Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
@@ -1372,6 +1395,11 @@ rule("[interface/menu.ostw] Menu left-right")
                     Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
                     Wait(Is Button Held(Event Player, Button(Ability 1)) ? 0.064 : 0.1, Abort When False);
                 End;
+                Skip(4);
+                Global.interactDestroysDeployableCompen = !Global.interactDestroysDeployableCompen;
+                Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+                Global._arrayConstructor[12] = Global.interactDestroysDeployableCompen;
+                Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
             End;
             Abort;
         End;
@@ -5676,7 +5704,7 @@ rule("[SUB | interface/dummyBotsAndReplay/botEditPage.del] Load data from player
     }
 }
 
-// Rule Element Count: 125
+// Rule Element Count: 126
 rule("[interface/dummyBotsAndReplay/botEditPage.del] Change hero")
 {
     event
@@ -5692,14 +5720,16 @@ rule("[interface/dummyBotsAndReplay/botEditPage.del] Change hero")
         Event Player.selectedBotEditAction == 2;
     }
 
-    // Element Count: 117, Action Count: 31
-    // Largest Action Index: 12 using 22 Elements
+    // Element Count: 118, Action Count: 33
+    // Largest Action Index: 14 using 22 Elements
     actions
     {
         "We don't want to transfer recordings between heroes"
         If(Event Player.selectedBot.sampleCount > 0);
-            Event Player.selectedBot.recordingPlayStopFlag = 3;
-            Wait(0.016, Ignore Condition);
+            Small Message(Event Player, Custom String("  Replays are hero-specific and cannot be transferred between heroes!"));
+            Small Message(Event Player, Custom String("  Delete the replay before changing the bot's hero."));
+            Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 100);
+            Abort;
         End;
         Call Subroutine(StoreTempDataFromBot);
         Event Player.tempHeroStorage = Hero Of(Event Player);
@@ -7919,7 +7949,7 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Re
     }
 }
 
-// Rule Element Count: 66
+// Rule Element Count: 87
 rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Interact")
 {
     event
@@ -7928,14 +7958,22 @@ rule("[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - In
         PlayFrameInteract;
     }
 
-    // Element Count: 65, Action Count: 15
-    // Largest Action Index: 11 using 21 Elements
+    // Element Count: 86, Action Count: 23
+    // Largest Action Index: 19 using 21 Elements
     actions
     {
         Event Player.sampleValue = First Of(Event Player.interactEvents[Event Player.currentEventIndices[9]]);
         If(Event Player.sampleValue == True);
             If(!Is Button Held(Event Player, Button(Interact)));
                 Start Holding Button(Event Player, Button(Interact));
+                If(Global.interactDestroysDeployableCompen);
+                    If(Hero Of(Event Player) == Hero(Illari));
+                        Press Button(Event Player, Button(Ability 2));
+                    End;
+                    If(Hero Of(Event Player) == Hero(Torbjörn));
+                        Press Button(Event Player, Button(Ability 1));
+                    End;
+                End;
             End;
         Else;
             If(Is Button Held(Event Player, Button(Interact)));
