@@ -1,4 +1,4 @@
-globalvar Boolean OptimizeMetricsForOverTime = WorkshopSettingToggle(InformationCategory, "Optimize DPS/HPS Meters for Over Time Effects", false);
+globalvar Boolean OptimizeMetricsForOverTime = WorkshopSettingCombo(InformationCategory, "HPS/DPS Meter Optimization", 0, ["Normal", "Over Time"], 0) == 1;
 Number healOverTimePeriod: 0.192;
 Number healOverTimePeriodsInOneSecond: RoundToInteger(1 / healOverTimePeriod, Rounding.Down);
 
