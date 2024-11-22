@@ -16,37 +16,14 @@ A set of tools that make custom games more useful for recreating, testing, and r
             Hero Limit: 1 Per Team
             Game Mode Start: Immediately
             Tank Role Passive Health Bonus: Disabled
-        }
-
-        Escort {
             Limit Roles: 1 Tank 2 Offense 2 Support
-            Competitive Rules: On
         }
 
         Hybrid {
-
-            Limit Roles: 1 Tank 2 Offense 2 Support
             Competitive Rules: On
         }
 
         Clash {
-            Limit Roles: 1 Tank 2 Offense 2 Support
-            Competitive Rules: On
-        }
-
-        Control {
-
-            Limit Roles: 1 Tank 2 Offense 2 Support
-            Competitive Rules: On
-        }
-
-        Flashpoint {
-            Limit Roles: 1 Tank 2 Offense 2 Support
-            Competitive Rules: On
-        }
-
-        Push {
-            Limit Roles: 1 Tank 2 Offense 2 Support
             Competitive Rules: On
         }
     }
