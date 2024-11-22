@@ -140,8 +140,10 @@ if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
 {
   # We don't want to transfer recordings between heroes
   if (hasRecordedClip(selectedBot)) {
-    selectedBot.recordingPlayStopFlag = RecordingAction.DELETE;
-    MinWait();
+    SmallMessage(EventPlayer(), "  Replays are hero-specific and cannot be transferred between heroes!");
+    SmallMessage(EventPlayer(), "  Delete the replay before changing the bot's hero.");
+    PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+    Abort();
   }
   StoreTempDataFromBot();
   tempHeroStorage = HeroOf();
