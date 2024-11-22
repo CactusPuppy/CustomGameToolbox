@@ -2,13 +2,15 @@ enum ConfigItem {
   METERS_OPTIMIZED_FOR_OVER_TIME,
   BUTTON_SPAM_PERIOD,
   SLOW_MOTION_SPEED,
+  INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY,
   END_SENTINEL
 }
 
 String currentConfigItem: [
   "HPS/DPS Meter Optimization",
   "Button Spam Period",
-  "Slow Motion Speed"
+  "Slow Motion Speed",
+  "Interact Destroys Deployables In Replay"
 ][currentConfigSelection];
 
 playervar ConfigItem currentConfigSelection;
@@ -73,6 +75,9 @@ void ConfigMenu_ThrottleLeftRight() {
       case ConfigItem.SLOW_MOTION_SPEED:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
         break;
+      case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
+        break;
     }
     return;
   }
@@ -131,6 +136,10 @@ void ConfigMenu_Left() {
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
       break;
+    case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
+      interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
+      break;
   }
 }
 
@@ -179,6 +188,10 @@ void ConfigMenu_Right() {
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
+      break;
+    case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
+      interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
       break;
   }
 }

@@ -619,11 +619,17 @@ void PlayFrameReload() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   }
 }
 
+globalvar Boolean interactDestroysDeployableCompensation = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Interact Destroys Deployables In Replay", false);
+
 void PlayFrameInteract() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Play Frame - Interact" {
   sampleValue = EventPlayer().interactEvents[currentEventIndices[InputType.INTERACT]].value;
   if (sampleValue == true) {
     if (!IsButtonHeld(EventPlayer(), Button.Interact)) {
       StartHoldingButton(EventPlayer(), Button.Interact);
+      if (interactDestroysDeployableCompensation) {
+        if (HeroOf() == Hero.Illari) PressButton(EventPlayer(), Button.Ability2);
+        if (HeroOf() == Hero.Torbjorn) PressButton(EventPlayer(), Button.Ability1);
+      }
     }
   } else {
     if (IsButtonHeld(EventPlayer(), Button.Interact)) {
