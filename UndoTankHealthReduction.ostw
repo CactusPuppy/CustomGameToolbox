@@ -1,20 +1,24 @@
 import "main.ostw";
 globalvar Boolean UseRoleQueueHealth = WorkshopSettingToggle(HeroSettingsCategory, "Use Role Queue Tank Health", true, 0);
 
+playervar Any TankHealthPool;
+
 rule: "Create tank health pool"
 Event.OngoingPlayer
 if (UseRoleQueueHealth)
 if (AllTankHeroes().Contains(HeroOf()))
 if ((HeroOf() == Hero.Dva && IsInAlternateForm()) == false)
 {
-  AddHealthPoolToPlayer(
+  TankHealthPool = AddHealthPoolToPlayer(
     Player: EventPlayer(),
     HealthType: HealthType.Health,
     MaxHealth: 150);
   WaitUntil(!UseRoleQueueHealth
     || !AllTankHeroes().Contains(HeroOf())
     || (HeroOf() == Hero.Dva && IsInAlternateForm()), 1000000);
-  RemoveHealthPoolFromPlayer(LastCreatedHealthPool());
+  RemoveHealthPoolFromPlayer(TankHealthPool);
+  MinWait();
+  LoopIfConditionIsTrue();
 }
 
 // DEBUG
