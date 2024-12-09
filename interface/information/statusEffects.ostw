@@ -10,7 +10,8 @@ enum StatusEffect {
   PhasedOut,
   Rooted,
   Stunned,
-  Unkillable
+  Unkillable,
+  Reloading
 }
 
 Player[] PlayersToInformOfStatuses: AllPlayers().FilteredArray((p) => p.activeInfoDisplays.Contains(InfoAction.STATUS_EFFECT_READOUT));
@@ -21,7 +22,7 @@ playervar Number[] effectDuration;
 
 void ProcessStatusEffect(in StatusEffect statusEffect, Status status, in String statusName, in String statusIcon) {
   effectStartTimestamp[statusEffect] = TotalTimeElapsed();
-  WaitUntil(!HasStatus(EventPlayer(), status), 99999);
+  WaitUntil(statusEffect == StatusEffect.Reloading ? !IsReloading() : !HasStatus(EventPlayer(), status), 99999);
   effectDuration[statusEffect] = TotalTimeElapsed() - effectStartTimestamp[statusEffect];
   SmallMessage(PlayersToInformOfStatuses, <" <0> <1> had status <2> for <3> secs (<4> ticks)", statusIcon, EventPlayer(), statusName, effectDuration[statusEffect], RoundToInteger(effectDuration[statusEffect] / 0.016, Rounding.Nearest)>);
 }
@@ -39,7 +40,7 @@ rule: "[interface/information/statusEffects.ostw] Sleep"
 Event.OngoingPlayer
 if (HasStatus(EventPlayer(), Status.Asleep))
 {
- ProcessStatusEffect(StatusEffect.Asleep, Status.Asleep, "ASLEEP", AbilityIconString(Hero.Ana, Button.Ability1));
+  ProcessStatusEffect(StatusEffect.Asleep, Status.Asleep, "ASLEEP", AbilityIconString(Hero.Ana, Button.Ability1));
 }
 
 rule: "[interface/information/statusEffects.ostw] Burning"
@@ -110,4 +111,11 @@ Event.OngoingPlayer
 if (HasStatus(EventPlayer(), Status.Unkillable))
 {
   ProcessStatusEffect(StatusEffect.Unkillable, Status.Unkillable, "UNKILLABLE", AbilityIconString(Hero.Baptiste, Button.Ability2));
+}
+
+rule: "[interface/information/statusEffects.ostw] Reloading"
+Event.OngoingPlayer
+if (IsReloading())
+{
+  ProcessStatusEffect(StatusEffect.Reloading, Status.Asleep, "RELOADING", IconString(Icon.Recycle));
 }
