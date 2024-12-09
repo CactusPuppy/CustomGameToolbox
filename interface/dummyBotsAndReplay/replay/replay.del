@@ -22,11 +22,14 @@ Event.OngoingGlobal
 
 void ReturnToPreRecordState() playervar "[SUB | interface/dummyBotsAndReplay/replay/replay.del] Restore selected bot to original state"
 {
+  if (recordingCountdownText.timerValue > 0) {
+    RemoveOneLockFromAllButtons();
+    DestroyInWorldText(recordingCountdownText.textID);
+  }
   if (allBotsReplayDuringRecording) {
     AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).waitingOnPlayer = null;
     AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).recordingPlayStopFlag = RecordingAction.STOP;
   }
-  DestroyInWorldText(recordingCountdownText.textID);
 
   # Restore bot to reset point and recording player to original hero
   ForcePlayerHero(EventPlayer(), originalHero);

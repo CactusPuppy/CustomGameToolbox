@@ -34,6 +34,8 @@ if (botControlMode == BotControlMode.Edit)
   RemoveOneLockFromButton(EventPlayer(), Button.PrimaryFire);
   RemoveOneLockFromButton(EventPlayer(), Button.SecondaryFire);
   RemoveOneLockFromButton(EventPlayer(), Button.Reload);
+  MinWait();
+  LoopIfConditionIsTrue();
 }
 
 playervar SelectionEntity selectedControl;
