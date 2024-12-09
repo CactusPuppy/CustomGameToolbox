@@ -137,6 +137,7 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on 
       && LocalPlayer().botControlMode == BotControlMode.Edit
       && !IsButtonHeld(LocalPlayer(), Button.PrimaryFire)
       && getClosestSelectionEntity(LocalPlayer()).Id != 0
+      && getClosestSelectionEntity(LocalPlayer()).Owner.IsAlive()
         ? LocalPlayer() : null,
     Type: Effect.Sphere,
     Color: Color.Blue,
@@ -158,6 +159,7 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on 
       && LocalPlayer().currentMenuState == MenuState.CLOSED
       && LocalPlayer().selectedControl.Id == 0
       && getClosestSelectionEntity(LocalPlayer()).Id != 0
+      && getClosestSelectionEntity(LocalPlayer()).Owner.IsAlive()
         ? LocalPlayer() : null,
     Header: <"<0> | Drag<1>",
       InputBindingString(Button.PrimaryFire),
