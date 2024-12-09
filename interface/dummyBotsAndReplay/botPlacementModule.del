@@ -135,8 +135,8 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on 
   CreateEffect(
     VisibleTo: EntityExists(LocalPlayer())
       && LocalPlayer().botControlMode == BotControlMode.Edit
-      && !(IsButtonHeld(LocalPlayer(), Button.PrimaryFire)
-        && getClosestSelectionEntity(LocalPlayer()).Id != 0)
+      && !IsButtonHeld(LocalPlayer(), Button.PrimaryFire)
+      && getClosestSelectionEntity(LocalPlayer()).Id != 0
         ? LocalPlayer() : null,
     Type: Effect.Sphere,
     Color: Color.Blue,
