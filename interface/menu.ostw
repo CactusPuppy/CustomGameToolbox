@@ -133,7 +133,7 @@ rule: "[interface/menu.ostw] Global menu setup"
   CreateBotButtonEditPage();
   # Create background orbie
   CreateEffect(
-    VisibleTo:    LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
+    VisibleTo:    EntityExists(LocalPlayer()) && LocalPlayer().currentMenuState != MenuState.CLOSED ? LocalPlayer() : null,
     Type:         Effect.Orb,
     Color:        Color.Black,
     Position:     LocalPlayer().menuActivationPoint.eyePosition - 0.325 * LocalPlayer().menuActivationPoint.facing,

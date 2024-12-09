@@ -84,7 +84,7 @@ Vector desiredFacingControlPosition(Player controlOwner = EventPlayer()): RayCas
 Boolean IsControllable(Player player = EventPlayer()): IsDummyBot(player);
 Player[] AllControllablePlayers(): AllPlayers().FilteredArray((player) => IsControllable(player));
 Player | Player[] playersWhoShouldSeeControls(SelectionEntity entity):
-  AllPlayers().Contains(LocalPlayer())
+  EntityExists(LocalPlayer())
   && IsControllable(entity.Owner)
   && IsAlive(entity.Owner)
   && entity.Owner.replayState == ReplayState.NONE
@@ -133,7 +133,7 @@ if (HasSpawned())
 rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on closest selection entity"
 {
   CreateEffect(
-    VisibleTo: AllPlayers().Contains(LocalPlayer())
+    VisibleTo: EntityExists(LocalPlayer())
       && LocalPlayer().botControlMode == BotControlMode.Edit
       && !(IsButtonHeld(LocalPlayer(), Button.PrimaryFire)
         && getClosestSelectionEntity(LocalPlayer()).Id != 0)
@@ -145,7 +145,7 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on 
     Reevaluation: EffectRev.VisibleToPositionAndRadius
   );
   CreateHudText(
-    VisibleTo: AllPlayers().Contains(LocalPlayer()) && LocalPlayer().botControlMode == BotControlMode.Edit ? LocalPlayer() : null,
+    VisibleTo: EntityExists(LocalPlayer()) && LocalPlayer().botControlMode == BotControlMode.Edit ? LocalPlayer() : null,
     Text: "Editing Bots",
     Location: Location.Top,
     TextColor: rainbow,
@@ -153,7 +153,7 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Create effects on 
     Reevaluation: HudTextRev.VisibleToStringAndColor
   );
   CreateInWorldText(
-    VisibleTo: AllPlayers().Contains(LocalPlayer())
+    VisibleTo: EntityExists(LocalPlayer())
       && LocalPlayer().botControlMode == BotControlMode.Edit
       && LocalPlayer().currentMenuState == MenuState.CLOSED
       && LocalPlayer().selectedControl.Id == 0
