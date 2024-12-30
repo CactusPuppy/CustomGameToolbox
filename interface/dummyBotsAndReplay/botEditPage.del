@@ -74,7 +74,7 @@ if (selectedBot != null)
     UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Edit Replay", Color.Gray);
     UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 0, 2, "Delete Replay", Color.Gray);
   }
-  WaitUntil(selectedBot != EvaluateOnce(selectedBot) || selectedBot.sampleCount != EvaluateOnce(selectedBot.sampleCount), 1000000);
+  WaitUntil(selectedBot != EvaluateOnce(selectedBot) || selectedBot.totalFrames != EvaluateOnce(selectedBot.totalFrames), 1000000);
   LoopIfConditionIsTrue();
 }
 
@@ -262,7 +262,7 @@ if (selectedBotEditAction == BotEditAction.RECORD_REPLAY)
       SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
       Abort();
     }
-    selectedBot.recordingPlayStopFlag = RecordingAction.STOP;
+    selectedBot.replayStateAction = ReplayStateAction.STOP_PLAYBACK;
     Abort();
   }
   if (replayState == ReplayState.RECORDING) {
@@ -279,10 +279,10 @@ if (selectedBotEditAction == BotEditAction.RECORD_REPLAY)
       Abort();
     }
     if (hasRecordedClip(selectedBot)) {
-      selectedBot.recordingPlayStopFlag = RecordingAction.PLAY;
+      selectedBot.replayStateAction = ReplayStateAction.PREPARE_FOR_PLAYBACK;
       CloseMenu(EventPlayer());
     } else {
-      PreparePlayerForRecording();
+      replayStateAction = ReplayStateAction.PREPARE_TO_RECORD;
     }
     Abort();
   }

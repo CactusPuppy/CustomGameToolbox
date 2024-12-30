@@ -1,38 +1,4 @@
-settings
-{
-	modes
-	{
-		Skirmish
-		{
-			enabled maps
-			{
-				Workshop Chamber 0
-			}
-		}
-	}
-}
-globalvar Number i;
-
-enum ReplayState {
-  NONE,
-  RECORDING,
-  PREPARING_FOR_PLAYBACK,
-  PLAYING,
-  REACHED_END_OF_REPLAY
-}
-
-globalvar Button[] AllButtons = [
-  Button.PrimaryFire,
-  Button.SecondaryFire,
-  Button.Ability1,
-  Button.Ability2,
-  Button.Crouch,
-  Button.Jump,
-  Button.Melee,
-  Button.Reload,
-  Button.Ultimate,
-  Button.Interact
-];
+import "replayStateMachine.del";
 
 enum InputType {
   THROTTLE,
@@ -48,13 +14,6 @@ enum InputType {
   RELOAD,
   ULTIMATE,
   INTERACT
-}
-
-struct InputEvent<T> {
-  public T value;
-  public Number frame;
-
-  public static InputEvent<T> New(T value, Number frame): { value: value, frame: frame };
 }
 
 struct InputChange<T> {
@@ -87,14 +46,12 @@ single struct SnapshotState {
   public Boolean interact;
 }
 
-// globalvar InputChange<Any>[] inputChanges;
-
+globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Loop Replay Playback", true);
 globalvar Number longestRecordingLength = 0;
 
-playervar ReplayState replayState;
+playervar ResetPoint replayResetPoint;
 playervar Number frame;
 playervar Number totalFrames;
-playervar Boolean botReadyToReplay;
 playervar Number playbackOffset;
 
 
@@ -106,6 +63,7 @@ playervar Number nextFrameIndex;
 playervar InputChange<Any>[] changeBuffer;
 
 
+Player[] AllBotsWithRecordings(): AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p));
 Number MAX_ARRAY_SIZE: 1000;
 Number TICK_LENGTH: 0.016;
 Boolean hasRecordedClip(Player p = EventPlayer()): p.totalFrames > 0;
@@ -124,193 +82,135 @@ void SafeAppendToBigArray<T>(ref T[][] arr, in T value) {
 }
 
 void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recording" {
+  logBuffer = $"DEL {TeamOf()} {SlotOf()}";
+  DumpLogBuffer();
   frame = 0;
   totalFrames = 0;
   playbackOffset = 0;
   recording = [[]];
-  // replayResetPoint.location = null;
-  // recordingHero = null;
-  // UpdateLongestRecordingLength();
+  replayResetPoint.location = null;
+  recordingHero = null;
+  UpdateLongestRecordingLength();
 }
 
-// void UpdateLongestRecordingLength() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Longest Recording Length" {
-//   longestRecordingLength = AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).Sort(p => p.totalFrames + p.playbackOffset).Last;
-//   longestRecordingLength = (<Player>longestRecordingLength).totalFrames + (<Player>longestRecordingLength).playbackOffset;
-// }
+void TransferRecording(in Player from, in Player to) {
+  logBuffer = $"TR {TeamOf(from)} {SlotOf(from)} {TeamOf(to)} {SlotOf(to)}";
+  DumpLogBuffer();
+  to.recording = from.recording;
+  to.totalFrames = from.totalFrames;
+  to.playbackOffset = from.playbackOffset;
+  to.recordingHero = from.recordingHero;
+  UpdateLongestRecordingLength();
+}
+
+void UpdateLongestRecordingLength() "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Update Longest Recording Length" {
+  longestRecordingLength = AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p)).Sort(p => p.totalFrames + p.playbackOffset).Last;
+  longestRecordingLength = (<Player>longestRecordingLength).totalFrames + (<Player>longestRecordingLength).playbackOffset;
+}
 
 rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] When bot is in recording state, loop every frame and record inputs"
 Event.OngoingPlayer
 // if (selectedBot != null)
 if (replayState == ReplayState.RECORDING)
 {
-  OnRecordingFrame();
+  # End the recording if the player opens the menu or switches to another hero
+  if (currentMenuState != MenuState.CLOSED || HeroOf() != recordingHero) {
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
+    Abort();
+  }
+  if (frame >= 0) OnRecordingFrame();
   frame += 1;
   MinWait();
   LoopIfConditionIsTrue();
 }
 
-void OnRecordingStart() {
-  // TODO: Save a whole-state snapshot here
-  startPoint = PositionOf();
-  startFacing = FacingDirectionOf(EventPlayer());
-
-  changeBuffer = [
-    InputChange<Any>.New(InputType.THROTTLE, ThrottleOf(EventPlayer())),
-    InputChange<Any>.New(InputType.FACING, FacingDirectionOf(EventPlayer())),
-    InputChange<Any>.New(InputType.WEAPON, Weapon(EventPlayer())),
-    InputChange<Any>.New(InputType.PRIMARY_FIRE, IsButtonHeld(EventPlayer(), Button.PrimaryFire)),
-    InputChange<Any>.New(InputType.SECONDARY_FIRE, IsButtonHeld(EventPlayer(), Button.SecondaryFire)),
-    InputChange<Any>.New(InputType.ABILITY_1, IsButtonHeld(EventPlayer(), Button.Ability1)),
-    InputChange<Any>.New(InputType.ABILITY_2, IsButtonHeld(EventPlayer(), Button.Ability2)),
-    InputChange<Any>.New(InputType.CROUCH, IsButtonHeld(EventPlayer(), Button.Crouch)),
-    InputChange<Any>.New(InputType.JUMP, IsButtonHeld(EventPlayer(), Button.Jump)),
-    InputChange<Any>.New(InputType.MELEE, IsButtonHeld(EventPlayer(), Button.Melee)),
-    InputChange<Any>.New(InputType.RELOAD, IsButtonHeld(EventPlayer(), Button.Reload)),
-    InputChange<Any>.New(InputType.ULTIMATE, IsButtonHeld(EventPlayer(), Button.Ultimate)),
-    InputChange<Any>.New(InputType.INTERACT, IsButtonHeld(EventPlayer(), Button.Interact))
-  ];
-
-  SafeAppendToBigArray(recording, <DeltaFrame>[DeltaFrame.New(changeBuffer, 0)]);
-  lastRecordedState = {
-    throttle:        ThrottleOf(EventPlayer()),
-    facing:          FacingDirectionOf(EventPlayer()),
-    weapon:          Weapon(EventPlayer()),
-    primaryFire:     IsButtonHeld(EventPlayer(), Button.PrimaryFire),
-    secondaryFire:   IsButtonHeld(EventPlayer(), Button.SecondaryFire),
-    ability1:        IsButtonHeld(EventPlayer(), Button.Ability1),
-    ability2:        IsButtonHeld(EventPlayer(), Button.Ability2),
-    crouch:          IsButtonHeld(EventPlayer(), Button.Crouch),
-    jump:            IsButtonHeld(EventPlayer(), Button.Jump),
-    melee:           IsButtonHeld(EventPlayer(), Button.Melee),
-    reload:          IsButtonHeld(EventPlayer(), Button.Reload),
-    ultimate:        IsButtonHeld(EventPlayer(), Button.Ultimate),
-    interact:        IsButtonHeld(EventPlayer(), Button.Interact)
-  };
-}
-
 void OnRecordingFrame() {
-  changeBuffer = [];
+  logBuffer = "";
+  selectedBot.changeBuffer = [];
   # THROTTLE
-  if (lastRecordedState.throttle != ThrottleOf(EventPlayer())) {
-    changeBuffer.ModAppend(InputChange<Vector>.New(InputType.THROTTLE, ThrottleOf(EventPlayer())));
-    lastRecordedState.throttle = ThrottleOf(EventPlayer());
+  if (selectedBot.lastRecordedState.throttle != ThrottleOf(EventPlayer())) {
+    // ModifyVariable(selectedBot.changeBuffer, Operation.AppendToArray, [InputChange<Vector>.New(InputType.THROTTLE, ThrottleOf(EventPlayer()))]);
+    selectedBot.changeBuffer += InputChange<Vector>.New(InputType.THROTTLE, ThrottleOf(EventPlayer()));
+    selectedBot.lastRecordedState.throttle = ThrottleOf(EventPlayer());
+    logBuffer = logBuffer + <"T <0> ", ThrottleOf()>;
   }
   # FACING
-  if (lastRecordedState.facing != FacingDirectionOf(EventPlayer())) {
-    changeBuffer.ModAppend(InputChange<Vector>.New(InputType.FACING, FacingDirectionOf(EventPlayer())));
-    lastRecordedState.facing = FacingDirectionOf(EventPlayer());
+  if (selectedBot.lastRecordedState.facing != FacingDirectionOf(EventPlayer())) {
+    selectedBot.changeBuffer += InputChange<Vector>.New(InputType.FACING, FacingDirectionOf(EventPlayer()));
+    selectedBot.lastRecordedState.facing = FacingDirectionOf(EventPlayer());
+    logBuffer = logBuffer + <"F <0> ", FacingDirectionOf()>;
   }
   # WEAPON
-  if (lastRecordedState.weapon != Weapon(EventPlayer())) {
-    changeBuffer.ModAppend(InputChange<Number>.New(InputType.WEAPON, Weapon(EventPlayer())));
-    lastRecordedState.weapon = Weapon(EventPlayer());
+  if (selectedBot.lastRecordedState.weapon != Weapon(EventPlayer())) {
+    selectedBot.changeBuffer += InputChange<Number>.New(InputType.WEAPON, Weapon(EventPlayer()));
+    selectedBot.lastRecordedState.weapon = Weapon(EventPlayer());
+    logBuffer = logBuffer + <"W <0>", Weapon(EventPlayer())>;
   }
   # PRIMARY FIRE
-  if (lastRecordedState.primaryFire != IsButtonHeld(EventPlayer(), Button.PrimaryFire)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.PRIMARY_FIRE, IsButtonHeld(EventPlayer(), Button.PrimaryFire)));
-    lastRecordedState.primaryFire = IsButtonHeld(EventPlayer(), Button.PrimaryFire);
+  if (selectedBot.lastRecordedState.primaryFire != IsButtonHeld(EventPlayer(), Button.PrimaryFire)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.PRIMARY_FIRE, IsButtonHeld(EventPlayer(), Button.PrimaryFire));
+    selectedBot.lastRecordedState.primaryFire = IsButtonHeld(EventPlayer(), Button.PrimaryFire);
+    logBuffer = logBuffer + <"PF <0>", IsButtonHeld(EventPlayer(), Button.PrimaryFire)>;
   }
   # SECONDARY FIRE
-  if (lastRecordedState.secondaryFire != IsButtonHeld(EventPlayer(), Button.SecondaryFire)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.SECONDARY_FIRE, IsButtonHeld(EventPlayer(), Button.SecondaryFire)));
-    lastRecordedState.secondaryFire = IsButtonHeld(EventPlayer(), Button.SecondaryFire);
+  if (selectedBot.lastRecordedState.secondaryFire != IsButtonHeld(EventPlayer(), Button.SecondaryFire)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.SECONDARY_FIRE, IsButtonHeld(EventPlayer(), Button.SecondaryFire));
+    selectedBot.lastRecordedState.secondaryFire = IsButtonHeld(EventPlayer(), Button.SecondaryFire);
+    logBuffer = logBuffer + <"SF <0>", IsButtonHeld(EventPlayer(), Button.SecondaryFire)>;
   }
   # ABILITY 1
-  if (lastRecordedState.ability1 != IsButtonHeld(EventPlayer(), Button.Ability1)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.ABILITY_1, IsButtonHeld(EventPlayer(), Button.Ability1)));
-    lastRecordedState.ability1 = IsButtonHeld(EventPlayer(), Button.Ability1);
+  if (selectedBot.lastRecordedState.ability1 != IsButtonHeld(EventPlayer(), Button.Ability1)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.ABILITY_1, IsButtonHeld(EventPlayer(), Button.Ability1));
+    selectedBot.lastRecordedState.ability1 = IsButtonHeld(EventPlayer(), Button.Ability1);
+    logBuffer = logBuffer + <"A1 <0>", IsButtonHeld(EventPlayer(), Button.Ability1)>;
   }
   # ABILITY 2
-  if (lastRecordedState.ability2 != IsButtonHeld(EventPlayer(), Button.Ability2)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.ABILITY_2, IsButtonHeld(EventPlayer(), Button.Ability2)));
-    lastRecordedState.ability2 = IsButtonHeld(EventPlayer(), Button.Ability2);
+  if (selectedBot.lastRecordedState.ability2 != IsButtonHeld(EventPlayer(), Button.Ability2)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.ABILITY_2, IsButtonHeld(EventPlayer(), Button.Ability2));
+    selectedBot.lastRecordedState.ability2 = IsButtonHeld(EventPlayer(), Button.Ability2);
+    logBuffer = logBuffer + <"A2 <0>", IsButtonHeld(EventPlayer(), Button.Ability2)>;
   }
   # CROUCH
-  if (lastRecordedState.crouch != IsButtonHeld(EventPlayer(), Button.Crouch)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.CROUCH, IsButtonHeld(EventPlayer(), Button.Crouch)));
-    lastRecordedState.crouch = IsButtonHeld(EventPlayer(), Button.Crouch);
+  if (selectedBot.lastRecordedState.crouch != IsButtonHeld(EventPlayer(), Button.Crouch)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.CROUCH, IsButtonHeld(EventPlayer(), Button.Crouch));
+    selectedBot.lastRecordedState.crouch = IsButtonHeld(EventPlayer(), Button.Crouch);
+    logBuffer = logBuffer + <"C <0>", IsButtonHeld(EventPlayer(), Button.Crouch)>;
   }
   # JUMP
-  if (lastRecordedState.jump != IsButtonHeld(EventPlayer(), Button.Jump)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.JUMP, IsButtonHeld(EventPlayer(), Button.Jump)));
-    lastRecordedState.jump = IsButtonHeld(EventPlayer(), Button.Jump);
+  if (selectedBot.lastRecordedState.jump != IsButtonHeld(EventPlayer(), Button.Jump)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.JUMP, IsButtonHeld(EventPlayer(), Button.Jump));
+    selectedBot.lastRecordedState.jump = IsButtonHeld(EventPlayer(), Button.Jump);
+    logBuffer = logBuffer + <"J <0>", IsButtonHeld(EventPlayer(), Button.Jump)>;
   }
   # MELEE
-  if (lastRecordedState.melee != IsButtonHeld(EventPlayer(), Button.Melee)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.MELEE, IsButtonHeld(EventPlayer(), Button.Melee)));
-    lastRecordedState.melee = IsButtonHeld(EventPlayer(), Button.Melee);
+  if (selectedBot.lastRecordedState.melee != IsButtonHeld(EventPlayer(), Button.Melee)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.MELEE, IsButtonHeld(EventPlayer(), Button.Melee));
+    selectedBot.lastRecordedState.melee = IsButtonHeld(EventPlayer(), Button.Melee);
+    logBuffer = logBuffer + <"M <0>", IsButtonHeld(EventPlayer(), Button.Melee)>;
   }
   # RELOAD
-  if (lastRecordedState.reload != IsButtonHeld(EventPlayer(), Button.Reload)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.RELOAD, IsButtonHeld(EventPlayer(), Button.Reload)));
-    lastRecordedState.reload = IsButtonHeld(EventPlayer(), Button.Reload);
+  if (selectedBot.lastRecordedState.reload != IsButtonHeld(EventPlayer(), Button.Reload)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.RELOAD, IsButtonHeld(EventPlayer(), Button.Reload));
+    selectedBot.lastRecordedState.reload = IsButtonHeld(EventPlayer(), Button.Reload);
+    logBuffer = logBuffer + <"R <0>", IsButtonHeld(EventPlayer(), Button.Reload)>;
   }
   # ULTIMATE
-  if (lastRecordedState.ultimate != IsButtonHeld(EventPlayer(), Button.Ultimate)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.ULTIMATE, IsButtonHeld(EventPlayer(), Button.Ultimate)));
-    lastRecordedState.ultimate = IsButtonHeld(EventPlayer(), Button.Ultimate);
+  if (selectedBot.lastRecordedState.ultimate != IsButtonHeld(EventPlayer(), Button.Ultimate)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.ULTIMATE, IsButtonHeld(EventPlayer(), Button.Ultimate));
+    selectedBot.lastRecordedState.ultimate = IsButtonHeld(EventPlayer(), Button.Ultimate);
+    logBuffer = logBuffer + <"U <0>", IsButtonHeld(EventPlayer(), Button.Ultimate)>;
   }
   # INTERACT
-  if (lastRecordedState.interact != IsButtonHeld(EventPlayer(), Button.Interact)) {
-    changeBuffer.ModAppend(InputChange<Boolean>.New(InputType.INTERACT, IsButtonHeld(EventPlayer(), Button.Interact)));
-    lastRecordedState.interact = IsButtonHeld(EventPlayer(), Button.Interact);
+  if (selectedBot.lastRecordedState.interact != IsButtonHeld(EventPlayer(), Button.Interact)) {
+    selectedBot.changeBuffer += InputChange<Boolean>.New(InputType.INTERACT, IsButtonHeld(EventPlayer(), Button.Interact));
+    selectedBot.lastRecordedState.interact = IsButtonHeld(EventPlayer(), Button.Interact);
+    logBuffer = logBuffer + <"I <0>", IsButtonHeld(EventPlayer(), Button.Interact)>;
   }
-  if (changeBuffer.Length > 0) {
-    SafeAppendToBigArray(recording, <DeltaFrame>[DeltaFrame.New(changeBuffer, frame)]);
+  if (selectedBot.changeBuffer.Length > 0) {
+    logBuffer = <"f<0> <1>", frame, logBuffer>;
+    DumpLogBuffer();
+    SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New(changeBuffer, frame)]);
   }
-}
-
-void OnRecordingStop() {
-  # Add one more dummy frame to the end to ensure OOB doesn't happen
-  SafeAppendToBigArray(recording, <DeltaFrame>[DeltaFrame.New([], frame)]);
-  totalFrames = frame;
-  replayBot.recording = recording;
-  replayBot.totalFrames = totalFrames;
-  DeleteRecording();
-}
-
-rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Record on pressing Interact, wait until next press to stop recording"
-Event.OngoingPlayer
-if (IsDummyBot() == false)
-if (IsButtonHeld(EventPlayer(), Button.Interact))
-{
-  DeleteRecording();
-  replayState = ReplayState.RECORDING;
-  OnRecordingStart();
-  SmallMessage(EventPlayer(), "  Recording started");
-  WaitUntil(!IsButtonHeld(EventPlayer(), Button.Interact), 1000000);
-  WaitUntil(IsButtonHeld(EventPlayer(), Button.Interact), 1000000);
-  OnRecordingStop();
-  replayState = ReplayState.NONE;
-  SmallMessage(EventPlayer(), "  Recording stopped");
-}
-
-rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] Play recording on pressing Reload"
-Event.OngoingPlayer
-if (IsDummyBot() == false)
-if (IsButtonHeld(EventPlayer(), Button.Reload))
-{
-  InitializeReplayBot();
-  Wait(0.25);
-  replayBot.replayState = ReplayState.PLAYING;
-  StartReplayBotPlayback();
-  SmallMessage(EventPlayer(), "  Playing recording");
-  WaitUntil(!IsButtonHeld(EventPlayer(), Button.Reload), 1000000);
-  WaitUntil(IsButtonHeld(EventPlayer(), Button.Reload), 1000000);
-  replayBot.replayState = ReplayState.NONE;
-  SmallMessage(EventPlayer(), "  Playback stopped");
-}
-
-void InitializeReplayBot() {
-  Teleport(replayBot, startPoint);
-  MinWait();
-  SetFacing(replayBot, startFacing);
-  SetWeapon(replayBot, 0);
-}
-
-void StartReplayBotPlayback() {
-  replayBot.nextFrameIndex = 0;
-  replayBot.currentFrame = BigArrayAccess(recording, nextFrameIndex);
 }
 
 rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] When bot is in playing state, loop every frame and replay inputs"
@@ -320,119 +220,98 @@ if (replayState == ReplayState.PLAYING)
   Wait(TICK_LENGTH * playbackOffset, WaitBehavior.AbortWhenFalse);
   for (frame = 0; totalFrames; 1) {
     if (frame >= currentFrame.frame) {
-      for (i = 0; currentFrame.changes.Length; 1) {
-        switch (currentFrame.changes[i].type) {
-          case InputType.THROTTLE:
-            StartThrottleInDirection(EventPlayer(), currentFrame.changes[i].new_value,
-              MagnitudeOf(currentFrame.changes[i].new_value), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.None);
-            break;
-          case InputType.FACING:
-            SetFacing(EventPlayer(), currentFrame.changes[i].new_value, Relative.ToWorld);
-            break;
-          case InputType.WEAPON:
-            SetWeapon(EventPlayer(), currentFrame.changes[i].new_value);
-            break;
-          case InputType.PRIMARY_FIRE:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.PrimaryFire);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.PrimaryFire);
-            }
-            break;
-          case InputType.SECONDARY_FIRE:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.SecondaryFire);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.SecondaryFire);
-            }
-            break;
-          case InputType.ABILITY_1:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Ability1);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Ability1);
-            }
-            break;
-          case InputType.ABILITY_2:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Ability2);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Ability2);
-            }
-            break;
-          case InputType.CROUCH:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Crouch);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Crouch);
-            }
-            break;
-          case InputType.JUMP:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Jump);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Jump);
-            }
-            break;
-          case InputType.MELEE:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Melee);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Melee);
-            }
-            break;
-          case InputType.RELOAD:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Reload);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Reload);
-            }
-            break;
-          case InputType.ULTIMATE:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Ultimate);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Ultimate);
-            }
-            break;
-          case InputType.INTERACT:
-            if (currentFrame.changes[i].new_value) {
-              StartHoldingButton(EventPlayer(), Button.Interact);
-            } else {
-              StopHoldingButton(EventPlayer(), Button.Interact);
-            }
-            break;
-        }
-      }
+      ProcessAllChangesInCurrentFrame();
       nextFrameIndex += 1;
       currentFrame = BigArrayAccess(recording, nextFrameIndex);
     }
     Wait(TICK_LENGTH, WaitBehavior.AbortWhenFalse);
   }
-  OnReplayEnd();
+  replayStateAction = ReplayStateAction.REACHED_END_OF_REPLAY;
 }
 
-void OnReplayEnd() {
-  replayState = ReplayState.REACHED_END_OF_REPLAY;
-  StopThrottleInDirection();
-  StopFacing();
-  for (i = 0; AllButtons.Length; 1) {
-    StopHoldingButton(EventPlayer(), AllButtons[i]);
+void ProcessAllChangesInCurrentFrame() {
+  for (i = 0; currentFrame.changes.Length; 1) {
+    switch (currentFrame.changes[i].type) {
+      case InputType.THROTTLE:
+        StartThrottleInDirection(EventPlayer(), currentFrame.changes[i].new_value,
+          MagnitudeOf(currentFrame.changes[i].new_value), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.None);
+        break;
+      case InputType.FACING:
+        SetFacing(EventPlayer(), currentFrame.changes[i].new_value, Relative.ToWorld);
+        break;
+      case InputType.WEAPON:
+        SetWeapon(EventPlayer(), currentFrame.changes[i].new_value);
+        break;
+      case InputType.PRIMARY_FIRE:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.PrimaryFire);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+        }
+        break;
+      case InputType.SECONDARY_FIRE:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.SecondaryFire);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+        }
+        break;
+      case InputType.ABILITY_1:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Ability1);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Ability1);
+        }
+        break;
+      case InputType.ABILITY_2:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Ability2);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Ability2);
+        }
+        break;
+      case InputType.CROUCH:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Crouch);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Crouch);
+        }
+        break;
+      case InputType.JUMP:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Jump);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Jump);
+        }
+        break;
+      case InputType.MELEE:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Melee);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Melee);
+        }
+        break;
+      case InputType.RELOAD:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Reload);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Reload);
+        }
+        break;
+      case InputType.ULTIMATE:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Ultimate);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Ultimate);
+        }
+        break;
+      case InputType.INTERACT:
+        if (currentFrame.changes[i].new_value) {
+          StartHoldingButton(EventPlayer(), Button.Interact);
+        } else {
+          StopHoldingButton(EventPlayer(), Button.Interact);
+        }
+        break;
+    }
   }
-}
-
-globalvar Player replayBot = CreateDummyBot(Hero.Hazard, Team.Team1, 5, null, null);
-globalvar Vector startPoint;
-globalvar Vector startFacing;
-
-import "../../../OSTWUtils/Diagnostics.del";
-
-rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] DEBUG: Diagnostics display"
-Event.OngoingGlobal
-{
-  new Diagnostics(
-    ShowServerLoad: true,
-    ShowServerLoadAverage: true,
-    ShowServerLoadPeak: true
-  );
 }

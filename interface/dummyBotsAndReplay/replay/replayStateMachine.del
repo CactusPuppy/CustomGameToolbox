@@ -1,0 +1,354 @@
+enum ReplayState {
+  NONE = "NONE",
+  PREPARING_TO_RECORD = "PREPARING_TO_RECORD",
+  RECORDING = "RECORDING",
+  PREPARING_FOR_PLAYBACK = "PREPARING_FOR_PLAYBACK",
+  PLAYING = "PLAYING",
+  REACHED_END_OF_REPLAY = "REACHED_END_OF_REPLAY"
+}
+
+enum ReplayStateAction {
+  NONE = "NONE",
+  PREPARE_TO_RECORD = "PREPARE_TO_RECORD",
+  START_RECORDING = "START_RECORDING",
+  STOP_RECORDING = "STOP_RECORDING",
+  PREPARE_FOR_PLAYBACK = "PREPARE_FOR_PLAYBACK",
+  START_PLAYBACK = "START_PLAYBACK",
+  REACHED_END_OF_REPLAY = "REACHED_END_OF_REPLAY",
+  STOP_PLAYBACK = "STOP_PLAYBACK",
+  DELETE_RECORDING = "DELETE_RECORDING"
+}
+
+/*
+! ============= MASTER STATE MACHINE CALLSITE =============
+*/
+
+playervar ReplayState replayState = ReplayState.NONE;
+playervar ReplayStateAction replayStateAction = ReplayStateAction.NONE;
+rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Process replay state action"
+Event.OngoingPlayer
+if (replayStateAction != ReplayStateAction.NONE)
+{
+  logBuffer = "Replay State Handler: [State " + replayState + "] [Action: " + replayStateAction + "]";
+  DumpLogBuffer();
+  switch (replayState) {
+    case ReplayState.NONE:
+      HandleReplayStateAction_Normal();
+      break;
+    case ReplayState.PREPARING_TO_RECORD:
+      # Recording cases
+      HandleReplayStateAction_PreparingToRecord();
+      break;
+    case ReplayState.RECORDING:
+      HandleReplayStateAction_Recording();
+      break;
+
+    case ReplayState.PREPARING_FOR_PLAYBACK:
+      # Playback cases
+      HandleReplayStateAction_PreparingForPlayback();
+      break;
+    case ReplayState.PLAYING:
+      HandleReplayStateAction_Playing();
+      break;
+    case ReplayState.REACHED_END_OF_REPLAY:
+      HandleReplayStateAction_ReachedEndOfReplay();
+      break;
+  }
+  replayStateAction = ReplayStateAction.NONE;
+  MinWait();
+  LoopIfConditionIsTrue();
+}
+
+/*
+! ============= PER-STATE ACTION HANDLERS =============
+*/
+
+void HandleReplayStateAction_Normal()
+{
+  switch (replayStateAction) {
+    case ReplayStateAction.DELETE_RECORDING:
+      DeleteRecording();
+      break;
+    case ReplayStateAction.PREPARE_TO_RECORD:
+      # All handling for entering this state is done in the auto-transition rule
+      replayState = ReplayState.PREPARING_TO_RECORD;
+      break;
+    case ReplayStateAction.PREPARE_FOR_PLAYBACK:
+      PrepBotForPlayback();
+      replayState = ReplayState.PREPARING_FOR_PLAYBACK;
+      break;
+  }
+}
+
+void HandleReplayStateAction_PreparingToRecord()
+{
+  switch (replayStateAction) {
+    case ReplayStateAction.DELETE_RECORDING:
+      DeleteRecording();
+      break;
+    case ReplayStateAction.START_RECORDING:
+      replayState = ReplayState.RECORDING;
+      OnRecordingStart();
+      break;
+    case ReplayStateAction.STOP_RECORDING:
+      replayState = ReplayState.NONE;
+      break;
+  }
+}
+
+void HandleReplayStateAction_Recording()
+{
+  switch (replayStateAction) {
+    case ReplayStateAction.STOP_RECORDING:
+      replayState = ReplayState.NONE;
+      OnRecordingStop();
+      break;
+  }
+}
+
+void HandleReplayStateAction_PreparingForPlayback()
+{
+  switch (replayStateAction) {
+    case ReplayStateAction.DELETE_RECORDING:
+      DeleteRecording();
+      break;
+    case ReplayStateAction.START_PLAYBACK:
+      waitingOnPlayer = null;
+      OnReplayStart();
+      replayState = ReplayState.PLAYING;
+      break;
+    case ReplayStateAction.STOP_PLAYBACK:
+      waitingOnPlayer = null;
+      replayState = ReplayState.NONE;
+      break;
+  }
+}
+
+void HandleReplayStateAction_Playing()
+{
+  switch (replayStateAction) {
+    case ReplayStateAction.REACHED_END_OF_REPLAY:
+      replayState = ReplayState.REACHED_END_OF_REPLAY;
+      OnReplayEnd();
+      break;
+    case ReplayStateAction.STOP_PLAYBACK:
+      replayState = ReplayState.NONE;
+      OnReplayEnd();
+      break;
+  }
+}
+
+void HandleReplayStateAction_ReachedEndOfReplay()
+{
+  switch (replayStateAction) {
+    case ReplayStateAction.DELETE_RECORDING:
+      DeleteRecording();
+      replayState = ReplayState.NONE;
+      break;
+    case ReplayStateAction.START_PLAYBACK:
+      PrepBotForPlayback();
+      replayState = ReplayState.PREPARING_FOR_PLAYBACK;
+      break;
+    case ReplayStateAction.STOP_PLAYBACK:
+      replayState = ReplayState.NONE;
+      break;
+  }
+}
+
+/*
+! ============= REPLAY BOT FUNCTIONS =============
+*/
+
+void OnRecordingStart() {
+  selectedBot.changeBuffer = [
+    InputChange<Any>.New(InputType.THROTTLE, ThrottleOf(EventPlayer())),
+    InputChange<Any>.New(InputType.FACING, FacingDirectionOf(EventPlayer())),
+    InputChange<Any>.New(InputType.WEAPON, Weapon(EventPlayer())),
+    InputChange<Any>.New(InputType.PRIMARY_FIRE, IsButtonHeld(EventPlayer(), Button.PrimaryFire)),
+    InputChange<Any>.New(InputType.SECONDARY_FIRE, IsButtonHeld(EventPlayer(), Button.SecondaryFire)),
+    InputChange<Any>.New(InputType.ABILITY_1, IsButtonHeld(EventPlayer(), Button.Ability1)),
+    InputChange<Any>.New(InputType.ABILITY_2, IsButtonHeld(EventPlayer(), Button.Ability2)),
+    InputChange<Any>.New(InputType.CROUCH, IsButtonHeld(EventPlayer(), Button.Crouch)),
+    InputChange<Any>.New(InputType.JUMP, IsButtonHeld(EventPlayer(), Button.Jump)),
+    InputChange<Any>.New(InputType.MELEE, IsButtonHeld(EventPlayer(), Button.Melee)),
+    InputChange<Any>.New(InputType.RELOAD, IsButtonHeld(EventPlayer(), Button.Reload)),
+    InputChange<Any>.New(InputType.ULTIMATE, IsButtonHeld(EventPlayer(), Button.Ultimate)),
+    InputChange<Any>.New(InputType.INTERACT, IsButtonHeld(EventPlayer(), Button.Interact))
+  ];
+
+  SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New(changeBuffer, 0)]);
+  selectedBot.lastRecordedState = {
+    throttle:        ThrottleOf(EventPlayer()),
+    facing:          FacingDirectionOf(EventPlayer()),
+    weapon:          Weapon(EventPlayer()),
+    primaryFire:     IsButtonHeld(EventPlayer(), Button.PrimaryFire),
+    secondaryFire:   IsButtonHeld(EventPlayer(), Button.SecondaryFire),
+    ability1:        IsButtonHeld(EventPlayer(), Button.Ability1),
+    ability2:        IsButtonHeld(EventPlayer(), Button.Ability2),
+    crouch:          IsButtonHeld(EventPlayer(), Button.Crouch),
+    jump:            IsButtonHeld(EventPlayer(), Button.Jump),
+    melee:           IsButtonHeld(EventPlayer(), Button.Melee),
+    reload:          IsButtonHeld(EventPlayer(), Button.Reload),
+    ultimate:        IsButtonHeld(EventPlayer(), Button.Ultimate),
+    interact:        IsButtonHeld(EventPlayer(), Button.Interact)
+  };
+
+  # Wait one frame to start recording if all bots play their recordings during recording,
+  # since they need time to being playback.
+  selectedBot.frame = allBotsReplayDuringRecording ? -1 : 0;
+}
+
+void OnRecordingStop() {
+  # Add one more dummy frame to the end to ensure OOB doesn't happen
+  SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New([], frame)]);
+  selectedBot.totalFrames = frame;
+}
+
+void PrepBotForPlayback() {
+  Respawn();
+  TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), replayResetPoint);
+  SetWeapon(EventPlayer(), 0);
+}
+
+void OnReplayStart() {
+  nextFrameIndex = 0;
+  currentFrame = BigArrayAccess(recording, nextFrameIndex);
+}
+
+void OnReplayEnd() {
+  StopThrottleInDirection();
+  StopFacing();
+  for (i = 0; AllButtons.Length; 1) {
+    StopHoldingButton(EventPlayer(), AllButtons[i]);
+  }
+}
+
+/*
+! ============= AUTO STATE TRANSITIONS =============
+*/
+playervar RecordingCountdownInfo recordingCountdownText;
+
+rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Auto-transition to recording state"
+Event.OngoingPlayer
+if (replayState == ReplayState.PREPARING_TO_RECORD)
+{
+  selectedBot.replayStateAction = ReplayStateAction.DELETE_RECORDING;
+  # Wait one tick to allow deletion to occur
+  MinWait();
+  selectedBot.replayResetPoint = NewResetFromPlayer(selectedBot);
+  recordingHero = selectedBot.Hero();
+  logBuffer = $"REC {selectedBot.Team() == Team.Team1 ? 'T1' : 'T2'} {SlotOf(selectedBot)} {recordingHero} {1000 * selectedBot.replayResetPoint.location} {1000 * selectedBot.replayResetPoint.facing}";
+  DumpLogBuffer();
+  originalHero = HeroOf();
+
+  # Move bot away from recording area
+  StopForcingPlayerPosition(selectedBot);
+  StartForcingPlayerPosition(selectedBot, Up() * 1000);
+  SetInvisible(selectedBot, InvisibleTo.All);
+
+  # Prepare player to record
+  StopEditingBots();
+  CloseMenu();
+  if (botControlMode == BotControlMode.Edit) {
+    botControlMode = BotControlMode.Normal;
+  }
+  MinWait();
+  ForcePlayerHero(EventPlayer(), recordingHero);
+  StartForcingPlayerPosition(EventPlayer(), selectedBot.replayResetPoint.location, true);
+  StartFacing(EventPlayer(), selectedBot.replayResetPoint.facing, 1000, Relative.ToWorld);
+  AddOneLockToAllButtons();
+
+  # If we should prompt all other bots to play their recordings,
+  # prompt them now.
+  if (allBotsReplayDuringRecording) {
+    AllBotsWithRecordings().waitingOnPlayer = EventPlayer();
+    AllBotsWithRecordings().replayStateAction = ReplayStateAction.PREPARE_FOR_PLAYBACK;
+  }
+  recordingCountdownText = { timerValue: 3, textColor: LighterRed, textID: null };
+
+  WaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+
+  recordingCountdownText.textID = OnScreenText.CreateOnScreenText(
+    VisibleTo: EventPlayer(),
+    Header: $"Recording starts in {recordingCountdownText.timerValue}...",
+    Color: recordingCountdownText.textColor,
+    PositionY: -0.5,
+    Scale: 2.5,
+    Reevaluation: InworldTextRev.VisibleToPositionStringAndColor
+  );
+  SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+
+  recordingCountdownText.timerValue = 2;
+  recordingCountdownText.textColor = Color.Yellow;
+  SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+
+  recordingCountdownText.timerValue = 1;
+  recordingCountdownText.textColor = Color.Green;
+  SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
+  if (shouldAbortRecordingCountdown()) {
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    SmallMessage(EventPlayer(), "  Recording aborted");
+    Abort();
+  }
+  recordingCountdownText.timerValue = 0;
+  DestroyInWorldText(recordingCountdownText.textID);
+  # Release player to record
+  StopForcingPlayerPosition(EventPlayer());
+  StopFacing(EventPlayer());
+  UnlockAllButtons();
+
+  replayStateAction = ReplayStateAction.START_RECORDING;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Auto-transition to playback state"
+Event.OngoingPlayer
+if (replayState == ReplayState.PREPARING_FOR_PLAYBACK)
+{
+  if (waitingOnPlayer != null) {
+    WaitUntil(waitingOnPlayer.replayState != ReplayState.PREPARING_FOR_PLAYBACK, 5);
+    if (waitingOnPlayer.replayState != ReplayState.PLAYING) {
+      replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+      waitingOnPlayer = null;
+      Abort();
+    }
+    waitingOnPlayer = null;
+  } else {
+    Wait(1, WaitBehavior.AbortWhenFalse);
+  }
+  replayStateAction = ReplayStateAction.START_PLAYBACK;
+}
+
+rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Auto-transition to looping if needed, otherwise end playback"
+Event.OngoingPlayer
+if (replayState == ReplayState.PLAYING)
+if (frame >= totalFrames)
+{
+  WaitUntil(
+    AllPlayers()
+      .Filter(p => IsControllable(p)
+        && hasRecordedClip(p))
+      .IsTrueForAll(p => [ReplayState.REACHED_END_OF_REPLAY, ReplayState.NONE].Contains(p.replayState)),
+    1000000);
+
+  if (SHOULD_LOOP_CLIP) {
+    replayStateAction = ReplayStateAction.START_PLAYBACK;
+  } else {
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+  }
+}
+

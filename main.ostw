@@ -37,12 +37,13 @@ import "UndoTankHealthReduction.ostw";
 import "interface/menu.ostw";
 import "lib/logs/logs.del";
 
-String GeneralSettingsCategory: "1. General";
-String HeroSettingsCategory: "2. Hero Settings";
-String MenuSettingsCategory: "3. Menu Settings";
-String ModSettingsCategory: "4. Mod Settings";
-String InformationCategory: "5. Information";
-String BotAndReplaySettingsCategory: "6. Bot and Replay";
+String GeneralSettingsCategory: "01. General";
+String HeroSettingsCategory: "02. Hero Settings";
+String MenuSettingsCategory: "03. Menu Settings";
+String ModSettingsCategory: "04. Mod Settings";
+String InformationCategory: "05. Information";
+String BotAndReplaySettingsCategory: "06. Bot and Replay";
+String DebugSettingsCategory: "19. Debug";
 
 globalvar Number i;
 
@@ -60,7 +61,9 @@ globalvar Number i;
 // }
 // import "interface/dummyBotsAndReplay/replay/magzie_echo_recorder.del";
 
+globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugSettingsCategory, "Enable Inspector Recording", true);
 rule: "[main.ostw] Disable Inspector Recording" -100
+if (INSPECTOR_DISABLED)
 {
   DisableInspectorRecording();
 }

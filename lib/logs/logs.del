@@ -1,5 +1,14 @@
 import "../../main.ostw";
 
+globalvar String logBuffer;
+
+void DumpLogBuffer() {
+  EnableInspectorRecording();
+  LogToInspector(logBuffer);
+  if (INSPECTOR_DISABLED) DisableInspectorRecording();
+  logBuffer = "";
+}
+
 enum LogLevel {
   DEBUG,
   INFO,
