@@ -82,8 +82,6 @@ void SafeAppendToBigArray<T>(ref T[][] arr, in T value) {
 }
 
 void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/replayDefs.del] Delete Recording" {
-  logBuffer = $"DEL {TeamOf()} {SlotOf()}";
-  DumpLogBuffer();
   frame = 0;
   totalFrames = 0;
   playbackOffset = 0;
@@ -91,6 +89,7 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   replayResetPoint.location = null;
   recordingHero = null;
   UpdateLongestRecordingLength();
+  DumpLogBuffer($"DEL {TeamOf()} {SlotOf()}");
 }
 
 void TransferRecording(in Player from, in Player to) {
