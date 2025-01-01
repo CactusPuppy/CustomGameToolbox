@@ -161,7 +161,13 @@ if (IsTrueForAny(AllPlayers().Filter((p) => !IsControllable(p)), ArrayElement().
 
 rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Update Play/Stop All Replays button appearance"
 Event.OngoingPlayer
-if (AllPlayers().Filter((p) => IsControllable(p)).IsTrueForAny((p) => p.replayState == ReplayState.PLAYING))
+if (AllPlayers()
+  .Filter((p) => IsControllable(p))
+  .IsTrueForAny((p) => [
+    ReplayState.PREPARING_FOR_PLAYBACK,
+    ReplayState.PLAYING,
+    ReplayState.REACHED_END_OF_REPLAY
+  ].Contains(p.replayState)))
 {
   UpdateButtonAppearance(MenuState.DUMMY_BOTS_AND_REPLAY, 1, 2, "Stop All Replays", Color.Red);
   WaitUntil(AllPlayers().Filter((p) => IsControllable(p)).IsTrueForAny((p) => p.replayState == ReplayState.PLAYING) == false, 9999);
