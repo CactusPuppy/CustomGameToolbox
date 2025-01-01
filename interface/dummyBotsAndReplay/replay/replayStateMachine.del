@@ -163,6 +163,7 @@ void HandleReplayStateAction_ReachedEndOfReplay()
 */
 
 void OnRecordingStart() {
+  frame = 0;
   selectedBot.changeBuffer = [
     InputChange<Any>.New(InputType.THROTTLE, ThrottleOf(EventPlayer())),
     InputChange<Any>.New(InputType.FACING, FacingDirectionOf(EventPlayer())),
@@ -223,6 +224,7 @@ void RestoreBot() {
 }
 
 void OnReplayStart() {
+  frame = 0;
   nextFrameIndex = 0;
   currentFrame = BigArrayAccess(recording, nextFrameIndex);
 }
