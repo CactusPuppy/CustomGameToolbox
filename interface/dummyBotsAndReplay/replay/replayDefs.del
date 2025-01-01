@@ -205,7 +205,7 @@ void OnRecordingFrame() {
     logBuffer = logBuffer + <"I <0>", IsButtonHeld(EventPlayer(), Button.Interact)>;
   }
   if (selectedBot.changeBuffer.Length > 0) {
-    DumpLogBuffer(<"f<0> <1>", frame, logBuffer>);
+    // DumpLogBuffer(<"f<0> <1>", frame, logBuffer>);
     SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New(selectedBot.changeBuffer, frame)]);
   }
 }
