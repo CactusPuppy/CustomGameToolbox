@@ -93,8 +93,7 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
 }
 
 void TransferRecording(in Player from, in Player to) {
-  logBuffer = $"TR {TeamOf(from)} {SlotOf(from)} {TeamOf(to)} {SlotOf(to)}";
-  DumpLogBuffer();
+  DumpLogBuffer($"TR {TeamOf(from)} {SlotOf(from)} {TeamOf(to)} {SlotOf(to)}");
   to.recording = from.recording;
   to.totalFrames = from.totalFrames;
   to.playbackOffset = from.playbackOffset;
@@ -206,9 +205,8 @@ void OnRecordingFrame() {
     logBuffer = logBuffer + <"I <0>", IsButtonHeld(EventPlayer(), Button.Interact)>;
   }
   if (selectedBot.changeBuffer.Length > 0) {
-    logBuffer = <"f<0> <1>", frame, logBuffer>;
-    DumpLogBuffer();
-    SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New(changeBuffer, frame)]);
+    DumpLogBuffer(<"f<0> <1>", frame, logBuffer>);
+    SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New(selectedBot.changeBuffer, frame)]);
   }
 }
 

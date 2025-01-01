@@ -2,7 +2,8 @@ import "../../main.ostw";
 
 globalvar String logBuffer;
 
-void DumpLogBuffer() {
+void DumpLogBuffer(in String message) {
+  logBuffer = message;
   EnableInspectorRecording();
   LogToInspector(logBuffer);
   if (INSPECTOR_DISABLED) DisableInspectorRecording();

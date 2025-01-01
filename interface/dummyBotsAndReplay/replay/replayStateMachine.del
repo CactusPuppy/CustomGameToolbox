@@ -29,8 +29,7 @@ rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Process repl
 Event.OngoingPlayer
 if (replayStateAction != ReplayStateAction.NONE)
 {
-  logBuffer = "Replay State Handler: [State " + replayState + "] [Action: " + replayStateAction + "]";
-  DumpLogBuffer();
+  DumpLogBuffer("Replay State Handler: [State " + replayState + "] [Action: " + replayStateAction + "]");
   switch (replayState) {
     case ReplayState.NONE:
       HandleReplayStateAction_Normal();
@@ -54,6 +53,8 @@ if (replayStateAction != ReplayStateAction.NONE)
       HandleReplayStateAction_ReachedEndOfReplay();
       break;
   }
+  # DEBUG
+  DumpLogBuffer("Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "] [End]");
   replayStateAction = ReplayStateAction.NONE;
   MinWait();
   LoopIfConditionIsTrue();
@@ -216,6 +217,8 @@ void OnReplayStart() {
 }
 
 void OnReplayEnd() {
+  # DEBUG
+  DumpLogBuffer("Ending replay for " + EventPlayer());
   StopThrottleInDirection();
   StopFacing();
   for (i = 0; AllButtons.Length; 1) {
@@ -237,8 +240,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
   MinWait();
   selectedBot.replayResetPoint = NewResetFromPlayer(selectedBot);
   recordingHero = selectedBot.Hero();
-  logBuffer = $"REC {selectedBot.Team() == Team.Team1 ? 'T1' : 'T2'} {SlotOf(selectedBot)} {recordingHero} {1000 * selectedBot.replayResetPoint.location} {1000 * selectedBot.replayResetPoint.facing}";
-  DumpLogBuffer();
+  DumpLogBuffer($"REC {selectedBot.Team() == Team.Team1 ? 'T1' : 'T2'} {SlotOf(selectedBot)} {recordingHero} {1000 * selectedBot.replayResetPoint.location} {1000 * selectedBot.replayResetPoint.facing}");
   originalHero = HeroOf();
 
   # Move bot away from recording area
