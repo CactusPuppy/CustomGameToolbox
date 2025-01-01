@@ -63,7 +63,7 @@ if (IsControllable(EventPlayer()))
 if (recordingPlayStopFlag != RecordingAction.NONE)
 {
   if (replayState == ReplayState.PLAYING && recordingPlayStopFlag == RecordingAction.STOP) {
-    replayState = ReplayState.NONE;
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
   } else if (replayState == ReplayState.NONE
     && recordingPlayStopFlag == RecordingAction.PLAY
     && hasRecordedClip(EventPlayer())) {
