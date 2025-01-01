@@ -29,7 +29,7 @@ rule: "[interface/menu.ostw] Set up action grid" -100
   ButtonActionGrid[MenuState.EDITING_REPLAY] = BotEditReplayActions;
   ButtonActionGrid[MenuState.CONFIG] = INTENTIONALLY_EMPTY_ACTION_GRID;
 }
-rule: "[interface/menu.ostw] Set up button label grid" -100
+rule: "[interface/menu.ostw] Set up button label and color grid" -100
 Event.OngoingPlayer
 {
   ButtonLabelGrid = [];
@@ -41,10 +41,7 @@ Event.OngoingPlayer
   ButtonLabelGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonLabels;
   ButtonLabelGrid[MenuState.EDITING_REPLAY] = BotEditReplayPageButtonLabels;
   ButtonLabelGrid[MenuState.CONFIG] = configMenuButtonLabels;
-}
-rule: "[interface/menu.ostw] Set up color grid" -100
-Event.OngoingPlayer
-{
+
   ButtonColorGrid = [];
   ButtonColorGrid[MenuState.MAIN_MENU] = mainMenuButtonColors;
   ButtonColorGrid[MenuState.TOOLS] = toolsMenuButtonColors;
@@ -154,17 +151,15 @@ Event.OngoingPlayer
 {
   if (hideMenuOpenTooltip) {
     WaitUntil(HasSpawned(), 1000000);
-    Wait(1);
+    WaitUntil(currentMenuState != MenuState.CLOSED, 1);
+    if (currentMenuState != MenuState.CLOSED) {
+      hideMenuOpenTooltip = true;
+      Abort();
+    }
     SmallMessage(EventPlayer(), <"   Hold <0> to open menu", InputBindingString(Button.Interact)>);
+    WaitUntil(currentMenuState != MenuState.CLOSED, 1000000);
+    hideMenuOpenTooltip = true;
   }
-}
-
-rule: "[interface/menu.ostw] When player first opens menu, hide tooltip when menu is closed"
-Event.OngoingPlayer
-if (!hideMenuOpenTooltip)
-if (currentMenuState != MenuState.CLOSED)
-{
-  hideMenuOpenTooltip = true;
 }
 
 rule: "[interface/menu.ostw] Initialize player and perform cleanup"
