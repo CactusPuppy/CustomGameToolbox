@@ -45,7 +45,7 @@ Color[] botsReplayMenuButtonColors: [
 void MarkLastCreatedBotAsPunchingBag() {
   LastCreatedEntity().isPunchingBag = true;
   AddHealthPoolToPlayer(LastCreatedEntity(), HealthType.Health, 1250, true, false);
-  StartForcingDummyBotName(LastCreatedEntity(), "Punching Bag");
+  // if (SHOULD_PUNCHIING_BAG_NAME_CHANGE) StartForcingDummyBotName(LastCreatedEntity(), "Punching Bag");
 }
 
 void HandleBotsMenuClick() {
