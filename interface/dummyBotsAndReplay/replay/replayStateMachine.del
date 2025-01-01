@@ -92,6 +92,7 @@ void HandleReplayStateAction_PreparingToRecord()
       OnRecordingStart();
       break;
     case ReplayStateAction.STOP_RECORDING:
+      RestoreBot();
       replayState = ReplayState.NONE;
       break;
   }
@@ -101,6 +102,7 @@ void HandleReplayStateAction_Recording()
 {
   switch (replayStateAction) {
     case ReplayStateAction.STOP_RECORDING:
+      RestoreBot();
       replayState = ReplayState.NONE;
       OnRecordingStop();
       break;
@@ -209,6 +211,15 @@ void PrepBotForPlayback() {
   Respawn();
   TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), replayResetPoint);
   SetWeapon(EventPlayer(), 0);
+}
+
+void RestoreBot() {
+  # Restore bot to reset point and recording player to original hero
+  ForcePlayerHero(EventPlayer(), originalHero);
+  StopForcingHero(EventPlayer());
+  StopForcingPlayerPosition(selectedBot);
+  SetInvisible(selectedBot, InvisibleTo.None);
+  TeleportPlayerToResetPoint(selectedBot, selectedBot.replayResetPoint);
 }
 
 void OnReplayStart() {
