@@ -77,13 +77,4 @@ if (recordingPlayStopFlag != RecordingAction.NONE)
   recordingPlayStopFlag = RecordingAction.NONE;
 }
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Delete"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.DELETE)
-{
-  DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
-  selectedBot = null;
-  CloseMenu(EventPlayer());
-}
-
 // import "replay_DEBUG.del";

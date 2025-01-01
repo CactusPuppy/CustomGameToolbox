@@ -47,8 +47,6 @@ Color[] botEditPageButtonColors: [
 void HandleBotEditPageClick() {
   AbortIf(BotEditActionGrid[currentGridIndex()] == BotEditAction.NONE);
   selectedBotEditAction = BotEditActionGrid[currentGridIndex()];
-  MinWait();
-  selectedBotEditAction = BotEditAction.NONE;
 }
 
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] When a bot becomes selected, initialize display options"
@@ -134,10 +132,69 @@ void LoadTempDataToSelectedBot() playervar "[SUB | interface/dummyBotsAndReplay/
 }
 
 playervar Hero tempHeroStorage;
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change hero"
+playervar Any botRespawnPoint_FX_Loc!;
+playervar Any botRespawnPoint_FX_Fac!;
+rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle bot edit actions"
 Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
+if (selectedBotEditAction != BotEditAction.NONE)
 {
+  switch (selectedBotEditAction) {
+    case BotEditAction.CHANGE_HERO:
+      # [CASE] Change hero
+      ChangeBotHero();
+      break;
+
+    case BotEditAction.CHANGE_TEAM:
+      # [CASE] Change team
+      StoreTempDataFromBot();
+      DestroyDummyBot(selectedBot.Team(), SlotOf(selectedBot));
+      Wait(0.064);
+      selectedBot = CreateDummyBot(tempHeroStorage, OppositeTeamOf(tempTeamStorage), -1, tempCurrentPosition.location, tempCurrentPosition.facing);
+      LoadTempDataToSelectedBot();
+      break;
+
+    case BotEditAction.SET_RESPAWN_POINT:
+      # [CASE] Set respawn point
+      ToggleBotRespawnPoint();
+      break;
+
+    case BotEditAction.EDIT_BUTTON_CONTROL:
+      # [CASE] Edit button control
+      OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT_BUTTONS);
+      break;
+
+    case BotEditAction.PIN_BOT_TO_POSITION:
+      # [CASE] Pin/unpin bot to position
+      PinUnpinHandler();
+      break;
+
+    case BotEditAction.RECORD_REPLAY:
+      # [CASE] Record replay
+      HandleRecordReplayPress();
+      break;
+
+    case BotEditAction.EDIT_REPLAY:
+      # [CASE] Edit replay
+      EditSelectedBotReplay();
+      break;
+
+    case BotEditAction.DELETE_REPLAY:
+      # [CASE] Delete replay
+      DeleteSelectedBotReplay();
+      break;
+
+    case BotEditAction.DELETE:
+      # [CASE] Delete bot
+      # TODO: Ask for confirmation before deleting bot
+      DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
+      selectedBot = null;
+      CloseMenu(EventPlayer());
+      break;
+  }
+  selectedBotEditAction = BotEditAction.NONE;
+}
+
+void ChangeBotHero() {
   # We don't want to transfer recordings between heroes
   if (hasRecordedClip(selectedBot)) {
     SmallMessage(EventPlayer(), "  Replays are hero-specific and cannot be transferred between heroes!");
@@ -164,24 +221,7 @@ if (selectedBotEditAction == BotEditAction.CHANGE_HERO)
   LoadTempDataToSelectedBot();
 }
 
-
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Change team"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.CHANGE_TEAM)
-{
-  StoreTempDataFromBot();
-  DestroyDummyBot(selectedBot.Team(), SlotOf(selectedBot));
-  selectedBot = CreateDummyBot(tempHeroStorage, OppositeTeamOf(tempTeamStorage), -1, tempCurrentPosition.location, tempCurrentPosition.facing);
-  LoadTempDataToSelectedBot();
-}
-
-playervar Any botRespawnPoint_FX_Loc!;
-playervar Any botRespawnPoint_FX_Fac!;
-
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Set respawn point"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.SET_RESPAWN_POINT)
-{
+void ToggleBotRespawnPoint() {
   if (selectedBot.respawnPoint.location == null) {
     selectedBot.respawnPoint = NewResetFromPlayer(selectedBot);
     PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, EventPlayer(), 100);
@@ -213,17 +253,7 @@ if (selectedBotEditAction == BotEditAction.SET_RESPAWN_POINT)
   }
 }
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Switch to button control page"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.EDIT_BUTTON_CONTROL)
-{
-  OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT_BUTTONS);
-}
-
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Toggle bot pin"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.PIN_BOT_TO_POSITION)
-{
+void PinUnpinHandler() {
   if (selectedBot.pinnedPosition.location == null) {
     selectedBot.pinnedPosition = NewResetFromPlayer(selectedBot);
     SmallMessage(EventPlayer(), "  Pinned bot to current position");
@@ -251,9 +281,7 @@ if (pinnedPosition.location != null)
   }
 }
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Record actions"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.RECORD_REPLAY)
+void HandleRecordReplayPress()
 {
   if (replayState == ReplayState.PLAYING) {
     if (selectedBot == null) {
@@ -288,9 +316,7 @@ if (selectedBotEditAction == BotEditAction.RECORD_REPLAY)
   }
 }
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Edit replay"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.EDIT_REPLAY)
+void EditSelectedBotReplay()
 {
   if (selectedBot == null) {
     SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
@@ -307,9 +333,7 @@ if (selectedBotEditAction == BotEditAction.EDIT_REPLAY)
   }
 }
 
-rule: "[interface/dummyBotsAndReplay/botEditPage.del] Delete replay"
-Event.OngoingPlayer
-if (selectedBotEditAction == BotEditAction.DELETE_REPLAY)
+void DeleteSelectedBotReplay()
 {
   if (selectedBot == null) {
     SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
