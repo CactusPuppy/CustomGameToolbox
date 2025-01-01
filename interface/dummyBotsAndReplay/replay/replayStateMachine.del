@@ -350,8 +350,7 @@ if (replayState == ReplayState.PREPARING_FOR_PLAYBACK)
 
 rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Auto-transition to looping if needed, otherwise end playback"
 Event.OngoingPlayer
-if (replayState == ReplayState.PLAYING)
-if (frame >= totalFrames)
+if (replayState == ReplayState.REACHED_END_OF_REPLAY)
 {
   WaitUntil(
     AllPlayers()
