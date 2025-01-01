@@ -136,7 +136,7 @@ void OnRecordingFrame() {
   if (selectedBot.lastRecordedState.facing != FacingDirectionOf(EventPlayer())) {
     selectedBot.changeBuffer += InputChange<Vector>.New(InputType.FACING, FacingDirectionOf(EventPlayer()));
     selectedBot.lastRecordedState.facing = FacingDirectionOf(EventPlayer());
-    logBuffer = logBuffer + <"F <0> ", FacingDirectionOf()>;
+    logBuffer = logBuffer + <"F <0> ", FacingDirectionOf() * 1000>;
   }
   # WEAPON
   if (selectedBot.lastRecordedState.weapon != Weapon(EventPlayer())) {
