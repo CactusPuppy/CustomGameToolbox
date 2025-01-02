@@ -56,14 +56,63 @@ Color[] toolsMenuButtonColors: [
 void HandleToolsMenuClick() {
   AbortIf(ToolsActionGrid[currentGridIndex()] == 0);
   toolsActionID = ToolsActionGrid[currentGridIndex()];
-  MinWait();
-  toolsActionID = null;
+}
+
+rule: "[interface/toolsMenu.ostw] Handle toolsActionID"
+Event.OngoingPlayer
+if (toolsActionID != ToolsAction.EMPTY)
+{
+  switch (toolsActionID) {
+    case ToolsAction.SET_RESPAWN:
+      # [CASE] SET_RESPAWN
+      ToggleRespawnPoint();
+      break;
+    case ToolsAction.CHANGE_HERO:
+      # [CASE] CHANGE_HERO
+      ChangeHero();
+      break;
+    case ToolsAction.NO_CLIP:
+      # [CASE] NO_CLIP
+      ToggleNoClip();
+      break;
+    case ToolsAction.TOGGLE_PAUSE:
+      # [CASE] TOGGLE_PAUSE
+      TogglePause();
+      break;
+    case ToolsAction.RETURN_TO_ASSEMBLING_HEROES:
+      # [CASE] RETURN_TO_ASSEMBLING_HEROES
+      ReturnToAssembleHeroes();
+      break;
+    case ToolsAction.FAST_FORWARD:
+      # [CASE] FAST_FORWARD
+      FastForward();
+      break;
+    case ToolsAction.END_GAME:
+      # [CASE] END_GAME
+      EndGame();
+      break;
+    case ToolsAction.RULER:
+      # [CASE] RULER
+      ToggleRuler();
+      break;
+    case ToolsAction.THIRD_PERSON:
+      # [CASE] THIRD_PERSON
+      ToggleThirdPerson();
+      break;
+    case ToolsAction.UNLOCK_ALL_BUTTONS:
+      # [CASE] UNLOCK_ALL_BUTTONS
+      ResetState();
+      break;
+    case ToolsAction.TOGGLE_INVISIBLE:
+      # [CASE] TOGGLE_INVIS
+      ToggleInvisibility();
+      break;
+  }
+  toolsActionID = ToolsAction.EMPTY;
 }
 
 playervar ResetPoint respawnPoint!;
-rule: "[interface/toolsMenu.ostw] Respawn point"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.SET_RESPAWN)
+void ToggleRespawnPoint()
 {
   if (respawnPoint.location == null) {
     respawnPoint = NewResetFromPlayer(EventPlayer());
@@ -80,7 +129,6 @@ if (toolsActionID == ToolsAction.SET_RESPAWN)
     # Set new button look
     UpdateButtonAppearance(MenuState.TOOLS, 1, 1, "Set Respawn Point", CustomColor(80, 187, 217, 255));
   }
-  Wait(0.5);
 }
 
 rule: "[interface/toolsMenu.ostw] If respawn point is set, and player dies, respawn them at the respawn point"
@@ -91,9 +139,7 @@ Event.OnDeath
   else if (replayResetPoint.location != null) TeleportPlayerToResetPoint(EventPlayer(), replayResetPoint);
 }
 
-rule: "[interface/toolsMenu.ostw] Change hero"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.CHANGE_HERO)
+void ChangeHero()
 {
   SetAllowedHeroes(EventPlayer(), AllowedHeroes().Remove(HeroOf()));
   WaitUntil(!HasSpawned(), 3);
@@ -107,9 +153,7 @@ if (toolsActionID == ToolsAction.CHANGE_HERO)
   CloseMenu(EventPlayer());
 }
 
-rule: "[interface/toolsMenu.ostw] Toggle noclip"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.NO_CLIP)
+void ToggleNoClip()
 {
   if (isNoClipActive) {
     isNoClipActive = false;
@@ -124,9 +168,7 @@ if (toolsActionID == ToolsAction.NO_CLIP)
   CloseMenu(EventPlayer());
 }
 
-rule: "[interface/toolsMenu.ostw] Toggle pause button"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.TOGGLE_PAUSE)
+void TogglePause()
 {
   if (isTimePaused) {
     UnpauseMatchTime();
@@ -150,17 +192,13 @@ if (!isTimePaused)
   UpdateButtonAppearance(MenuState.TOOLS, 1, 3, "Pause Match Time", Color.Purple);
 }
 
-rule: "[interface/toolsMenu.ostw] Handle request for returning to assembling heroes"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.RETURN_TO_ASSEMBLING_HEROES)
+void ReturnToAssembleHeroes()
 {
   GoToAssembleHeroes();
   CloseMenu(EventPlayer());
 }
 
-rule: "[interface/toolsMenu.ostw] When fast-forward is requested, make it happen"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.FAST_FORWARD)
+void FastForward()
 {
   # Setup skip
   if (IsInSetup()) {
@@ -202,18 +240,14 @@ if (IsGameInProgress())
   UpdateButtonAppearance(MenuState.TOOLS, 2, 3, "End Round", CustomColor(212, 62, 62, 255));
 }
 
-rule: "[interface/toolsMenu.ostw] Handle request to end match"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.END_GAME)
+void EndGame()
 {
   MinWait();
   currentMenuState = MenuState.CONFIRMING_END_GAME;
   menuXIndex = 1; menuYIndex = 0;
 }
 
-rule: "[interface/toolsMenu.ostw] Handle request to toggle ruler"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.RULER)
+void ToggleRuler()
 {
   switch (playerRulerState) {
     case RulerState.HIDDEN:
@@ -232,9 +266,7 @@ if (toolsActionID == ToolsAction.RULER)
   }
 }
 
-rule: "[interface/toolsMenu.ostw] Handle request to change third person state"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.THIRD_PERSON)
+void ToggleThirdPerson()
 {
   switch (thirdPersonState) {
     case ThirdPersonState.OFF:
@@ -254,9 +286,7 @@ if (toolsActionID == ToolsAction.THIRD_PERSON)
   }
 }
 
-rule: "[interface/toolsMenu.ostw] Handle request to unlock all buttons"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.UNLOCK_ALL_BUTTONS)
+void ResetState()
 {
   UnlockAllButtons();
   phasedOutLockCount = 0;
@@ -266,9 +296,7 @@ if (toolsActionID == ToolsAction.UNLOCK_ALL_BUTTONS)
 
 import "./invisibility.del";
 
-rule: "[interface/toolsMenu.ostw] Handle request to toggle invisibility"
-Event.OngoingPlayer
-if (toolsActionID == ToolsAction.TOGGLE_INVISIBLE)
+void ToggleInvisibility()
 {
   AddOneInvisibilityLock();
   AddOnePhasedOutLock();
