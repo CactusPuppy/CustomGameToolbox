@@ -103,6 +103,10 @@ void TransferRecording(in Player from, in Player to) {
   to.totalFrames = from.totalFrames;
   to.playbackOffset = from.playbackOffset;
   to.recordingHero = from.recordingHero;
+  from.recording = [[]];
+  from.totalFrames = 0;
+  from.playbackOffset = 0;
+  from.recordingHero = null;
   UpdateLongestRecordingLength();
 }
 
