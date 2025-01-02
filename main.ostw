@@ -59,9 +59,8 @@ globalvar Number i;
 //     ShowServerLoadPeak: true);
 //   // printMenuValues();
 // }
-// import "interface/dummyBotsAndReplay/replay/magzie_echo_recorder.del";
 
-globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugSettingsCategory, "Enable Inspector Recording", true);
+globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugSettingsCategory, "Enable Inspector Recording", false);
 rule: "[main.ostw] Disable Inspector Recording" -100
 if (INSPECTOR_DISABLED)
 {
