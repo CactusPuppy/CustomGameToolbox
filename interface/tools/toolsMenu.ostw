@@ -56,6 +56,8 @@ Color[] toolsMenuButtonColors: [
 void HandleToolsMenuClick() {
   AbortIf(ToolsActionGrid[currentGridIndex()] == 0);
   toolsActionID = ToolsActionGrid[currentGridIndex()];
+  MinWait();
+  toolsActionID = ToolsAction.EMPTY;
 }
 
 rule: "[interface/toolsMenu.ostw] Handle toolsActionID"
@@ -108,7 +110,6 @@ if (toolsActionID != ToolsAction.EMPTY)
       ToggleInvisibility();
       break;
   }
-  toolsActionID = ToolsAction.EMPTY;
 }
 
 playervar ResetPoint respawnPoint!;

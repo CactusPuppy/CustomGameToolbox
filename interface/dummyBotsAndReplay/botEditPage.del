@@ -47,6 +47,8 @@ Color[] botEditPageButtonColors: [
 void HandleBotEditPageClick() {
   AbortIf(BotEditActionGrid[currentGridIndex()] == BotEditAction.NONE);
   selectedBotEditAction = BotEditActionGrid[currentGridIndex()];
+  MinWait();
+  selectedBotEditAction = BotEditAction.NONE;
 }
 
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] When a bot becomes selected, initialize display options"
@@ -200,7 +202,6 @@ if (selectedBotEditAction != BotEditAction.NONE)
       CloseMenu(EventPlayer());
       break;
   }
-  selectedBotEditAction = BotEditAction.NONE;
 }
 
 void ChangeBotHero() {
