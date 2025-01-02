@@ -130,7 +130,7 @@ void ResetAllBotsToResetPoints() playervar "[interface/dummyBotsAndReplay/botsMe
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
     Wait(0.25);
     SmallMessage(EventPlayer(), "  Teleporting those bots to you...");
-    Abort();
+    return;
   }
 }
 
@@ -179,11 +179,11 @@ void PlayAllReplays()
   if (AllPlayers().Filter((p) => IsControllable(p) && hasRecordedClip(p)).Length == 0) {
     SmallMessage(EventPlayer(), "  No replays recorded yet!");
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
-    Abort();
+    return;
   }
   if (AllPlayers().Filter((p) => IsControllable(p)).Any((p) => p.replayState == ReplayState.PLAYING)) {
     AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.STOP;
-    Abort();
+    return;
   }
   AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.PLAY;
   CloseMenu(EventPlayer());
@@ -194,7 +194,7 @@ void DeleteAllReplays()
   if (AllPlayers().Filter((p) => IsControllable(p) && hasRecordedClip(p)).Length == 0) {
     BigMessage(EventPlayer(), "  No replays recorded yet!");
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
-    Abort();
+    return;
   }
   AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.DELETE;
 }

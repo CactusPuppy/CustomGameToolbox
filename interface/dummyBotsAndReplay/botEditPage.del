@@ -209,7 +209,7 @@ void ChangeBotHero() {
     SmallMessage(EventPlayer(), "  Replays are hero-specific and cannot be transferred between heroes!");
     SmallMessage(EventPlayer(), "  Delete the replay before changing the bot's hero.");
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
-    Abort();
+    return;
   }
   StoreTempDataFromBot();
   tempHeroStorage = HeroOf();
@@ -292,28 +292,28 @@ if (pinnedPosition.location != null)
 
 void HandleRecordReplayPress()
 {
-  if (replayState == ReplayState.PLAYING) {
+  if (IsBotReplaying(selectedBot)) {
     if (selectedBot == null) {
       SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
       Wait(0.25);
       SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
-      Abort();
+      return;
     }
     selectedBot.replayStateAction = ReplayStateAction.STOP_PLAYBACK;
-    Abort();
+    return;
   }
   if (replayState == ReplayState.RECORDING) {
     SmallMessage(EventPlayer(), "  Menu opening should end recording. This is a bug!");
     Wait(0.25);
     SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
-    Abort();
+    return;
   }
   if (replayState == ReplayState.NONE) {
     if (selectedBot == null) {
       SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
       Wait(0.25);
       SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
-      Abort();
+      return;
     }
     if (hasRecordedClip(selectedBot)) {
       selectedBot.replayStateAction = ReplayStateAction.PREPARE_FOR_PLAYBACK;
@@ -321,7 +321,7 @@ void HandleRecordReplayPress()
     } else {
       replayStateAction = ReplayStateAction.PREPARE_TO_RECORD;
     }
-    Abort();
+    return;
   }
 }
 
@@ -331,7 +331,7 @@ void EditSelectedBotReplay()
     SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
     Wait(0.25);
     SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
-    Abort();
+    return;
   }
   if (hasRecordedClip(selectedBot)) {
     OpenMenuToPage(EventPlayer(), MenuState.EDITING_REPLAY);
@@ -348,7 +348,7 @@ void DeleteSelectedBotReplay()
     SmallMessage(EventPlayer(), "  No bot selected, this is a bug!");
     Wait(0.25);
     SmallMessage(EventPlayer(), "  Please report this to CactusPuppy.");
-    Abort();
+    return;
   }
   if (hasRecordedClip(selectedBot)) {
     selectedBot.recordingPlayStopFlag = RecordingAction.DELETE;
