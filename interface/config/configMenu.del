@@ -79,9 +79,9 @@ void ConfigMenu_ThrottleLeftRight() {
       case ConfigItem.SLOW_MOTION_SPEED:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
         break;
-      // case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
-      //   UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
-      //   break;
+      case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
+        break;
       case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion * 100}");
         break;
@@ -143,10 +143,10 @@ void ConfigMenu_Left() {
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
       break;
-    // case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
-    //   interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
-    //   UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
-    //   break;
+    case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
+      interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
+      break;
   }
 }
 
@@ -196,9 +196,9 @@ void ConfigMenu_Right() {
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
       break;
-    // case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
-    //   interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
-    //   UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
-    //   break;
+    case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
+      interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
+      break;
   }
 }
