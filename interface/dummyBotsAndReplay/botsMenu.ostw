@@ -159,18 +159,16 @@ if (IsTrueForAny(AllPlayers().Filter((p) => !IsControllable(p)), ArrayElement().
   }
 }
 
+Boolean ANY_BOTS_REPLAYING(): AllPlayers()
+  .Filter((p) => IsControllable(p))
+  .IsTrueForAny((p) => IsBotReplaying(p));
+
 rule: "[interface/dummyBotsAndReplay/botsMenu.ostw] Update Play/Stop All Replays button appearance"
 Event.OngoingPlayer
-if (AllPlayers()
-  .Filter((p) => IsControllable(p))
-  .IsTrueForAny((p) => [
-    ReplayState.PREPARING_FOR_PLAYBACK,
-    ReplayState.PLAYING,
-    ReplayState.REACHED_END_OF_REPLAY
-  ].Contains(p.replayState)))
+if (ANY_BOTS_REPLAYING())
 {
   UpdateButtonAppearance(MenuState.DUMMY_BOTS_AND_REPLAY, 1, 2, "Stop All Replays", Color.Red);
-  WaitUntil(AllPlayers().Filter((p) => IsControllable(p)).IsTrueForAny((p) => p.replayState == ReplayState.PLAYING) == false, 9999);
+  WaitUntil(ANY_BOTS_REPLAYING() == false, 9999);
   UpdateButtonAppearance(MenuState.DUMMY_BOTS_AND_REPLAY, 1, 2, "Play All Replays", Color.LimeGreen);
 }
 
@@ -181,7 +179,7 @@ void PlayAllReplays()
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
     return;
   }
-  if (AllPlayers().Filter((p) => IsControllable(p)).Any((p) => p.replayState == ReplayState.PLAYING)) {
+  if (AllPlayers().Filter((p) => IsControllable(p)).Any((p) => IsBotReplaying(p))) {
     AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.STOP;
     return;
   }

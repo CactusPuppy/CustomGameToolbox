@@ -64,6 +64,11 @@ playervar InputChange<Any>[] changeBuffer;
 
 
 Player[] AllBotsWithRecordings(): AllPlayers().Filter(p => IsControllable(p) && hasRecordedClip(p));
+Boolean IsBotReplaying(Player p = EventPlayer()): [
+    ReplayState.PREPARING_FOR_PLAYBACK,
+    ReplayState.PLAYING,
+    ReplayState.REACHED_END_OF_REPLAY
+  ].Contains(p.replayState);
 Number MAX_ARRAY_SIZE: 1000;
 Number TICK_LENGTH: 0.016;
 Boolean hasRecordedClip(Player p = EventPlayer()): p.totalFrames > 0;

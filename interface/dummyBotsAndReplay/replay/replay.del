@@ -62,7 +62,7 @@ Event.OngoingPlayer
 if (IsControllable(EventPlayer()))
 if (recordingPlayStopFlag != RecordingAction.NONE)
 {
-  if (replayState == ReplayState.PLAYING && recordingPlayStopFlag == RecordingAction.STOP) {
+  if (IsBotReplaying() && recordingPlayStopFlag == RecordingAction.STOP) {
     replayStateAction = ReplayStateAction.STOP_PLAYBACK;
   } else if (replayState == ReplayState.NONE
     && recordingPlayStopFlag == RecordingAction.PLAY
