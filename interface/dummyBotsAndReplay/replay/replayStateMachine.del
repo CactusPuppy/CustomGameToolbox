@@ -113,15 +113,19 @@ void HandleReplayStateAction_PreparingForPlayback()
 {
   switch (replayStateAction) {
     case ReplayStateAction.DELETE_RECORDING:
+      StopForcingPlayerPosition();
       DeleteRecording();
+      replayState = ReplayState.NONE;
       break;
     case ReplayStateAction.START_PLAYBACK:
       waitingOnPlayer = null;
+      StopForcingPlayerPosition();
       OnReplayStart();
       replayState = ReplayState.PLAYING;
       break;
     case ReplayStateAction.STOP_PLAYBACK:
       waitingOnPlayer = null;
+      StopForcingPlayerPosition();
       replayState = ReplayState.NONE;
       break;
   }
@@ -211,6 +215,7 @@ void OnRecordingStop() {
 void PrepBotForPlayback() {
   Respawn();
   TeleportPlayerToResetPoint_CONSTANT_TIME(EventPlayer(), replayResetPoint);
+  StartForcingPlayerPosition(EventPlayer(), replayResetPoint.location);
   SetWeapon(EventPlayer(), 0);
 }
 
