@@ -341,16 +341,17 @@ Event.OngoingPlayer
 if (replayState == ReplayState.PREPARING_FOR_PLAYBACK)
 {
   if (waitingOnPlayer != null) {
-    WaitUntil(waitingOnPlayer.replayState != ReplayState.PREPARING_FOR_PLAYBACK, 5);
-    if (waitingOnPlayer.replayState != ReplayState.PLAYING) {
+    WaitUntil(waitingOnPlayer.replayState != ReplayState.PREPARING_TO_RECORD, 5);
+    if (waitingOnPlayer.replayState != ReplayState.RECORDING) {
       replayStateAction = ReplayStateAction.STOP_PLAYBACK;
       waitingOnPlayer = null;
-      Abort();
+      return;
     }
     waitingOnPlayer = null;
   } else {
     Wait(1, WaitBehavior.AbortWhenFalse);
   }
+  AbortIf(hasRecordedClip() == false);
   replayStateAction = ReplayStateAction.START_PLAYBACK;
 }
 
