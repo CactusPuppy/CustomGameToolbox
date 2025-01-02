@@ -365,6 +365,7 @@ if (replayState == ReplayState.REACHED_END_OF_REPLAY)
       .IsTrueForAll(p => [ReplayState.REACHED_END_OF_REPLAY, ReplayState.NONE].Contains(p.replayState)),
     1000000);
 
+  AbortIf(replayState != ReplayState.REACHED_END_OF_REPLAY);
   if (SHOULD_LOOP_CLIP) {
     replayStateAction = ReplayStateAction.START_PLAYBACK;
   } else {
