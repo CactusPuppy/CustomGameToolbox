@@ -184,7 +184,7 @@ void OnRecordingStart() {
     InputChange<Any>.New(InputType.INTERACT, IsButtonHeld(EventPlayer(), Button.Interact))
   ];
 
-  SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New(changeBuffer, 0)]);
+  SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New(selectedBot.changeBuffer, 0)]);
   selectedBot.lastRecordedState = {
     throttle:        ThrottleOf(EventPlayer()),
     facing:          FacingDirectionOf(EventPlayer()),
