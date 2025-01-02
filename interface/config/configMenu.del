@@ -3,6 +3,8 @@ enum ConfigItem {
   BUTTON_SPAM_PERIOD,
   SLOW_MOTION_SPEED,
   INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY,
+  // PUNCHING_BAG_HEALTH_PERCENTAGE,
+  // SHOULD_PUNCHIING_BAG_NAME_CHANGE,
   END_SENTINEL
 }
 
@@ -12,6 +14,8 @@ String currentConfigItem: [
   "Slow Motion Speed",
   "Interact Destroys Deployables In Replay"
 ][currentConfigSelection];
+
+// globalvar Boolean SHOULD_PUNCHIING_BAG_NAME_CHANGE = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Should Punching Bag Name Change", true);
 
 playervar ConfigItem currentConfigSelection;
 
@@ -78,6 +82,9 @@ void ConfigMenu_ThrottleLeftRight() {
       case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
         break;
+      // case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
+      //   UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion * 100}");
+      //   break;
     }
     return;
   }

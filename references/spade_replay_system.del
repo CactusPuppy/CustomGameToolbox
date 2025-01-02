@@ -1,0 +1,2017 @@
+globalvar define bot;
+globalvar define timer;
+globalvar define recording;
+globalvar define allButtons;
+globalvar define timelineTextLineCount;
+globalvar define timelineFrameText;
+globalvar define timelineThrottleText;
+globalvar define timelineFacingText;
+globalvar define posBeforeUnspawn;
+globalvar define inMenu;
+globalvar define menuString;
+globalvar define menuCurrItems;
+globalvar define menuActions;
+globalvar define menuHoverIndex;
+globalvar define menuIncrementSign;
+globalvar define selectedFrame;
+globalvar define timelineOpen;
+globalvar define thirdPersonCamOn;
+globalvar define forcePrepFacing;
+globalvar define botInvisOn;
+globalvar define menuValueLabels;
+globalvar define recordSpeed;
+globalvar define replaySpeed;
+globalvar define tmpProgresBar;
+globalvar define iVal1;
+globalvar define iVal0;
+globalvar define niVal0;
+globalvar define editPrepFrames;
+globalvar define requestTimelineUpdate;
+globalvar define watchBotOnReplay;
+globalvar define menuEnabled;
+globalvar define heroBeforeBotHeroSelect;
+globalvar define iVal2;
+globalvar define timelineViewLength;
+globalvar define speedAtFrame;
+globalvar define showData;
+globalvar define tooltip;
+globalvar define itemTooltips;
+globalvar define facingBeforeUnspawn;
+globalvar define disableAbilitiesInRecord;
+globalvar define selectedFrameBeforeReplay;
+globalvar define data;
+globalvar define iVal3;
+globalvar define iVal4;
+globalvar define iVal5;
+globalvar define iVal6;
+globalvar define iVal7;
+globalvar define iVal8;
+globalvar define numbers;
+globalvar define iVal9;
+globalvar define iVal10;
+globalvar define iVal11;
+globalvar define iVal12;
+globalvar define iVal13;
+globalvar define logBuffer;
+globalvar define map;
+globalvar define arrayToText;
+globalvar define arrayAsText;
+globalvar define buttonDataText;
+globalvar define buttonDataTextWidth;
+globalvar define buttonDataOn;
+globalvar define buttonSelected;
+playervar define throttles;
+playervar define throttleTimings;
+playervar define facings;
+playervar define facingTimings;
+playervar define initButtonStates;
+playervar define buttonsTimings;
+playervar define weapon;
+playervar define lastButtonsState;
+playervar define weaponTimings;
+playervar define attachee;
+playervar define buttonsState;
+playervar define preRefreshPos;
+playervar define preRefreshFace;
+playervar define selectedHero;
+playervar define doRefresh;
+playervar define totalFrames;
+playervar define replayFacingIndex;
+playervar define replayThrottleIndex;
+playervar define replayButtonsIndices;
+playervar define number;
+playervar define replayFrameCounter;
+playervar define replaying;
+playervar define initFacing;
+playervar define initPos;
+playervar define p_iVal0;
+playervar define replayWeaponIndex;
+
+rule: "disable inspector"
+{
+		DisableInspectorRecording();
+}
+
+rule: "init global"
+{
+		numbers = "0123456789";
+		allButtons = [Button.PrimaryFire, Button.SecondaryFire, Button.Ability1, Button.Ability2, Button.Ultimate, Button.Interact, Button.Jump, Button.Crouch, Button.Melee, Button.Reload];
+		// DisableInspectorRecording();
+		timelineThrottleText = "";
+		timelineFacingText = "";
+		timelineOpen = true;
+		thirdPersonCamOn = false;
+		watchBotOnReplay = false;
+		forcePrepFacing = false;
+		botInvisOn = true;
+		recordSpeed = 10;
+		replaySpeed = 100;
+		editPrepFrames = 40;
+		menuHoverIndex = 0;
+		menuEnabled = true;
+		timer = 100;
+		disableAbilitiesInRecord = true;
+		showData = true;
+		buttonDataOn = false;
+		buttonSelected = 0;
+		# log commands: n - make a new bot, b - change to bot, x - remove bot, r - reset bot data, c - cut bot's data, a - append to bot's var, p - set bot init pos, f - set bot init facing
+		logBuffer = "";
+		timelineViewLength = 50;
+		// timelineFrameText = 440 / timelineViewLength;
+		menuActions = ["\nreplay", "replay at frame", "\nrecord from current bot pos", "\nrecord at frame", "\n \ntp all bots to start", "\ntp bot to start", "\ntp bot here", "tp to bot", "\n \nchange hero", "swap teams", "\n \nAdd Bot Team 1", "Add Bot Team 2", "\nAdd Bot Deathmatch", "\nchange bot hero", "Remove bot", "\n \nFlash Inspector"];
+		menuValueLabels = ["\n \nbot ", "\nselected frame ", "\n \n3p Cam ", "replay watch bot ", "\nforce facing in prep ", "\nbot invis while recording ", "\ndisable abilities while recording ", "\n \nshow data ", <"\ntimeline next <0> frames ", timelineViewLength>, "\nshow button data ", "\nbutton selected ", "\n \nrecord speed ", "replay speed "];
+		itemTooltips = ["play at replay speed \ninteract + reload stops replay", "plays to frame normally then slows to replay speed \ninteract + reload stops replay", "record from bot's current position \noverwrites bot data from beginning \ninteract + reload stops record", "plays to frame then slows and records \noverwrites bot data from selected frame \ninteract + reload stops record", null, null, null, null, null, null, null, null, null, null, "warning: deletes bot data.", "toggles workshop inspector on and off. \nputs bot data in data variable", null, null, null, null, null, null, null, <"Displays a timeline containing the \n<0> frames after selected frame", timelineViewLength>, "Displays button data. shows button's \ninitial state and frames where its state changes", null, null, null];
+		logBuffer = <"m <0>", CurrentMap()>;
+		pushLog();
+		buttonDataTextWidth = 80;
+}
+
+rule: "map warning"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()) == IsAlive(EventPlayer()))
+if (map == true)
+if (<"<0>", CurrentMap()> != map)
+{
+		Wait(0.25, WaitBehavior.IgnoreCondition);
+		BigMessage(EventPlayer(), <"Warning: Map may be incompatible; Recording was made on <0>", map>);
+}
+
+disabled rule: "init bots"
+{
+		# dumb bot
+		CreateDummyBot(Hero.Ana, Team.Team1, 1, Vector(-15.511, 0.574, -89.571), Vector(0, 0, 0));
+		bot.number = 1;
+		bot = LastCreatedEntity();
+		logBuffer = <"b <0>", bot.number>;
+		pushLog();
+}
+
+rule: "skip asembling"
+if (IsAssemblingHeroes() == true)
+{
+		Wait(1, WaitBehavior.IgnoreCondition);
+		SetMatchTime(0);
+		WaitUntil(IsInSetup(), 99999);
+		SetMatchTime(0);
+}
+
+rule: "match time"
+if (IsGameInProgress() == true)
+if (MatchTime() < 3500)
+{
+		Wait(60, WaitBehavior.IgnoreCondition);
+		PauseMatchTime();
+		SetMatchTime(3599);
+}
+
+rule: "bot init"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (initFacing == false)
+if (HasSpawned(EventPlayer()) == IsAlive(EventPlayer()))
+{
+		# init arrays
+		throttles = [[ThrottleOf(HostPlayer())]];
+		throttleTimings = [];
+		# facing
+		facings = [[FacingDirectionOf(HostPlayer())]];
+		facingTimings = [[]];
+		# weapon
+		weapon = [Weapon(HostPlayer())];
+		weaponTimings = [[]];
+		# input buttons
+		initButtonStates = MappedArray(allButtons, IsButtonHeld(HostPlayer(), ArrayElement()));
+		buttonsTimings = MappedArray(allButtons, [[]]);
+}
+
+rule: "bot respawn"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (HasSpawned(EventPlayer()) == IsAlive(EventPlayer()))
+{
+		if (initFacing)
+		{
+				Teleport(EventPlayer(), initPos);
+				SetFacing(EventPlayer(), facings, Relative.ToWorld);
+		}
+		if (selectedHero)
+		{
+				ForcePlayerHero(EventPlayer(), selectedHero);
+		}
+}
+
+rule: "player spawn/resp"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == false)
+if (IsAlive(EventPlayer()) == HasSpawned(EventPlayer()))
+{
+		DisableMovementCollisionWithPlayers(EventPlayer());
+		SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+		// Teleport(EventPlayer(), Vector(-18.527, 0.574, -86.743));
+		SetDamageDealt(EventPlayer(), 0);
+		SetKnockbackDealt(EventPlayer(), 0);
+}
+
+rule: "vis"
+{
+		CreateProgressBarInWorldText(showData && timer < EvaluateOnce(editPrepFrames) ? LocalPlayer() : 0, UpdateEveryFrame(100 * timer / EvaluateOnce(editPrepFrames)), null, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + -100 * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1, Clipping.DoNotClip, Color.Yellow, Color.White, ProgressBarWorldEvaluation.VisibleToPositionValuesAndColor, Spectators.DefaultVisibility);
+		CreateHudText(showData ? LocalPlayer() : 0, <"<0> \n<1> \n<2>", <"<0> fx <1> txt", EntityCount(), TextCount()>, <"<0> ld <1> avg <2> pk", ServerLoad(), ServerLoadAverage(), ServerLoadPeak()>, <"<0> \n<1>", <"<0> pos \n <1> face \n <2> angles", PositionOf(LocalPlayer()), FacingDirectionOf(LocalPlayer()), <"(<0>°, <1>°)", HorizontalFacingAngleOf(LocalPlayer()), VerticalFacingAngleOf(LocalPlayer())>>, <"hspd <1> vspd <2>\nspd <0>", SpeedOf(LocalPlayer()), HorizontalSpeedOf(LocalPlayer()), VerticalSpeedOf(LocalPlayer())>>>, null, null, Location.Left, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+		CreateHudText(showData ? LocalPlayer() : 0, <"<0> bot frame \n<1> throttle index \n<2> facing index", bot.replayFrameCounter, bot.replayThrottleIndex, bot.replayFacingIndex>, null, null, Location.Left, 2, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+		# frame indicator
+		CreateIcon(showData ? LocalPlayer() : 0, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + -30 * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), Icon.Circle, IconRev.VisibleToPositionAndColor, UpdateEveryFrame(TotalTimeElapsed() % 0.032 < 0.016 ? CustomColor(255, 0, 0, 255) : CustomColor(0, 255, 0, 255)), true);
+		# throttle indicator
+		CreateBeamEffect(showData ? LocalPlayer() : [], BeamType.SymmetraProjectorBeam, UpdateEveryFrame(0.5 * (EyePosition(bot) + PositionOf(bot))), UpdateEveryFrame(0.5 * (EyePosition(bot) + PositionOf(bot)) + 5 * WorldVectorOf(ThrottleOf(bot), bot, LocalVector.Rotation)), TeamOf(LocalPlayer()), EffectRev.VisibleToPositionRadiusAndColor);
+		# looking indicator
+		CreateBeamEffect(showData ? LocalPlayer() : [], BeamType.TorbjornTurretSightBeam, UpdateEveryFrame(EyePosition(bot)), UpdateEveryFrame(EyePosition(bot) + 5 * FacingDirectionOf(bot)), TeamOf(LocalPlayer()), EffectRev.VisibleToPositionRadiusAndColor);
+		CreateHudText(inMenu ? LocalPlayer() : 0, null, menuString, null, Location.Right, 1, Color.White, Color.LimeGreen, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+		CreateHudText(inMenu ? LocalPlayer() : 0, null, null, tooltip, Location.Left, 0, Color.Orange, Color.Orange, Color.Orange, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+		CreateHudText(showData && buttonDataOn ? AllPlayers(Team.All) : [], null, buttonDataText, null, Location.Left, 5, Color.White, CustomColor(255, 0, 255, 255), Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+		# push down by 0.48 per line at scale 0
+		CreateInWorldText(showData && timelineOpen ? LocalPlayer() : 0, <"<0>#", timelineFrameText>, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + 120 * WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation) - (timelineTextLineCount * 0.48 + 125) * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1.1, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+		# Global.timelineThrottleText
+		CreateInWorldText(showData && timelineOpen ? LocalPlayer() : 0, <"<0>Throttle", timelineThrottleText>, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + 100 * WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation) - (timelineTextLineCount * 0.48 + 125) * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1.1, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.Blue, Spectators.DefaultVisibility);
+		# Global.timelineFacingText
+		CreateInWorldText(showData && timelineOpen ? LocalPlayer() : 0, <"<0>Facing", timelineFacingText>, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + 60 * WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation) - (timelineTextLineCount * 0.48 + 125) * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1.1, Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.Green, Spectators.DefaultVisibility);
+}
+
+rule: "debug vis"
+{
+		// CreateHudText(showData ? LocalPlayer() : 0, <"<0> throttle val frame \n<1> frame val", bot.throttles[RoundToInteger(bot.replayFacingIndex / 1000, Rounding.Down)][bot.replayFacingIndex % 1000], bot.throttleTimings[RoundToInteger(bot.replayThrottleIndex / 20, Rounding.Down)][bot.replayThrottleIndex % 20]>, null, null, Location.Right, 1, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+disabled rule: "RECORD AND REPLAY"
+{
+}
+
+rule: "record"
+if (recording == true)
+{
+		SetWeapon(bot, Weapon(HostPlayer()));
+		if (forcePrepFacing)
+		{
+				SetFacing(HostPlayer(), FacingDirectionOf(bot), Relative.ToWorld);
+		}
+		# tp and attach
+		Teleport(HostPlayer(), PositionOf(bot));
+		AttachPlayers(HostPlayer(), bot, Vector(0, 0, 0));
+		# recording; first frame was recorded in init so wait is before subroutine
+		while (recording)
+		{
+				registerInputToBot();
+				shadowInputToBot();
+				MinWait();
+				bot.replayFrameCounter += 1;
+		}
+		capBotRecord();
+		populateButtonData();
+		# stop bot shadowing buttons
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				StopHoldingButton(bot, allButtons[iVal0]);
+		}
+		StopThrottleInDirection(bot);
+		StopFacing(bot);
+		# return everything to normal
+		DetachPlayers(HostPlayer());
+		bot.attachee = null;
+		hostEnableAll();
+		StopForcingHero(HostPlayer());
+		SetInvisible(bot, InvisibleTo.None);
+		bot.totalFrames = bot.replayFrameCounter;
+		logBuffer = <"t <0>", bot.totalFrames>;
+		pushLog();
+		if (timelineOpen)
+		{
+				updateTimeline();
+		}
+		SetSlowMotion(100);
+}
+
+rule: "replay"
+Event.OngoingPlayer
+if (replaying == true)
+if (IsDummyBot(EventPlayer()) == true)
+{
+		refreshBot();
+		Teleport(EventPlayer(), initPos);
+		# index of current action value; current throttle, current facing etc.
+		replayFacingIndex = 0;
+		replayThrottleIndex = 0;
+		replayButtonsIndices = MappedArray(allButtons, 0);
+		replayWeaponIndex = 0;
+		# frame counter
+		replayFrameCounter = 0;
+		# init button states
+		buttonsState = initButtonStates;
+		# init start holding buttons
+		for (p_iVal0 = 0; CountOf(allButtons); 1)
+		{
+				if (initButtonStates[p_iVal0])
+				{
+						StartHoldingButton(EventPlayer(), allButtons[p_iVal0]);
+				}
+		}
+		# throttle and facing
+		StartThrottleInDirection(EventPlayer(), throttles[RoundToInteger(replayThrottleIndex / 1000, Rounding.Down)][replayThrottleIndex % 1000], MagnitudeOf(throttles[RoundToInteger(replayThrottleIndex / 1000, Rounding.Down)][replayThrottleIndex % 1000]), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.DirectionAndMagnitude);
+		StartFacing(EventPlayer(), facings[RoundToInteger(replayFacingIndex / 1000, Rounding.Down)][replayFacingIndex % 1000], 10000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+		SetWeapon(EventPlayer(), FirstOf(weapon));
+		# replay loop
+		for (replayFrameCounter = 1; totalFrames; 1)
+		{
+				MinWait();
+				if (!replaying)
+				{
+						break;
+				}
+				# change action after reaching
+				if (replayFrameCounter >= throttleTimings[RoundToInteger(replayThrottleIndex / 1000, Rounding.Down)][replayThrottleIndex % 1000])
+				{
+						replayThrottleIndex += 1;
+				}
+				if (replayFrameCounter >= facingTimings[RoundToInteger(replayFacingIndex / 1000, Rounding.Down)][replayFacingIndex % 1000])
+				{
+						replayFacingIndex += 1;
+				}
+				if (replayFrameCounter >= weaponTimings[RoundToInteger(replayWeaponIndex / 1000, Rounding.Down)][replayWeaponIndex % 1000])
+				{
+						replayWeaponIndex += 1;
+						SetWeapon(EventPlayer(), weapon[RoundToInteger(replayWeaponIndex / 1000, Rounding.Down)][replayWeaponIndex % 1000]);
+				}
+				# change states
+				for (p_iVal0 = 0; CountOf(allButtons); 1)
+				{
+						# if the current frame is past the timestamp
+						if (replayFrameCounter >= buttonsTimings[p_iVal0][replayButtonsIndices[p_iVal0] / 1000][replayButtonsIndices[p_iVal0] % 1000])
+						{
+								# flip the button's state
+								buttonsState[p_iVal0] = !buttonsState[p_iVal0];
+								# change hold/release accordingly
+								if (buttonsState[p_iVal0])
+								{
+										StartHoldingButton(EventPlayer(), allButtons[p_iVal0]);
+								}
+								else
+								{
+										StopHoldingButton(EventPlayer(), allButtons[p_iVal0]);
+								}
+								# increment button's index
+								replayButtonsIndices[p_iVal0] += 1;
+						}
+				}
+		}
+		# stop bot holding buttons
+		for (p_iVal0 = 0; CountOf(allButtons); 1)
+		{
+				StopHoldingButton(EventPlayer(), allButtons[p_iVal0]);
+		}
+		StopThrottleInDirection(EventPlayer());
+		StopFacing(EventPlayer());
+		replaying = false;
+		if (timelineOpen)
+		{
+				requestTimelineUpdate = true;
+		}
+}
+
+void registerInputToBot() "register input to bot SUBROUTINE"
+{
+		logBuffer = "";
+		# THROTTLE
+		if (LastOf(LastOf(bot.throttles)) != ThrottleOf(HostPlayer()))
+		{
+				if (CountOf(LastOf(bot.throttles)) == 1000)
+				{
+						bot.throttles[CountOf(bot.throttles)] = [ThrottleOf(HostPlayer())];
+				}
+				else
+				{
+						ModifyVariable(bot.throttles[CountOf(bot.throttles) - 1], Operation.AppendToArray, ThrottleOf(HostPlayer()));
+				}
+				# corresponds to the end time of formerly last elem of throttles (at this point, throttles[count(throttles) - 2])
+				if (CountOf(LastOf(bot.throttleTimings)) == 1000)
+				{
+						bot.throttleTimings[CountOf(bot.throttleTimings)] = [bot.replayFrameCounter];
+				}
+				else
+				{
+						ModifyVariable(bot.throttleTimings[CountOf(bot.throttleTimings) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+				}
+				logBuffer = <"<0><1> \n", logBuffer, <"a thrT <0> \na thr <1>", bot.replayFrameCounter, 1000 * ThrottleOf(HostPlayer())>>;
+		}
+		# FACING
+		if (LastOf(LastOf(bot.facings)) != FacingDirectionOf(HostPlayer()))
+		{
+				if (CountOf(LastOf(bot.facings)) == 1000)
+				{
+						bot.facings[CountOf(bot.facings)] = [FacingDirectionOf(HostPlayer())];
+				}
+				else
+				{
+						ModifyVariable(bot.facings[CountOf(bot.facings) - 1], Operation.AppendToArray, FacingDirectionOf(HostPlayer()));
+				}
+				if (CountOf(LastOf(bot.facingTimings)) == 1000)
+				{
+						bot.facingTimings[CountOf(bot.facingTimings)] = [bot.replayFrameCounter];
+				}
+				else
+				{
+						ModifyVariable(bot.facingTimings[CountOf(bot.facingTimings) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+				}
+				logBuffer = <"<0><1> \n", logBuffer, <"a facT <0> \na fac <1>", bot.replayFrameCounter, 1000 * FacingDirectionOf(HostPlayer())>>;
+		}
+		# WEAPON
+		if (LastOf(LastOf(bot.weapon)) != Weapon(HostPlayer()))
+		{
+				if (CountOf(LastOf(bot.weapon)) == 1000)
+				{
+						bot.weapon[CountOf(bot.weapon)] = [Weapon(HostPlayer())];
+				}
+				else
+				{
+						ModifyVariable(bot.weapon[CountOf(bot.weapon) - 1], Operation.AppendToArray, Weapon(HostPlayer()));
+				}
+				if (CountOf(LastOf(bot.weaponTimings)) == 1000)
+				{
+						bot.weaponTimings[CountOf(bot.weaponTimings)] = [bot.replayFrameCounter];
+				}
+				else
+				{
+						ModifyVariable(bot.weaponTimings[CountOf(bot.weaponTimings) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+				}
+				logBuffer = <"<0><1> \n", logBuffer, <"a wepT <0> \na wep <1>", bot.replayFrameCounter, Weapon(HostPlayer())>>;
+		}
+		# BUTTONS
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				# if match, continue count for button, else start a new count
+				if (bot.buttonsState[iVal0] != IsButtonHeld(HostPlayer(), allButtons[iVal0]))
+				{
+						iVal1 = bot.buttonsTimings[iVal0];
+						if (CountOf(LastOf(iVal1)) == 1000)
+						{
+								iVal1[CountOf(iVal1)] = [bot.replayFrameCounter];
+						}
+						else
+						{
+								ModifyVariable(iVal1[CountOf(iVal1) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+						}
+						bot.buttonsTimings[iVal0] = iVal1;
+						logBuffer = <"<0><1> \n", logBuffer, <"a butT <1> <0>", iVal0, bot.replayFrameCounter>>;
+				}
+		}
+		# update button state
+		bot.buttonsState = MappedArray(allButtons, IsButtonHeld(HostPlayer(), ArrayElement()));
+		pushLog();
+}
+
+void shadowInputToBot() "shadow input to bot SUBROUTINE"
+{
+		SetWeapon(bot, Weapon(HostPlayer()));
+		StartThrottleInDirection(bot, ThrottleOf(HostPlayer()), MagnitudeOf(ThrottleOf(HostPlayer())), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.None);
+		SetFacing(bot, FacingDirectionOf(HostPlayer()), Relative.ToWorld);
+		bot.buttonsState = MappedArray(allButtons, IsButtonHeld(HostPlayer(), ArrayElement()));
+		# if state changed for a button, stop/start holding it accordingly
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				if (bot.buttonsState[iVal0] != bot.lastButtonsState[iVal0])
+				{
+						if (bot.buttonsState[iVal0])
+						{
+								// SmallMessage(AllPlayers(Team.All), "qwasda");
+								StartHoldingButton(bot, allButtons[iVal0]);
+						}
+						else
+						{
+								// SmallMessage(AllPlayers(Team.All), "agagae");
+								StopHoldingButton(bot, allButtons[iVal0]);
+						}
+				}
+		}
+		bot.lastButtonsState = bot.buttonsState;
+}
+
+void capBotRecord() "cap bot record SUBROUTINE"
+{
+		logBuffer = "";
+		# cap off frame counts; each throttle val has a corresponding end frame time. technically doesn't matter what this val is, just needs to be past total frames count; everything is shut off at the end
+		if (CountOf(LastOf(bot.throttleTimings)) == 1000)
+		{
+				bot.throttleTimings[CountOf(bot.throttleTimings)] = [bot.replayFrameCounter];
+		}
+		else
+		{
+				ModifyVariable(bot.throttleTimings[CountOf(bot.throttleTimings) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+		}
+		logBuffer = <"<0><1> \n", logBuffer, <"a thrT <0>", bot.replayFrameCounter>>;
+		if (CountOf(LastOf(bot.facingTimings)) == 1000)
+		{
+				bot.facingTimings[CountOf(bot.facingTimings)] = [bot.replayFrameCounter];
+		}
+		else
+		{
+				ModifyVariable(bot.facingTimings[CountOf(bot.facingTimings) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+		}
+		logBuffer = <"<0><1> \n", logBuffer, <"a facT <0>", bot.replayFrameCounter>>;
+		if (CountOf(LastOf(bot.weaponTimings)) == 1000)
+		{
+				bot.weaponTimings[CountOf(bot.weaponTimings)] = [bot.replayFrameCounter];
+		}
+		else
+		{
+				ModifyVariable(bot.weaponTimings[CountOf(bot.weaponTimings) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+		}
+		logBuffer = <"<0><1> \n", logBuffer, <"a wepT <0>", bot.replayFrameCounter>>;
+		# cap stops invalid access
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				iVal1 = bot.buttonsTimings[iVal0];
+				if (CountOf(LastOf(iVal1)) == 1000)
+				{
+						iVal1[CountOf(iVal1)] = [bot.replayFrameCounter];
+				}
+				else
+				{
+						ModifyVariable(iVal1[CountOf(iVal1) - 1], Operation.AppendToArray, bot.replayFrameCounter);
+				}
+				bot.buttonsTimings[iVal0] = iVal1;
+				logBuffer = <"<0><1> \n", logBuffer, <"a butT <1> <0>", iVal0, bot.replayFrameCounter>>;
+		}
+		EnableInspectorRecording();
+		LogToInspector(logBuffer);
+		DisableInspectorRecording();
+}
+
+disabled rule: "TIMELINE"
+Event.OngoingPlayer
+{
+}
+
+rule: "timeline on/off control"
+if (timelineOpen == true)
+{
+		updateTimeline();
+		WaitUntil(!timelineOpen, 99999);
+		destroyTimeline();
+}
+
+rule: "timeline request update system"
+if (requestTimelineUpdate == true)
+{
+		updateTimeline();
+		requestTimelineUpdate = false;
+		MinWait();
+		LoopIfConditionIsTrue();
+}
+
+void updateTimeline() "update timeline SUBROUTINE"
+{
+		destroyTimeline();
+		initTimeline();
+		populateTimeline();
+}
+
+void destroyTimeline() "destroy visualizer SUBROUTINE"
+{
+}
+
+void initTimeline() "init visualizer SUBROUTINE"
+{
+		timelineFrameText = "";
+		timelineThrottleText = "";
+		timelineFacingText = "";
+}
+
+void populateTimeline() "populate timeline SUBROUTINE"
+{
+		timelineTextLineCount = Min(selectedFrame + timelineViewLength, bot.totalFrames) - selectedFrame;
+		for (iVal0 = selectedFrame; selectedFrame + timelineTextLineCount; 1)
+		{
+				timelineFrameText = <"<1>\n<0>", timelineFrameText, iVal0>;
+		}
+		iVal6 = "---\n";
+		# THROTTLE TIMELINE
+		if (bot.throttleTimings[0][0] > selectedFrame)
+		{
+				timelineThrottleText = <"<1>\n<0>", timelineThrottleText, Vector(0, 0, 0)>;
+				for (iVal0 = selectedFrame + 1; bot.throttleTimings[0][0]; 1)
+				{
+						timelineThrottleText = <"<1><0>", timelineThrottleText, iVal6>;
+				}
+		}
+		# maybe go last frame to first so that we know that the last checked frame is iVal0==0, iVal1==0
+		for (iVal0 = 0; CountOf(bot.throttles); 1)
+		{
+				for (iVal1 = 0; CountOf(bot.throttles[iVal0]); 1)
+				{
+						# next timing
+						iVal2 = iVal0 == CountOf(bot.throttles) - 1 && iVal1 == CountOf(bot.throttles[iVal0]) - 1 ? bot.totalFrames : bot.throttleTimings[iVal0 + (iVal1 == 999)][(iVal1 + 1) % 1000];
+						# current timing
+						iVal3 = bot.throttleTimings[iVal0][iVal1];
+						# if current timing is in range
+						if (iVal2 > selectedFrame)
+						{
+								timelineThrottleText = <"<1>\n<0>", timelineThrottleText, bot.throttles[iVal0][iVal1]>;
+								iVal5 = Min(iVal2, selectedFrame + timelineViewLength) - Max(iVal3, selectedFrame);
+								for (iVal4 = 1; iVal5; 1)
+								{
+										timelineThrottleText = <"<1><0>", timelineThrottleText, iVal6>;
+								}
+								# selected frame is between current timing and next timing
+								if (iVal2 >= selectedFrame + timelineViewLength)
+								{
+										break;
+								}
+						}
+				}
+				# FACING TIMELINE
+				if (bot.facingTimings[0][0] > selectedFrame)
+				{
+						timelineFacingText = <"<1>\n<0>", timelineFacingText, Vector(0, 0, 1)>;
+						for (iVal0 = selectedFrame + 1; bot.facingTimings[0][0]; 1)
+						{
+								timelineFacingText = <"<1><0>", timelineFacingText, iVal6>;
+						}
+				}
+				# maybe go last frame to first so that we know that the last checked frame is iVal0==0, iVal1==0
+				for (iVal0 = 0; CountOf(bot.facings); 1)
+				{
+						for (iVal1 = 0; CountOf(bot.facings[iVal0]); 1)
+						{
+								# next timing
+								iVal2 = iVal0 == CountOf(bot.facings) - 1 && iVal1 == CountOf(bot.facings[iVal0]) - 1 ? bot.totalFrames : bot.facingTimings[iVal0 + (iVal1 == 999)][(iVal1 + 1) % 1000];
+								# current timing
+								iVal3 = bot.facingTimings[iVal0][iVal1];
+								# if current timing is in range
+								if (iVal2 > selectedFrame)
+								{
+										timelineFacingText = <"<1>\n<0>", timelineFacingText, bot.facings[iVal0][iVal1]>;
+										iVal5 = Min(iVal2, selectedFrame + timelineViewLength) - Max(iVal3, selectedFrame);
+										for (iVal4 = 1; iVal5; 1)
+										{
+												timelineFacingText = <"<1><0>", timelineFacingText, iVal6>;
+										}
+										# selected frame is between current timing and next timing
+										if (iVal2 >= selectedFrame + timelineViewLength)
+										{
+												break;
+										}
+								}
+						}
+				}
+		}
+}
+
+rule: "keep up with replay - replay frame past upper bound"
+if (timelineOpen == true)
+if (bot.replaying == true)
+if (UpdateEveryFrame(bot.replayFrameCounter) != selectedFrame)
+{
+		# idk why i need to subtract 1 some tick off by 1 bs
+		selectedFrame = bot.replayFrameCounter;
+		requestTimelineUpdate = true;
+		MinWait();
+		LoopIfConditionIsTrue();
+}
+
+disabled rule: "keep up with replay - replay frame before lower bound"
+if (timelineOpen == true)
+if (bot.replaying == true)
+if (UpdateEveryFrame(bot.replayFrameCounter) < selectedFrame)
+{
+		selectedFrame = bot.replayFrameCounter;
+		requestTimelineUpdate = true;
+		MinWait();
+		LoopIfConditionIsTrue();
+}
+
+void populateButtonData() "populate button data SUBROUTINE"
+{
+		// SmallMessage(AllPlayers(Team.All), <"<0> opened", allButtons[iVal2]>);
+		buttonDataText = <"<0>: init <1> \n", allButtons[buttonSelected], bot.initButtonStates[buttonSelected]>;
+		arrayToText = bot.buttonsTimings[buttonSelected];
+		arrayToText();
+		buttonDataText = <"<0><1>", buttonDataText, arrayAsText>;
+}
+
+disabled rule: "MENU"
+Event.OngoingPlayer
+{
+}
+
+rule: "enter menu"
+if (HostPlayer() == true)
+if (inMenu == false)
+if (menuEnabled == true)
+if (IsButtonHeld(HostPlayer(), Button.Interact) == true)
+// if (IsButtonHeld(HostPlayer(), Button.Reload) == false)
+{
+		CreateProgressBarHudText(AllPlayers(Team.All), UpdateEveryFrame(100 * (TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed())) / 0.25), null, Location.Top, 0, Color.Purple, Color.Purple, ProgressBarHudEvaluation.VisibleToAndValues, Spectators.DefaultVisibility);
+		tmpProgresBar = LastTextID();
+		WaitUntil(!IsButtonHeld(HostPlayer(), Button.Interact), 0.25);
+		DestroyProgressBarHudText(tmpProgresBar);
+		if (!IsButtonHeld(HostPlayer(), Button.Interact))
+		{
+				Abort();
+		}
+		PlayEffect(AllPlayers(Team.All), PlayEffect.BuffImpactSound, Color.White, PositionOf(HostPlayer()), 100);
+		inMenu = true;
+		hostDisableAll();
+		updateMenuString();
+		WaitUntil(!inMenu || !IsButtonHeld(HostPlayer(), Button.Interact), 99999);
+		WaitUntil(!inMenu || IsButtonHeld(HostPlayer(), Button.Interact), 99999);
+		if (inMenu)
+		{
+				exitMenu();
+				MinWait();
+		}
+}
+
+rule: "menu up"
+if (ZOf(ThrottleOf(HostPlayer())) > 0.3)
+{
+		if (inMenu)
+		{
+				menuHoverIndex = (menuHoverIndex + CountOf(menuCurrItems) - 1) % CountOf(menuCurrItems);
+				updateMenuString();
+				Wait(0.5, WaitBehavior.AbortWhenFalse);
+				while (true)
+				{
+						menuHoverIndex = (menuHoverIndex + CountOf(menuCurrItems) - 1) % CountOf(menuCurrItems);
+						updateMenuString();
+						Wait(0.064, WaitBehavior.AbortWhenFalse);
+				}
+		}
+}
+
+rule: "menu down"
+if (ZOf(ThrottleOf(HostPlayer())) < -0.3)
+{
+		if (inMenu)
+		{
+				menuHoverIndex = (menuHoverIndex + 1) % CountOf(menuCurrItems);
+				updateMenuString();
+				Wait(0.5, WaitBehavior.AbortWhenFalse);
+				while (true)
+				{
+						menuHoverIndex = (menuHoverIndex + 1) % CountOf(menuCurrItems);
+						updateMenuString();
+						Wait(0.096, WaitBehavior.AbortWhenFalse);
+				}
+		}
+}
+
+rule: "menu activate"
+if (recording == false)
+if (IsButtonHeld(HostPlayer(), Button.Jump) == true)
+{
+		if (!inMenu)
+		{
+				Abort();
+		}
+		# switch statement
+		Skip(2 * menuHoverIndex);
+		beginReplay();
+		Else();
+		beginReplayAtFrame();
+		Else();
+		beginRecord();
+		Else();
+		beginRecordAtFrame();
+		Else();
+		tpAllBotsToStart();
+		Else();
+		tpBotToStart();
+		Else();
+		tpBotHere();
+		Else();
+		tpToBot();
+		Else();
+		changeHostHero();
+		Else();
+		swapTeams();
+		Else();
+		createBotTeam1();
+		Else();
+		createBotTeam2();
+		// Else();
+		createBotAllTeam();
+		Else();
+		changeBotHero();
+		Else();
+		removeBot();
+		Else();
+		saveToGlobal();
+		End();
+}
+
+rule: "menu change val"
+if (inMenu == true)
+if (AbsoluteValue(XOf(ThrottleOf(HostPlayer()))) > 0.3)
+{
+		if (!inMenu)
+		{
+				Abort();
+		}
+		if (menuHoverIndex >= CountOf(menuActions))
+		{
+				if (XOf(ThrottleOf(HostPlayer())) < 0)
+				{
+						menuIncrementSign = 1;
+				}
+				else
+				{
+						menuIncrementSign = -1;
+				}
+				changeValue();
+				Wait(0.5, WaitBehavior.AbortWhenFalse);
+				menuIncrementSign *= 5;
+				while (menuIncrementSign * XOf(ThrottleOf(HostPlayer())) < -0.3)
+				{
+						changeValue();
+						Wait(0.096, WaitBehavior.IgnoreCondition);
+				}
+		}
+}
+
+void updateMenuString() "menu refresh text SUBROUTINE"
+{
+		menuString = "";
+		menuCurrItems = menuActions;
+		for (iVal0 = 0; CountOf(menuValueLabels); 1)
+		{
+				# uses iVal0 as input, outputs iVal1
+				getValue();
+				ModifyVariable(menuCurrItems, Operation.AppendToArray, <"<0><1>", menuValueLabels[iVal0], iVal1>);
+		}
+		for (iVal0 = CountOf(menuCurrItems) - 1; -1; -1)
+		{
+				// manual stepping
+				// WaitUntil(!IsButtonHeld(HostPlayer(), Button.PrimaryFire), 99999);
+				// WaitUntil(IsButtonHeld(HostPlayer(), Button.PrimaryFire), 99999);
+				if (menuHoverIndex == iVal0)
+				{
+						if (CharInString(menuCurrItems[menuHoverIndex + 1], 0) != "\n")
+						{
+								menuString = <"\n<0>", menuString>;
+						}
+						menuString = <"\n<0> <1> \n<2>", menuCurrItems[iVal0], IconString(Icon.ArrowLeft), menuString>;
+						if (CharInString(menuCurrItems[menuHoverIndex], 0) != "\n")
+						{
+								menuString = <"\n<0>", menuString>;
+						}
+						// menuString = <"<0> < \n<1>", menuCurrItems[iVal0], menuString>;
+				}
+				else
+				{
+						menuString = <"<0>        <1>", menuCurrItems[iVal0], menuString>;
+				}
+		}
+		menuString = <"________________________________________<0>", menuString>;
+		// menuString = StringSlice(menuString, 0, StringLength(menuString) - 1);
+		updateToolTip();
+}
+
+void updateToolTip() "update tool tip SUBROUTINE"
+{
+		tooltip = "interact to exit menu\n";
+		tooltip = <"<0><1> and <2> to change\n", tooltip, IconString(Icon.ArrowUp), IconString(Icon.ArrowDown)>;
+		if (menuHoverIndex < CountOf(menuActions))
+		{
+				tooltip = <"<0> \nJump To activate", tooltip>;
+		}
+		else
+		{
+				tooltip = <"<0> \npress/hold <1> and <2> To change", tooltip, IconString(Icon.ArrowLeft), IconString(Icon.ArrowRight)>;
+		}
+		iVal0 = itemTooltips[menuHoverIndex];
+		if (iVal0)
+		{
+				tooltip = <"<0> \n \n<1>", tooltip, iVal0>;
+		}
+}
+
+void exitMenu() "exit menu SUBROUTINE"
+{
+		inMenu = false;
+		hostEnableAll();
+}
+
+void changeValue() "change value SUBROUTINE"
+{
+		# switch statement
+		Skip(2 * Max(menuHoverIndex - CountOf(menuActions) + 1, 0));
+		# do nothing
+		continue;
+		Else();
+		changeBot();
+		Else();
+		changeFrame();
+		Else();
+		thirdPersonCamOn = !thirdPersonCamOn;
+		Else();
+		watchBotOnReplay = !watchBotOnReplay;
+		Else();
+		forcePrepFacing = !forcePrepFacing;
+		Else();
+		botInvisOn = !botInvisOn;
+		Else();
+		disableAbilitiesInRecord = !disableAbilitiesInRecord;
+		Else();
+		showData = !showData;
+		Else();
+		timelineOpen = !timelineOpen;
+		Else();
+		toggleButtonData();
+		Else();
+		changeButtonSelected();
+		Else();
+		recordSpeed = (recordSpeed - 10 + 100 + 10 * menuIncrementSign) % 100 + 10;
+		Else();
+		replaySpeed = (replaySpeed - 10 + 100 + 10 * menuIncrementSign) % 100 + 10;
+		End();
+		updateMenuString();
+}
+
+void getValue() "get value SUBROUTINE"
+{
+		# switch statement
+		Skip(2 * iVal0);
+		iVal1 = EntityExists(bot) ? <"<0> <1> slot <2>", TeamOf(bot) == Team.Team1 ? "T1" : TeamOf(bot) == Team.Team2 ? "T2" : "DM", HeroIconString(HeroOf(bot)), SlotOf(bot)> : "unselected";
+		Else();
+		iVal1 = <"<0>/<1>", selectedFrame, bot.totalFrames - 1>;
+		Else();
+		iVal1 = thirdPersonCamOn ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = watchBotOnReplay ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = forcePrepFacing ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = botInvisOn ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = disableAbilitiesInRecord ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = showData ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = timelineOpen ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = buttonDataOn ? "<ON>" : "<OFF>";
+		Else();
+		iVal1 = <"<<0>>", allButtons[buttonSelected]>;
+		Else();
+		iVal1 = recordSpeed;
+		Else();
+		iVal1 = replaySpeed;
+		End();
+}
+
+void beginReplay() "begin replay SUBROUTINE"
+{
+		selectedFrameBeforeReplay = selectedFrame;
+		if (watchBotOnReplay)
+		{
+				// if (thirdPersonCamOn)
+				{
+						StartCamera(HostPlayer(), UpdateEveryFrame(RayCastHitPosition(EyePosition(bot), EyePosition(bot) + -3.5 * FacingDirectionOf(HostPlayer()), [], [], false)), UpdateEveryFrame(EyePosition(bot)), 0);
+				}
+				else
+				{
+						// StartCamera(HostPlayer(), UpdateEveryFrame(EyePosition(bot)), UpdateEveryFrame(EyePosition(bot) + FacingDirectionOf(bot)), 0);
+				}
+		}
+		exitMenu();
+		# wait for slow motion to reach full speed
+		SetSlowMotion(replaySpeed);
+		timer = 0;
+		tpAllBotsToStart();
+		FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).doRefresh = true;
+		Wait(0.016 * editPrepFrames, WaitBehavior.IgnoreCondition);
+		FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).replaying = true;
+		WaitUntil(IsTrueForAll(AllPlayers(Team.All), !ArrayElement().replaying) || !(IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload)), 99999);
+		WaitUntil(IsTrueForAll(AllPlayers(Team.All), !ArrayElement().replaying) || IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload), 99999);
+		AllPlayers(Team.All).replaying = false;
+		# wait for slow motion to reach full speed
+		SetSlowMotion(100);
+		iVal0 = FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()));
+		for (iVal1 = 0; CountOf(iVal0); 1)
+		{
+				Teleport(iVal1[iVal0], iVal0[iVal1].initPos);
+				SetFacing(iVal1[iVal0], iVal0[iVal1].initFacing, Relative.ToWorld);
+		}
+		StopCamera(HostPlayer());
+		if (thirdPersonCamOn)
+		{
+				StartCamera(HostPlayer(), UpdateEveryFrame(RayCastHitPosition(EyePosition(HostPlayer()), EyePosition(HostPlayer()) + -3.5 * FacingDirectionOf(HostPlayer()), [], [], false)), UpdateEveryFrame(EyePosition(HostPlayer())), 0);
+		}
+		selectedFrame = selectedFrameBeforeReplay;
+		if (timelineOpen)
+		{
+				requestTimelineUpdate = true;
+		}
+}
+
+void beginReplayAtFrame() "begin replay at frame SUBROUTINE"
+{
+		selectedFrameBeforeReplay = selectedFrame;
+		if (watchBotOnReplay)
+		{
+				StartCamera(HostPlayer(), UpdateEveryFrame(RayCastHitPosition(EyePosition(bot), EyePosition(bot) + -3.5 * FacingDirectionOf(HostPlayer()), [], [], false)), UpdateEveryFrame(EyePosition(bot)), 0);
+		}
+		exitMenu();
+		tpAllBotsToStart();
+		# if framestart is 0, init everything, refresh bot, set slomo, wait for prep
+		if (selectedFrame == 0)
+		{
+				# wait for slow motion to reach full speed
+				SetSlowMotion(replaySpeed);
+				FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).doRefresh = true;
+				Wait(0.016 * editPrepFrames, WaitBehavior.IgnoreCondition);
+				FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).replaying = true;
+		}
+		else
+		{
+				speedAtFrame = replaySpeed;
+				goToFrame();
+		}
+		WaitUntil(IsTrueForAll(AllPlayers(Team.All), !ArrayElement().replaying) || !(IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload)), 99999);
+		WaitUntil(IsTrueForAll(AllPlayers(Team.All), !ArrayElement().replaying) || IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload), 99999);
+		AllPlayers(Team.All).replaying = false;
+		# wait for slow motion to reach full speed
+		SetSlowMotion(100);
+		iVal0 = FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()));
+		for (iVal1 = 0; CountOf(iVal0); 1)
+		{
+				Teleport(iVal1[iVal0], iVal0[iVal1].initPos);
+				SetFacing(iVal1[iVal0], iVal0[iVal1].initFacing, Relative.ToWorld);
+		}
+		StopCamera(HostPlayer());
+		if (thirdPersonCamOn)
+		{
+				StartCamera(HostPlayer(), UpdateEveryFrame(RayCastHitPosition(EyePosition(HostPlayer()), EyePosition(HostPlayer()) + -3.5 * FacingDirectionOf(HostPlayer()), [], [], false)), UpdateEveryFrame(EyePosition(HostPlayer())), 0);
+		}
+		selectedFrame = selectedFrameBeforeReplay;
+		if (timelineOpen)
+		{
+				requestTimelineUpdate = true;
+		}
+}
+
+void stopReplay() "stop replay SUBROUTINE"
+{
+		# wait for slow motion to reach full speed
+		SetSlowMotion(100);
+		AllPlayers(Team.All).replaying = false;
+		MinWait();
+}
+
+void beginRecord() "begin record SUBROUTINE"
+{
+		CreateProgressBarHudText(AllPlayers(Team.All), UpdateEveryFrame(100 * (TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed())) / 0.5), null, Location.Top, 0, Color.Purple, Color.Purple, ProgressBarHudEvaluation.VisibleToAndValues, Spectators.DefaultVisibility);
+		tmpProgresBar = LastTextID();
+		WaitUntil(!IsButtonHeld(HostPlayer(), Button.Jump), 0.5);
+		DestroyProgressBarHudText(tmpProgresBar);
+		if (!IsButtonHeld(HostPlayer(), Button.Jump))
+		{
+				Abort();
+		}
+		# wait for slow motion to reach full speed
+		SetSlowMotion(100);
+		AllPlayers(Team.All).replaying = false;
+		# init state
+		bot.initPos = PositionOf(bot);
+		logBuffer = <"p <0>", 1000 * bot.initPos>;
+		pushLog();
+		tpAllBotsToStart();
+		MinWait();
+		exitMenu();
+		# disable inputs
+		if (disableAbilitiesInRecord)
+		{
+				hostDisableAll();
+		}
+		destroyTimeline();
+		menuEnabled = false;
+		StartFacing(HostPlayer(), FacingDirectionOf(bot), 9999, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+		# tp and attach
+		Teleport(HostPlayer(), PositionOf(bot));
+		AttachPlayers(HostPlayer(), bot, Vector(0, 0, 0));
+		bot.attachee = HostPlayer();
+		if (botInvisOn)
+		{
+				SetInvisible(bot, InvisibleTo.All);
+		}
+		ForcePlayerHero(HostPlayer(), HeroOf(bot));
+		FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).doRefresh = true;
+		SetSlowMotion(recordSpeed);
+		timer = 0;
+		if (!forcePrepFacing)
+		{
+				StopFacing(HostPlayer());
+		}
+		Wait(0.016 * editPrepFrames, WaitBehavior.IgnoreCondition);
+		StopFacing(HostPlayer());
+		exitMenu();
+		# disable inputs
+		if (disableAbilitiesInRecord)
+		{
+				hostDisableAll();
+		}
+		AttachPlayers(HostPlayer(), bot, Vector(0, 0, 0));
+		bot.replayFrameCounter = 0;
+		# init state
+		bot.initFacing = FacingDirectionOf(HostPlayer());
+		logBuffer = <"f <0>", 1000 * bot.initFacing>;
+		pushLog();
+		initBotArrays();
+		bot.replaying = false;
+		recording = true;
+		RemoveFromArray(FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())), bot).replaying = true;
+		WaitUntil(!(IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload)), 99999);
+		WaitUntil(IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload), 99999);
+		AllPlayers(Team.All).replaying = false;
+		recording = false;
+		menuEnabled = true;
+}
+
+void beginRecordAtFrame() "begin record at frame SUBROUTINE"
+{
+		CreateProgressBarHudText(AllPlayers(Team.All), UpdateEveryFrame(100 * (TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed())) / 0.5), null, Location.Top, 0, Color.Purple, Color.Purple, ProgressBarHudEvaluation.VisibleToAndValues, Spectators.DefaultVisibility);
+		tmpProgresBar = LastTextID();
+		WaitUntil(!IsButtonHeld(HostPlayer(), Button.Jump), 0.5);
+		DestroyProgressBarHudText(tmpProgresBar);
+		if (!IsButtonHeld(HostPlayer(), Button.Jump))
+		{
+				Abort();
+		}
+		tpAllBotsToStart();
+		# reset to full speed
+		SetSlowMotion(100);
+		AllPlayers(Team.All).replaying = false;
+		MinWait();
+		exitMenu();
+		# disable inputs
+		if (disableAbilitiesInRecord)
+		{
+				hostDisableAll();
+		}
+		destroyTimeline();
+		menuEnabled = false;
+		StartFacing(HostPlayer(), FacingDirectionOf(bot), 9999, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+		# tp and attach
+		Teleport(HostPlayer(), PositionOf(bot));
+		AttachPlayers(HostPlayer(), bot, Vector(0, 0, 0));
+		bot.attachee = HostPlayer();
+		if (botInvisOn)
+		{
+				SetInvisible(bot, InvisibleTo.All);
+		}
+		ForcePlayerHero(HostPlayer(), HeroOf(bot));
+		# if framestart is 0, init everything, refresh bot, set slomo, wait for prep
+		if (selectedFrame == 0)
+		{
+				FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).doRefresh = true;
+				tpBotToStart();
+				timer = 0;
+				SetSlowMotion(recordSpeed);
+				Wait(0.016 * editPrepFrames, WaitBehavior.IgnoreCondition);
+				bot.replayFrameCounter = 0;
+				initBotArrays();
+		}
+		else
+		{
+				speedAtFrame = recordSpeed;
+				goToFrame();
+				cutBotData();
+		}
+		StopFacing(HostPlayer());
+		exitMenu();
+		# disable abils
+		if (disableAbilitiesInRecord)
+		{
+				hostDisableAll();
+		}
+		AttachPlayers(HostPlayer(), bot, Vector(0, 0, 0));
+		bot.attachee = HostPlayer();
+		bot.replaying = false;
+		recording = true;
+		RemoveFromArray(FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())), bot).replaying = true;
+		WaitUntil(!(IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload)), 99999);
+		WaitUntil(IsButtonHeld(HostPlayer(), Button.Interact) && IsButtonHeld(HostPlayer(), Button.Reload), 99999);
+		AllPlayers(Team.All).replaying = false;
+		recording = false;
+		menuEnabled = true;
+}
+
+void initBotArrays() "init bot data SUBROUTINE"
+{
+		logBuffer = "r";
+		# init arrays
+		bot.throttles = [[ThrottleOf(HostPlayer())]];
+		logBuffer = <"<0> <1>", logBuffer, 1000 * FirstOf(FirstOf(bot.throttles))>;
+		bot.throttleTimings = [[]];
+		# facing
+		bot.facings = [[FacingDirectionOf(HostPlayer())]];
+		logBuffer = <"<0> <1>", logBuffer, 1000 * FirstOf(FirstOf(bot.facings))>;
+		bot.facingTimings = [[]];
+		# weapon
+		bot.weapon = [Weapon(HostPlayer())];
+		logBuffer = <"<0> <1>", logBuffer, FirstOf(FirstOf(bot.weapon))>;
+		bot.weaponTimings = [[]];
+		# input buttons
+		bot.initButtonStates = MappedArray(allButtons, IsButtonHeld(HostPlayer(), ArrayElement()));
+		# for shadowing
+		bot.lastButtonsState = MappedArray(allButtons, false);
+		bot.buttonsState = bot.initButtonStates;
+		logBuffer = <"<0> {", logBuffer>;
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				logBuffer = <"<0> <1>", logBuffer, bot.initButtonStates[iVal0]>;
+		}
+		logBuffer = <"<0> }", logBuffer>;
+		bot.buttonsTimings = MappedArray(allButtons, [[]]);
+		pushLog();
+}
+
+void goToFrame() "go to frame SUBROUTINE"
+{
+		tpAllBotsToStart();
+		# when to begin entering slow motion; Global.editPrepFrames ticks = Global.editPrepFrames * 0.016s
+		niVal0 = selectedFrame - editPrepFrames;
+		# begin replay if the start prep frame occurs after 0
+		if (niVal0 >= 0)
+		{
+				FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).doRefresh = true;
+				Wait(0.256, WaitBehavior.IgnoreCondition);
+				FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).replaying = true;
+				# wait if time to prep is nonzero
+				if (niVal0 > 0)
+				{
+						Wait(0.016 * niVal0, WaitBehavior.IgnoreCondition);
+				}
+				timer = 0;
+				# wait for slow motion to reach full speed
+				SetSlowMotion(speedAtFrame);
+				if (!forcePrepFacing)
+				{
+						StopFacing(HostPlayer());
+				}
+				Wait(0.016 * editPrepFrames, WaitBehavior.IgnoreCondition);
+		}
+		else
+		{
+				FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).doRefresh = true;
+				if (!forcePrepFacing)
+				{
+						StopFacing(HostPlayer());
+				}
+				Wait(0.256, WaitBehavior.IgnoreCondition);
+				timer = 0;
+				# wait for slow motion to reach full speed
+				SetSlowMotion(speedAtFrame);
+				# wait till start of playback; -niVal0 frames before playback
+				Wait(-0.016 * niVal0, WaitBehavior.IgnoreCondition);
+				FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement())).replaying = true;
+				# wait remainder
+				Wait(0.016 * (editPrepFrames + niVal0), WaitBehavior.IgnoreCondition);
+		}
+}
+
+void cutBotData() "cut bot data SUBROUTINE"
+{
+		logBuffer = "c";
+		# cut from 0 to idx + 1
+		bot.throttles = ArraySlice(bot.throttles, 0, bot.replayThrottleIndex / 1000 + 1);
+		bot.throttles[CountOf(bot.throttles) - 1] = ArraySlice(bot.throttles[CountOf(bot.throttles) - 1], 0, (bot.replayThrottleIndex + 1) % 1000);
+		# cut from 0 to idx + 1
+		bot.throttleTimings = ArraySlice(bot.throttleTimings, 0, bot.replayThrottleIndex / 1000 + 1);
+		bot.throttleTimings[CountOf(bot.throttleTimings) - 1] = ArraySlice(bot.throttleTimings[CountOf(bot.throttleTimings) - 1], 0, bot.replayThrottleIndex % 1000);
+		logBuffer = <"<0> <1>", logBuffer, bot.replayThrottleIndex>;
+		# cut from 0 to idx + 1
+		bot.facings = ArraySlice(bot.facings, 0, bot.replayFacingIndex + 1 / 1000 + 1);
+		bot.facings[CountOf(bot.facings) - 1] = ArraySlice(bot.facings[CountOf(bot.facings) - 1], 0, (bot.replayFacingIndex + 1) % 1000);
+		# cut from 0 to idx + 1
+		bot.facingTimings = ArraySlice(bot.facingTimings, 0, bot.replayFacingIndex / 1000 + 1);
+		bot.facingTimings[CountOf(bot.facingTimings) - 1] = ArraySlice(bot.facingTimings[CountOf(bot.facingTimings) - 1], 0, bot.replayFacingIndex % 1000);
+		logBuffer = <"<0> <1>", logBuffer, bot.replayFacingIndex>;
+		# cut from 0 to idx + 1
+		bot.weapon = ArraySlice(bot.weapon, 0, bot.replayWeaponIndex + 1 / 1000 + 1);
+		bot.weapon[CountOf(bot.weapon) - 1] = ArraySlice(bot.weapon[CountOf(bot.weapon) - 1], 0, (bot.replayWeaponIndex + 1) % 1000);
+		# cut from 0 to idx + 1
+		bot.weaponTimings = ArraySlice(bot.weaponTimings, 0, bot.replayWeaponIndex / 1000 + 1);
+		bot.weaponTimings[CountOf(bot.weaponTimings) - 1] = ArraySlice(bot.weaponTimings[CountOf(bot.weaponTimings) - 1], 0, (bot.replayWeaponIndex + 1) % 1000);
+		logBuffer = <"<0> <1>", logBuffer, bot.replayWeaponIndex>;
+		# cut from 0 to idx + 1
+		bot.buttonsTimings = MappedArray(bot.buttonsTimings, ArraySlice(ArrayElement(), 0, bot.replayButtonsIndices[CurrentArrayIndex()] / 1000 + 1));
+		logBuffer = <"<0> {", logBuffer>;
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				iVal1 = bot.buttonsTimings[iVal0];
+				iVal1[CountOf(iVal1) - 1] = ArraySlice(iVal1[CountOf(iVal1) - 1], 0, bot.replayButtonsIndices[iVal0] % 1000);
+				bot.buttonsTimings[iVal0] = iVal1;
+				logBuffer = <"<0> <1>", logBuffer, bot.replayButtonsIndices[iVal0]>;
+		}
+		logBuffer = <"<0> }", logBuffer>;
+		pushLog();
+}
+
+void tpAllBotsToStart() "tp all bots to start SUBROUTINE"
+{
+		iVal1 = FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()));
+		for (iVal0 = 0; CountOf(iVal1); 1)
+		{
+				iVal2 = iVal1[iVal0];
+				Teleport(iVal2, iVal2.initPos);
+				SetFacing(iVal2, iVal2.initFacing, Relative.ToWorld);
+		}
+}
+
+void tpBotToStart() "tp bot to start SUBROUTINE"
+{
+		Teleport(bot, bot.initPos);
+		SetFacing(bot, bot.initFacing, Relative.ToWorld);
+}
+
+void tpBotHere() "tp bot here SUBROUTINE"
+{
+		Teleport(bot, PositionOf(HostPlayer()));
+		SetFacing(bot, FacingDirectionOf(HostPlayer()), Relative.ToWorld);
+		# if no data has been recorded for this bot
+		if (totalFrames == 0)
+		{
+				bot.initPos = PositionOf(HostPlayer());
+				bot.initFacing = FacingDirectionOf(HostPlayer());
+				logBuffer = <"p <0> \nf <1>", 1000 * bot.initPos, 1000 * bot.initFacing>;
+				pushLog();
+		}
+}
+
+void tpToBot() "tp to bot SUBROUTINE"
+{
+		Teleport(HostPlayer(), PositionOf(bot));
+		SetFacing(HostPlayer(), FacingDirectionOf(bot), Relative.ToWorld);
+}
+
+void changeHostHero() "change host hero SUBROUTINE"
+{
+		exitMenu();
+		facingBeforeUnspawn = FacingDirectionOf(HostPlayer());
+		posBeforeUnspawn = PositionOf(HostPlayer());
+		SetAllowedHeroes(HostPlayer(), RemoveFromArray(AllHeroes(), HeroOf(HostPlayer())));
+		WaitUntil(!HasSpawned(HostPlayer()), 99999);
+		SetAllowedHeroes(HostPlayer(), AllHeroes());
+		WaitUntil(HasSpawned(HostPlayer()), 99999);
+		MinWait();
+		Teleport(HostPlayer(), posBeforeUnspawn);
+		SetFacing(HostPlayer(), facingBeforeUnspawn, Relative.ToWorld);
+}
+
+void swapTeams() "swap teams SUBROUTINE"
+{
+		exitMenu();
+		facingBeforeUnspawn = FacingDirectionOf(HostPlayer());
+		posBeforeUnspawn = PositionOf(HostPlayer());
+		heroBeforeBotHeroSelect = HeroOf(HostPlayer());
+		MovePlayerToTeam(HostPlayer(), OppositeTeamOf(TeamOf(HostPlayer())), 0);
+		MovePlayerToTeam(PlayersInSlot(0, OppositeTeamOf(TeamOf(HostPlayer()))), TeamOf(HostPlayer()), -1);
+		WaitUntil(!HasSpawned(HostPlayer()), 99999);
+		ForcePlayerHero(HostPlayer(), heroBeforeBotHeroSelect);
+		WaitUntil(HasSpawned(HostPlayer()), 99999);
+		MinWait();
+		Teleport(HostPlayer(), posBeforeUnspawn);
+		SetFacing(HostPlayer(), facingBeforeUnspawn, Relative.ToWorld);
+		StopForcingHero(HostPlayer());
+}
+
+void createBotTeam1() "create bot team 1 SUBROUTINE"
+{
+		iVal1 = Team.Team1;
+		createBot();
+}
+
+void createBotTeam2() "create bot team 2 SUBROUTINE"
+{
+		iVal1 = Team.Team2;
+		createBot();
+}
+
+void createBotAllTeam() "create deathmatch bot"
+{
+		iVal1 = Team.All;
+		createBot();
+}
+
+void createBot() "create dummy bot SUBROUTINE"
+{
+		# get first available bot slot
+		for (iVal0 = 1; 23; 1)
+		{
+				if (!EntityExists(PlayersInSlot(iVal0, iVal1)))
+				{
+						break;
+				}
+		}
+		if (HeroOf(bot) == true)
+		{
+				CreateDummyBot(HeroOf(bot), iVal1, iVal0, PositionOf(HostPlayer()), FacingDirectionOf(HostPlayer()));
+		}
+		else
+		{
+				CreateDummyBot(HeroOf(HostPlayer()), iVal1, iVal0, PositionOf(HostPlayer()), FacingDirectionOf(HostPlayer()));
+		}
+		if (EntityExists(LastCreatedEntity()))
+		{
+				bot = LastCreatedEntity();
+				bot.number = SlotOf(bot) + (TeamOf(bot) == Team.Team1 ? 0 : 24);
+				logBuffer = <"n <0> <1> <2>", bot.number, HeroOf(bot), TeamOf(bot) == Team.Team1 ? 0 : TeamOf(bot) == Team.Team2 ? 1 : 2>;
+				pushLog();
+				WaitUntil(HasSpawned(bot), 9999);
+				SetFacing(bot, FacingDirectionOf(HostPlayer()), Relative.ToWorld);
+				bot.initPos = PositionOf(HostPlayer());
+				bot.initFacing = FacingDirectionOf(HostPlayer());
+				logBuffer = <"p <0> \nf <1>", 1000 * bot.initPos, 1000 * bot.initFacing>;
+				pushLog();
+				updateMenuString();
+		}
+		else
+		{
+				SmallMessage(AllPlayers(Team.All), "failed to create bot");
+		}
+}
+
+void changeBotHero() "change bot hero SUBROUTINE"
+{
+		exitMenu();
+		facingBeforeUnspawn = FacingDirectionOf(HostPlayer());
+		posBeforeUnspawn = PositionOf(HostPlayer());
+		heroBeforeBotHeroSelect = HeroOf(HostPlayer());
+		SetAllowedHeroes(HostPlayer(), RemoveFromArray(AllHeroes(), HeroOf(HostPlayer())));
+		WaitUntil(!HasSpawned(HostPlayer()), 99999);
+		SetAllowedHeroes(HostPlayer(), AllHeroes());
+		WaitUntil(HasSpawned(HostPlayer()), 99999);
+		bot.selectedHero = HeroOf(HostPlayer());
+		ForcePlayerHero(bot, bot.selectedHero);
+		// StopForcingHero(bot);
+		ForcePlayerHero(HostPlayer(), heroBeforeBotHeroSelect);
+		StopForcingHero(HostPlayer());
+		logBuffer = <"h <0>", bot.selectedHero>;
+		pushLog();
+		MinWait();
+		Teleport(HostPlayer(), posBeforeUnspawn);
+		SetFacing(HostPlayer(), facingBeforeUnspawn, Relative.ToWorld);
+}
+
+void removeBot() "remove bot SUBROUTINE"
+{
+		CreateProgressBarHudText(AllPlayers(Team.All), UpdateEveryFrame(100 * (TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed())) / 0.5), null, Location.Top, 0, Color.Purple, Color.Purple, ProgressBarHudEvaluation.VisibleToAndValues, Spectators.DefaultVisibility);
+		tmpProgresBar = LastTextID();
+		WaitUntil(!IsButtonHeld(HostPlayer(), Button.Jump), 0.5);
+		DestroyProgressBarHudText(tmpProgresBar);
+		if (!IsButtonHeld(HostPlayer(), Button.Jump))
+		{
+				Abort();
+		}
+		# select the next bot
+		iVal0 = FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()));
+		iVal0 = iVal0[(IndexOfArrayValue(iVal0, bot) + CountOf(iVal0) - 1) % CountOf(iVal0)];
+		DestroyDummyBot(TeamOf(bot), SlotOf(bot));
+		bot = iVal0;
+		logBuffer = <"x \nb <0>", bot.number>;
+		updateMenuString();
+		pushLog();
+}
+
+void changeBot() "change bot SUBROUTINE"
+{
+		iVal0 = FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()));
+		# cant be bothered to do properly + all bots arr contains no dupes
+		bot = iVal0[(IndexOfArrayValue(iVal0, bot) + CountOf(iVal0) + menuIncrementSign) % CountOf(iVal0)];
+		logBuffer = <"b <0>", bot.number>;
+		selectedFrame = Min(selectedFrame, bot.totalFrames);
+		pushLog();
+}
+
+void changeFrame() "change frame SUBROUTINE"
+{
+		selectedFrame = (selectedFrame + bot.totalFrames + menuIncrementSign) % bot.totalFrames;
+		if (timelineOpen)
+		{
+				requestTimelineUpdate = true;
+		}
+}
+
+void toggleButtonData() "toggle button data SUBROUTINE"
+{
+		buttonDataOn = !buttonDataOn;
+		if (buttonDataOn)
+		{
+				populateButtonData();
+		}
+}
+
+void changeButtonSelected() "toggle button data SUBROUTINE"
+{
+		buttonSelected = (CountOf(allButtons) + menuIncrementSign + buttonSelected) % CountOf(allButtons);
+		if (buttonDataOn)
+		{
+				populateButtonData();
+		}
+}
+
+disabled rule: "MISC ACTIONS/SUBS"
+{
+}
+
+rule: "third person cam on/off"
+if (thirdPersonCamOn == true)
+{
+		StartCamera(HostPlayer(), UpdateEveryFrame(RayCastHitPosition(EyePosition(HostPlayer()), EyePosition(HostPlayer()) + -3.5 * FacingDirectionOf(HostPlayer()), [], [], false)), UpdateEveryFrame(EyePosition(HostPlayer())), 0);
+		WaitUntil(!thirdPersonCamOn, 99999);
+		StopCamera(HostPlayer());
+}
+
+void hostDisableAll() "disable all for host SUBROUTINE"
+{
+		SetMoveSpeed(HostPlayer(), 0);
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				DisallowButton(HostPlayer(), allButtons[iVal0]);
+		}
+		# stop jump out of activation
+		SetJumpEnabled(HostPlayer(), false);
+}
+
+void hostEnableAll() "enable all for host SUBROUTINE"
+{
+		SetMoveSpeed(HostPlayer(), 100);
+		for (iVal0 = 0; 10; 1)
+		{
+				AllowButton(HostPlayer(), allButtons[iVal0]);
+		}
+		SetJumpEnabled(HostPlayer(), true);
+}
+
+rule: "refresh bot on request"
+Event.OngoingPlayer
+if (doRefresh == true)
+// if (IsDummyBot(EventPlayer()) == true)
+{
+		refreshBot();
+		doRefresh = false;
+}
+
+void refreshBot() "refresh bot SUBROUTINE"
+{
+		Teleport(EventPlayer(), initPos);
+		preRefreshFace = FacingDirectionOf(EventPlayer());
+		selectedHero = HeroOf(EventPlayer());
+		preRefreshPos = PositionOf(EventPlayer());
+		# stupid d.va bug
+		if (HeroOf(EventPlayer()) == Hero.Dva)
+		{
+				Respawn(EventPlayer());
+		}
+		else
+		{
+				Resurrect(EventPlayer());
+				SetAllowedHeroes(EventPlayer(), RemoveFromArray(AllHeroes(), HeroOf(EventPlayer())));
+				WaitUntil(!HasSpawned(EventPlayer()), 999999);
+				SetAllowedHeroes(EventPlayer(), AllHeroes());
+				WaitUntil(HasSpawned(EventPlayer()), 999999);
+		}
+		MinWait();
+		ForcePlayerHero(EventPlayer(), selectedHero);
+		Teleport(EventPlayer(), preRefreshPos);
+		SetFacing(EventPlayer(), preRefreshFace, Relative.ToWorld);
+		if (attachee)
+		{
+				AttachPlayers(attachee, EventPlayer(), Vector(0, 0, 0));
+		}
+		CancelPrimaryAction(EventPlayer());
+		# stop bot shadowing buttons
+		for (p_iVal0 = 0; CountOf(allButtons); 1)
+		{
+				StopHoldingButton(EventPlayer(), allButtons[p_iVal0]);
+		}
+		StopThrottleInDirection(EventPlayer());
+		StopFacing(EventPlayer());
+		SetAbilityCooldown(EventPlayer(), Button.Ability1, 0);
+		SetAbilityCooldown(EventPlayer(), Button.Ability2, 0);
+		SetAbilityCooldown(EventPlayer(), Button.Crouch, 0);
+		SetAbilityCooldown(EventPlayer(), Button.SecondaryFire, 0);
+		SetUltimateCharge(EventPlayer(), 100);
+		SetPlayerHealth(EventPlayer(), MaxHealth(EventPlayer()));
+		Heal(EventPlayer(), null, 100);
+		ClearStatus(EventPlayer(), Status.Hacked);
+		ClearStatus(EventPlayer(), Status.KnockedDown);
+		ClearStatus(EventPlayer(), Status.Asleep);
+		ClearStatus(EventPlayer(), Status.Burning);
+		ClearStatus(EventPlayer(), Status.Frozen);
+		ClearStatus(EventPlayer(), Status.Unkillable);
+		ClearStatus(EventPlayer(), Status.Invincible);
+		ClearStatus(EventPlayer(), Status.PhasedOut);
+		ClearStatus(EventPlayer(), Status.Rooted);
+		ClearStatus(EventPlayer(), Status.Stunned);
+		SetWeapon(EventPlayer(), FirstOf(weapon));
+}
+
+rule: "host shadow bot's cooldowns"
+if (IsTrueForAny(allButtons, AbilityCooldown(HostPlayer(), ArrayElement()) != AbilityCooldown(bot, ArrayElement())) == true)
+{
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				SetAbilityCooldown(HostPlayer(), allButtons[iVal0], AbilityCooldown(bot, allButtons[iVal0]));
+		}
+		MinWait();
+		LoopIfConditionIsTrue();
+}
+
+rule: "host shadow bot's ammo"
+if (IsTrueForAny(allButtons, AbilityCooldown(HostPlayer(), ArrayElement()) != AbilityCooldown(bot, ArrayElement())) == true)
+{
+		for (iVal0 = 0; CountOf(allButtons); 1)
+		{
+				SetAbilityCooldown(HostPlayer(), allButtons[iVal0], AbilityCooldown(bot, allButtons[iVal0]));
+		}
+		MinWait();
+		LoopIfConditionIsTrue();
+}
+
+rule: "host shadow bot's ult"
+if (UltimateChargePercent(HostPlayer()) != UltimateChargePercent(bot))
+{
+		SetUltimateCharge(HostPlayer(), UltimateChargePercent(bot));
+		MinWait();
+		LoopIfConditionIsTrue();
+}
+
+rule: "timer chase"
+if (timer == 0)
+{
+		for (timer = 0; editPrepFrames; 1)
+		{
+				MinWait();
+		}
+}
+
+disabled rule: "testFx"
+{
+		iVal1 = "";
+		for (iVal0 = 0; 50; 10)
+		{
+				iVal1 = <"<0><1>", AbilityIconString(Hero.Ana, Button.Ability1), iVal1>;
+		}
+		# cant be bothered
+		CreateInWorldText(LocalPlayer(), iVal1, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + 0 * WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation) + -30 * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToAndPosition, CustomColor((XOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (YOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (ZOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, 255), Spectators.DefaultVisibility);
+		iVal1 = "";
+		for (iVal0 = 0; 50; 10)
+		{
+				iVal1 = <"<0><1>", AbilityIconString(Hero.Ana, Button.Ability2), iVal1>;
+		}
+		# cant be bothered
+		CreateInWorldText(LocalPlayer(), iVal1, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + 0 * WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation) + -40 * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1.25, Clipping.DoNotClip, InworldTextRev.VisibleToAndPosition, CustomColor((XOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (YOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (ZOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, 255), Spectators.DefaultVisibility);
+		iVal1 = "";
+		for (iVal0 = 0; 50; 10)
+		{
+				iVal1 = <"<0><1>", AbilityIconString(Hero.Ana, Button.Ultimate), iVal1>;
+		}
+		# cant be bothered
+		CreateInWorldText(LocalPlayer(), iVal1, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + 0 * WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation) + -50 * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1.75, Clipping.DoNotClip, InworldTextRev.VisibleToAndPosition, CustomColor((XOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (YOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (ZOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, 255), Spectators.DefaultVisibility);
+		# cant be bothered
+		CreateInWorldText(LocalPlayer(), iVal1, UpdateEveryFrame(EyePosition(LocalPlayer()) + 200 * FacingDirectionOf(LocalPlayer()) + 0 * WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation) + -50 * Normalize(CrossProduct(FacingDirectionOf(LocalPlayer()), WorldVectorOf(Left(), LocalPlayer(), LocalVector.Rotation)))), 1.75, Clipping.DoNotClip, InworldTextRev.VisibleToAndPosition, CustomColor((XOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (YOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, (ZOf(bot.facings[RoundToInteger(iVal0 / 1000, Rounding.Down)][iVal0 % 1000]) + 1) * 127.5, 255), Spectators.DefaultVisibility);
+}
+
+rule: "host player is spectating"
+if (HostPlayer() == false)
+{
+		exitMenu();
+}
+
+rule: "host player from spectator start replay"
+if (HostPlayer() == false)
+if (IsButtonHeld(HostPlayer(), Button.PrimaryFire) == true)
+{
+		beginReplay();
+}
+
+rule: "bot uses dva bomb - reattach"
+Event.OngoingPlayer
+Player.Dva
+if (IsDummyBot(EventPlayer()) == true)
+if (attachee == true)
+if (IsInAlternateForm(EventPlayer()) == true)
+{
+		AttachPlayers(attachee, EventPlayer(), Vector(0, 0, 0));
+		// demech
+		// Kill(attachee, null);
+}
+
+rule: "bot override detection"
+Event.OnPlayerLeave
+if (IsDummyBot(EventPlayer()) == true)
+{
+		logBuffer = "----------BOT OVERRIDE----------";
+		pushLog();
+		SmallMessage(AllPlayers(Team.All), "WARNING: BOT OVERRIDEN, REMEMBER TO SET LOBBY TO INVITE ONLY");
+		Wait(0.096, WaitBehavior.IgnoreCondition);
+		SmallMessage(AllPlayers(Team.All), "to recover your save, remove first override log and all proceeding logs, then reload that file");
+		Wait(0.096, WaitBehavior.IgnoreCondition);
+		SmallMessage(AllPlayers(Team.All), "see workshop.codes page for more info");
+}
+
+void pushLog() "push log SUBROUTINE"
+{
+		if (StringLength(logBuffer) > 0)
+		{
+				EnableInspectorRecording();
+				LogToInspector(logBuffer);
+				DisableInspectorRecording();
+				logBuffer = "";
+		}
+}
+
+void saveToGlobal() "save data SUBROUTINE"
+{
+		data = [];
+		iVal1 = FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()));
+		# scale 1000x
+		for (iVal0 = 0; CountOf(iVal1); 1)
+		{
+				iVal2 = iVal1[iVal0];
+				data[iVal0] = [HeroOf(iVal2), TeamOf(iVal2), iVal2.throttles, iVal2.throttleTimings, iVal2.facings, iVal2.facingTimings, iVal2.initButtonStates, iVal2.buttonsTimings, iVal2.weapon, iVal2.weaponTimings, 1000 * iVal2.initFacing, 1000 * iVal2.initPos, iVal2.totalFrames];
+		}
+		EnableInspectorRecording();
+		DisableInspectorRecording();
+		SmallMessage(AllPlayers(Team.All), "check inspector for global data");
+		data = [];
+}
+
+void initData() "gather data SUBROUTINE"
+{
+		loadData0();
+		loadData1();
+		loadData2();
+		loadData3();
+		loadData4();
+		loadData5();
+		loadData6();
+		loadData7();
+		loadData8();
+		loadData9();
+		loadData10();
+		loadData11();
+		loadData12();
+		loadData13();
+		loadData14();
+		loadData15();
+		loadData16();
+		loadData17();
+		loadData18();
+		loadData19();
+		loadData20();
+		loadData21();
+		loadData22();
+		loadData23();
+}
+
+rule: "load data if available"
+{
+		initData();
+		# uses ival 12, 11, 5, 3 and vars in sub decompressVectors
+		if (data)
+		{
+				# team distributions; team1, team2, team all
+				iVal12 = [1, 1, 1];
+				while (CountOf(data))
+				{
+						# topmost of stack
+						iVal11 = data[CountOf(data) - 1];
+						ModifyVariable(data, Operation.RemoveFromArrayByIndex, CountOf(data) - 1);
+						if (iVal11[1] == Team.Team1)
+						{
+								CreateDummyBot(iVal11[0], Team.Team1, iVal12[0], Vector(0, 0, 0), Vector(0, 0, 0));
+								iVal12[0] += 1;
+						}
+						else if (iVal11[1] == Team.Team2)
+						{
+								CreateDummyBot(iVal11[0], Team.Team2, iVal12[1], Vector(0, 0, 0), Vector(0, 0, 0));
+								iVal12[1] += 1;
+						}
+						else
+						{
+								CreateDummyBot(iVal11[0], Team.All, iVal12[2], Vector(0, 0, 0), Vector(0, 0, 0));
+								iVal12[2] += 1;
+						}
+						bot = LastCreatedEntity();
+						bot.number = SlotOf(bot) + (TeamOf(bot) == Team.Team1 ? 0 : 24);
+						logBuffer = <"n <0> <1> <2>", bot.number, HeroOf(bot), TeamOf(bot) == Team.Team1 ? 0 : TeamOf(bot) == Team.Team2 ? 1 : 2>;
+						pushLog();
+						bot.selectedHero = iVal11[0];
+						# decompress throttles
+						iVal10 = iVal11[2];
+						decompressVectors();
+						bot.throttles = iVal3;
+						bot.throttleTimings = iVal11[3];
+						for (iVal3 = 0; CountOf(bot.throttles); 1)
+						{
+								for (iVal4 = 0; CountOf(bot.throttles[iVal3]); 1)
+								{
+										logBuffer = <"a thr <0> \na thrT <1>", 1000 * bot.throttles[iVal3][iVal4], bot.throttleTimings[iVal3][iVal4]>;
+										pushLog();
+								}
+						}
+						# decompress facings
+						iVal10 = iVal11[4];
+						decompressVectors();
+						bot.facings = iVal3;
+						bot.facingTimings = iVal11[5];
+						for (iVal3 = 0; CountOf(bot.facings); 1)
+						{
+								for (iVal4 = 0; CountOf(bot.facings[iVal3]); 1)
+								{
+										logBuffer = <"a fac <0> \na facT <1>", 1000 * bot.facings[iVal3][iVal4], bot.facingTimings[iVal3][iVal4]>;
+										pushLog();
+								}
+						}
+						# buttons
+						bot.initButtonStates = iVal11[6];
+						bot.buttonsTimings = iVal11[7];
+						for (iVal3 = 0; CountOf(bot.buttonsTimings); 1)
+						{
+								for (iVal4 = 0; CountOf(bot.buttonsTimings[iVal3]); 1)
+								{
+										for (iVal5 = 0; CountOf(bot.buttonsTimings[iVal3][iVal4]); 1)
+										{
+												logBuffer = <"a butT <0> <1>", bot.buttonsTimings[iVal3][iVal4][iVal5], iVal3>;
+												pushLog();
+										}
+								}
+						}
+						# weapon
+						bot.weapon = iVal11[8];
+						bot.weaponTimings = iVal11[9];
+						for (iVal3 = 0; CountOf(bot.weapon); 1)
+						{
+								for (iVal4 = 0; CountOf(bot.weaponTimings[iVal3]); 1)
+								{
+										logBuffer = <"a wep <0> \na wepT <1>", bot.weapon[iVal3][iVal4], bot.weaponTimings[iVal3][iVal4]>;
+										pushLog();
+								}
+						}
+						# init facing and pos
+						bot.initFacing = Vector(iVal11[10] / 1000, iVal11[11] / 1000, iVal11[12] / 1000);
+						logBuffer = <"f (<0>, <1>, <2>)", iVal11[10], iVal11[11], iVal11[12]>;
+						pushLog();
+						bot.initPos = Vector(iVal11[13] / 1000, iVal11[14] / 1000, iVal11[15] / 1000);
+						logBuffer = <"p (<0>, <1>, <2>)", iVal11[13], iVal11[14], iVal11[15]>;
+						pushLog();
+						# total framecount
+						bot.totalFrames = iVal11[16];
+						logBuffer = <"t <0>", iVal11[16]>;
+						pushLog();
+						iVal3 = null;
+						iVal4 = null;
+				}
+				# for server load, clear these
+				data = null;
+				iVal5 = null;
+				iVal6 = null;
+				iVal7 = null;
+				iVal8 = null;
+				iVal9 = null;
+				iVal10 = null;
+				iVal11 = null;
+				iVal12 = null;
+				iVal13 = null;
+				SmallMessage(AllPlayers(Team.All), "data loaded - all bots initialized");
+		}
+		pushLog();
+		if (timelineOpen)
+		{
+				requestTimelineUpdate = true;
+		}
+}
+
+void decompressVectors() "decompress vectors SUBROUTINE"
+{
+		// uses ival 13, 10, 5, 6, 3
+		// continue;
+		# ival3 is output, ival10 is input
+		iVal3 = [[]];
+		# load first array from pop of stack of arrays
+		iVal13 = iVal10[CountOf(iVal10) - 1];
+		ModifyVariable(iVal10, Operation.RemoveFromArrayByIndex, CountOf(iVal10) - 1);
+		# load first string from pop of stack of strings
+		iVal4 = iVal13[CountOf(iVal13) - 1];
+		ModifyVariable(iVal13, Operation.RemoveFromArrayByIndex, CountOf(iVal13) - 1);
+		while (true)
+		{
+				# string more chars to parse
+				if (StringLength(iVal4) < 24)
+				{
+						# no string left to add to iVal4
+						if (CountOf(iVal13) == 0)
+						{
+								# no array to get more strings
+								if (CountOf(iVal10) == 0)
+								{
+										break;
+								}
+								else
+								{
+										iVal13 = iVal10[CountOf(iVal10) - 1];
+										# remove from top
+										ModifyVariable(iVal10, Operation.RemoveFromArrayByIndex, CountOf(iVal10) - 1);
+								}
+						}
+						# next string doesnt fit
+						if (StringLength(iVal4) + StringLength(iVal13[CountOf(iVal13) - 1]) > 511)
+						{
+								iVal5 = 511 - StringLength(iVal4);
+								# place new string in front; we read back to front of the string
+								iVal4 = <"<0><1>", StringSlice(iVal13[CountOf(iVal13) - 1], StringLength(iVal13[CountOf(iVal13) - 1]) - iVal5, iVal5), iVal4>;
+								iVal13[CountOf(iVal13) - 1] = StringSlice(iVal13[CountOf(iVal13) - 1], 0, StringLength(iVal13[CountOf(iVal13) - 1]) - iVal5);
+						}
+						else
+						{
+								# place new string in front; we read back to front of the string
+								iVal4 = <"<0><1>", iVal13[CountOf(iVal13) - 1], iVal4>;
+								ModifyVariable(iVal13, Operation.RemoveFromArrayByIndex, CountOf(iVal13) - 1);
+								MinWait();
+						}
+				}
+				iVal6 = [];
+				convertTop8ToNum();
+				iVal6[0] = iVal5;
+				convertTop8ToNum();
+				iVal6[1] = iVal5;
+				convertTop8ToNum();
+				iVal6 = Vector(iVal6[0], iVal6[1], iVal5);
+				if (CountOf(LastOf(iVal3)) == 1000)
+				{
+						ModifyVariable(iVal3, Operation.AppendToArray, [[iVal6]]);
+				}
+				else
+				{
+						ModifyVariable(iVal3[CountOf(iVal3) - 1], Operation.AppendToArray, iVal6);
+				}
+		}
+}
+
+void convertTop8ToNum() "convert top eight chars to num SUBROUTINE"
+{
+		// LogToInspector(iVal4);
+		# uses ival 4, 5, 7, 9. 5 is output, 4 is input, and modified
+		iVal9 = StringSlice(iVal4, StringLength(iVal4) - 8, 8);
+		# remove top 8 from ival4, put in 9
+		iVal4 = StringSlice(iVal4, 0, StringLength(iVal4) - 8);
+		iVal5 = 0;
+		# for ival7 from 7, 6, ... 1
+		for (iVal7 = 7; 0; -1)
+		{
+				iVal5 /= 10;
+				iVal5 += IndexOfStringChar(numbers, StringSlice(iVal9, iVal7, 1));
+		}
+		if (StringSlice(iVal9, 0, 1) == "-")
+		{
+				iVal5 = 0 - iVal5;
+		}
+}
+
+void arrayToText() "array to text"
+{
+		arrayAsText = "";
+		iVal2 = 0;
+		for (iVal0 = 0; CountOf(arrayToText); 1)
+		{
+				for (iVal1 = 0; CountOf(arrayToText[iVal0]); 1)
+				{
+						if (StringLength(arrayAsText) - iVal2 + StringLength(<"<0>", arrayToText[iVal0][iVal1]>) + 1 > buttonDataTextWidth)
+						{
+								iVal2 = StringLength(arrayAsText);
+								arrayAsText = <"<0> \n", arrayAsText>;
+						}
+						arrayAsText = <"<0><1>, ", arrayAsText, arrayToText[iVal0][iVal1]>;
+				}
+				arrayAsText = <"<0> \n \n", arrayAsText>;
+		}
+		arrayAsText = StringSlice(arrayAsText, 0, StringLength(arrayAsText) - 6);
+}
+
+disabled rule: "update host player button state"
+if (timelineOpen == true)
+if (recording == false)
+if (HostPlayer().buttonsState != MappedArray(allButtons, IsButtonHeld(HostPlayer(), ArrayElement())))
+{
+		# cant be bothered
+		iVal2 = IndexOfArrayValue(allButtons, FirstOf(FilteredArray(allButtons, IsButtonHeld(HostPlayer(), ArrayElement()) && !HostPlayer().buttonsState[CurrentArrayIndex()])));
+		if (iVal2 != -1)
+		{
+				SmallMessage(AllPlayers(Team.All), <"<0> opened", allButtons[iVal2]>);
+				buttonDataText = <"<0>: \n", allButtons[iVal2]>;
+				arrayToText = bot.buttonsTimings[iVal2];
+				arrayToText();
+				buttonDataText = <"<0><1>", buttonDataText, arrayAsText>;
+		}
+		HostPlayer().buttonsState = MappedArray(allButtons, IsButtonHeld(HostPlayer(), ArrayElement()));
+		Wait(0.25, WaitBehavior.IgnoreCondition);
+		LoopIfConditionIsTrue();
+}

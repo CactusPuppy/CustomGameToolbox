@@ -62,7 +62,6 @@ Event.OnPlayerLeave
 
 
 playervar Player[] selectedBots = [];
-playervar ResetPoint replayResetPoint;
 playervar SelectionEntity positionControl;
 playervar SelectionEntity facingControl;
 playervar BotControlMode botControlMode;
