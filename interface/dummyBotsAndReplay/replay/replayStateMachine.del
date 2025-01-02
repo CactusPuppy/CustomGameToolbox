@@ -25,7 +25,7 @@ enum ReplayStateAction {
 
 playervar ReplayState replayState = ReplayState.NONE;
 playervar ReplayStateAction replayStateAction = ReplayStateAction.NONE;
-rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Process replay state action"
+rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Process replay state action" 1
 Event.OngoingPlayer
 if (replayStateAction != ReplayStateAction.NONE)
 {
