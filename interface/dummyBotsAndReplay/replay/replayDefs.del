@@ -264,6 +264,8 @@ void ProcessAllChangesInCurrentFrame() {
         break;
       case InputType.ABILITY_1:
         if (currentFrame.changes[i].new_value) {
+          # SPECIAL CASE: Bots do not cancel Rein charge. Stop it manually if charging and ability 1 is pressed.
+          if (EffectiveHero() == Hero.Reinhardt && IsUsingAbility1()) CancelPrimaryAction();
           StartHoldingButton(EventPlayer(), Button.Ability1);
         } else {
           StopHoldingButton(EventPlayer(), Button.Ability1);

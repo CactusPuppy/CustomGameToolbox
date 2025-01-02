@@ -236,8 +236,7 @@ void OnReplayStart() {
 }
 
 void OnReplayEnd() {
-  # DEBUG
-  DumpLogBuffer("Ending replay for " + EventPlayer());
+  CancelPrimaryAction();
   StopThrottleInDirection();
   StopFacing();
   for (i = 0; AllButtons.Length; 1) {
