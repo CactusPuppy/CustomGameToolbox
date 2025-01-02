@@ -127,6 +127,15 @@ void LoadTempDataToSelectedBot() playervar "[SUB | interface/dummyBotsAndReplay/
   Wait(0.064);
   # We wait to transfer the recording to the new bot to avoid overloading the server
   if (hasRecordedClip(EventPlayer())) TransferRecording(EventPlayer(), selectedBot);
+  if (hasRecordedClip(selectedBot)) {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 2, "Play Replay", Color.LimeGreen);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Edit Replay", Color.Turquoise);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 0, 2, "Delete Replay", Color.Red);
+  } else {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 2, "Record Replay", CustomColor(186, 70, 213, 255));
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Edit Replay", Color.Gray);
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 0, 2, "Delete Replay", Color.Gray);
+  }
   Wait(0.064);
   TeleportPlayerToResetPoint(selectedBot, tempCurrentPosition);
 }
