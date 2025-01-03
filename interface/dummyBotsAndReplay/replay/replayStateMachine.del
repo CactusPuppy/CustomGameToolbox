@@ -103,6 +103,8 @@ void HandleReplayStateAction_Recording()
 {
   switch (replayStateAction) {
     case ReplayStateAction.STOP_RECORDING:
+      StartEditingBots();
+      CloseMenu(EventPlayer());
       RestoreBot();
       replayState = ReplayState.NONE;
       OnRecordingStop();
