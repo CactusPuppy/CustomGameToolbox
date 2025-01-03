@@ -69,6 +69,7 @@ Boolean IsBotReplaying(Player p = EventPlayer()): [
     ReplayState.PLAYING,
     ReplayState.REACHED_END_OF_REPLAY
   ].Contains(p.replayState);
+Player[] AllBotsReplaying(): AllPlayers().Filter(p => IsBotReplaying(p));
 Number MAX_ARRAY_SIZE: 1000;
 Number TICK_LENGTH: 0.016;
 Boolean hasRecordedClip(Player p = EventPlayer()): p.totalFrames > 0;

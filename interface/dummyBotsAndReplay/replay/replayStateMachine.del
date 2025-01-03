@@ -211,6 +211,8 @@ void OnRecordingStop() {
   # Add one more dummy frame to the end to ensure OOB doesn't happen
   SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New([], frame)]);
   selectedBot.totalFrames = frame;
+  # If bots are prompted to start replaying when
+  if (allBotsReplayDuringRecording) AllBotsReplaying().replayStateAction = ReplayStateAction.STOP_PLAYBACK;
   SmallMessage(EventPlayer(), "  Recording complete");
 }
 
