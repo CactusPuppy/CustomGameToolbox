@@ -92,6 +92,7 @@ void HandleReplayStateAction_PreparingToRecord()
       OnRecordingStart();
       break;
     case ReplayStateAction.STOP_RECORDING:
+      DestroyInWorldText(recordingCountdownText.textID);
       RestoreBot();
       replayState = ReplayState.NONE;
       break;
