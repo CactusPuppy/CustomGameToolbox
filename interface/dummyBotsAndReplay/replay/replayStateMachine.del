@@ -289,7 +289,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
 
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -304,7 +304,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
   );
   SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -313,7 +313,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
   recordingCountdownText.textColor = Color.Yellow;
   SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -322,7 +322,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
   recordingCountdownText.textColor = Color.Green;
   SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
