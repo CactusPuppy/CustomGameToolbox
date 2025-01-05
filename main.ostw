@@ -43,22 +43,54 @@ String MenuSettingsCategory: "03. Menu Settings";
 String ModSettingsCategory: "04. Mod Settings";
 String InformationCategory: "05. Information";
 String BotAndReplaySettingsCategory: "06. Bot and Replay";
-String DebugSettingsCategory: "19. Debug";
+String DebugSettingsCategory: "99. Debug";
 
 globalvar Number i;
 
 // DEBUG: Diagnostics
-// import "./OSTWUtils/Diagnostics.del";
-// rule: "[DEBUG | main.ostw] Show diagnostics"
-// {
-//   new Diagnostics(
-//     ShowEntityCount: true,
-//     ShowTextCount: true,
-//     ShowServerLoad: true,
-//     ShowServerLoadAverage: true,
-//     ShowServerLoadPeak: true);
-//   // printMenuValues();
-// }
+Number DummyBotCount(): CountOf(FilteredArray(AllPlayers(), IsDummyBot(ArrayElement())));
+Number HumanAndAICount(): CountOf(FilteredArray(AllPlayers(), !IsDummyBot(ArrayElement())));
+globalvar Color[] gradientColors! = [Color.Green, Color.LimeGreen, Color.Yellow, Color.Orange, Color.Red];
+import "OSTWUtils/Colors.del";
+void CreateDiagnostic(in String Text, in Color Color, in Number SortOrder) {
+  CreateHudText(
+    VisibleTo:      HostPlayer(),
+    Subheader:      Text,
+    Location:       Location.Right,
+    SubheaderColor: Color,
+    SortOrder:      SortOrder,
+    Reevaluation:   HudTextRev.VisibleToStringAndColor,
+    Spectators:     Spectators.VisibleAlways
+  );
+}
+rule: "[DEBUG | main.ostw] Show diagnostics"
+if (WorkshopSettingToggle(DebugSettingsCategory, "Show Diagnostics", false))
+{
+  CreateDiagnostic(
+    Text:           "[ {0} ]  Server Load".Format([ServerLoad()]),
+    Color:          Colors.StepGradient(gradientColors, ServerLoad()/255),
+    SortOrder:      1);
+  CreateDiagnostic(
+    Text:           "[ {0} ]  Server Load Average".Format([ServerLoadAverage()]),
+    Color:          Colors.StepGradient(gradientColors, ServerLoadAverage()/255),
+    SortOrder:      2);
+  CreateDiagnostic(
+    Text:           "[ {0} ]  Server Load Peak".Format([ServerLoadPeak()]),
+    Color:          Colors.StepGradient(gradientColors, ServerLoadPeak()/255),
+    SortOrder:      3);
+  CreateDiagnostic(
+    Text:           <"[ <0> / <1> ]  Entity Count", EntityCount(), 128>,
+    Color:          Colors.StepGradient(gradientColors, EntityCount()/128),
+    SortOrder:      4);
+  CreateDiagnostic(
+    Text:           <"[ <0> / <1> ]  Text Count", TextCount(), 128>,
+    Color:          Colors.StepGradient(gradientColors, TextCount() / 128),
+    SortOrder:      5);
+  CreateDiagnostic(
+    Text:           <"[ <0> / <1> ]  Dummy Bot Count", DummyBotCount(), 12 - HumanAndAICount()>,
+    Color:          Colors.StepGradient(gradientColors, DummyBotCount() / 12 - HumanAndAICount()),
+    SortOrder:      6);
+}
 
 globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugSettingsCategory, "Enable Inspector Recording", false);
 rule: "[main.ostw] Disable Inspector Recording" -100
