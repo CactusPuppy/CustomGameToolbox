@@ -18,6 +18,7 @@ playervar Number damageDealtInPeriodNonSelf;
 rule: "[lib/damagePerSecond.ostw] Track when a player receives damage"
 Event.OnDamageTaken
 if (EventDamage() > 0)
+if (AllPlayers().Any(p => p.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)))
 {
   eventTimestamp = TotalTimeElapsed();
   Victim().damageReceivedEvents = Victim().damageReceivedEvents.Append({ timestamp: eventTimestamp, amount: EventDamage(), attacker: Attacker(), victim: Victim() });

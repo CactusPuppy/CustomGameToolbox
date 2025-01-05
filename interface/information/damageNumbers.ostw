@@ -3,17 +3,17 @@ import "../../lib/utils/Colors.del";
 
 Number LINGER_TIME_IN_SECONDS: 3;
 
-playervar Any cumulativeDamageDisplayTextID! = -1;
-playervar Any lastDamageDisplayTextID! = -1;
-playervar Number cumulativeDamage!;
-playervar Number lastDamageInstanceAmount!;
-playervar Vector lastDamageInstancePosition!;
+playervar Any totalDamageDisplayTextID = -1;
+playervar Any lastDamageDisplayTextID = -1;
+playervar Number totalDamage;
+playervar Number lastDamageInstanceAmount;
+playervar Vector lastDamageInstancePosition;
 
-playervar Any cumulativeHealingDisplayTextID! = -1;
-playervar Any lastHealingDisplayTextID! = -1;
-playervar Number cumulativeHealing!;
-playervar Number lastHealInstanceAmount!;
-playervar Vector lastHealInstancePosition!;
+playervar Any totalHealingDisplayTextID = -1;
+playervar Any lastHealingDisplayTextID = -1;
+playervar Number totalHealing;
+playervar Number lastHealInstanceAmount;
+playervar Vector lastHealInstancePosition;
 
 String OFFSET: "    ";
 
@@ -36,12 +36,12 @@ if (EventDamage() > 0)
   lastDamageInstanceAmount = EventDamage();
   lastDamageInstancePosition = PositionOf();
   # If we don't have any active cumulative damage number, reset and create it
-  if (cumulativeDamageDisplayTextID == -1) {
-    cumulativeDamage = EventDamage();
+  if (totalDamageDisplayTextID == -1) {
+    totalDamage = EventDamage();
 
-    cumulativeDamageDisplayTextID = CreateInWorldText(
+    totalDamageDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
-      Header: <"-<0><1>", cumulativeDamage, (cumulativeHealingDisplayTextID != -1 ? OFFSET : "")>,
+      Header: <"-<0><1>", totalDamage, (totalHealingDisplayTextID != -1 ? OFFSET : "")>,
       Position: UpdateEveryFrame(PositionOf()) + Up() * cumulativeInstanceYOffset,
       Scale: 4,
       Clipping: Clipping.DoNotClip,
@@ -50,7 +50,7 @@ if (EventDamage() > 0)
     );
     lastDamageDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
-      Header: <"-<0><1>", lastDamageInstanceAmount, (cumulativeHealingDisplayTextID != -1 ? OFFSET : "")>,
+      Header: <"-<0><1>", lastDamageInstanceAmount, (totalHealingDisplayTextID != -1 ? OFFSET : "")>,
       Position: lastDamageInstancePosition + Up() * lastInstanceYOffset,
       Scale: 2,
       Clipping: Clipping.DoNotClip,
@@ -58,12 +58,12 @@ if (EventDamage() > 0)
       TextColor: LighterRed
     );
   } else {
-    cumulativeDamage += EventDamage();
+    totalDamage += EventDamage();
   }
   Wait(LINGER_TIME_IN_SECONDS, WaitBehavior.RestartWhenTrue);
-  DestroyInWorldText(cumulativeDamageDisplayTextID);
+  DestroyInWorldText(totalDamageDisplayTextID);
   DestroyInWorldText(lastDamageDisplayTextID);
-  cumulativeDamageDisplayTextID = -1;
+  totalDamageDisplayTextID = -1;
   lastDamageDisplayTextID = -1;
 }
 
@@ -74,12 +74,12 @@ if (EventHealing() > 0)
   lastHealInstanceAmount = EventHealing();
   lastHealInstancePosition = PositionOf();
   # If we don't have any active damage number, reset and create it
-  if (cumulativeHealingDisplayTextID == -1) {
-    cumulativeHealing = EventHealing();
+  if (totalHealingDisplayTextID == -1) {
+    totalHealing = EventHealing();
 
-    cumulativeHealingDisplayTextID = CreateInWorldText(
+    totalHealingDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
-      Header: <"<1>+<0>", cumulativeHealing, (cumulativeDamageDisplayTextID != -1 ? OFFSET : "")>,
+      Header: <"<1>+<0>", totalHealing, (totalDamageDisplayTextID != -1 ? OFFSET : "")>,
       Position: UpdateEveryFrame(PositionOf()) + Up() * cumulativeInstanceYOffset,
       Scale: 4,
       Clipping: Clipping.DoNotClip,
@@ -88,7 +88,7 @@ if (EventHealing() > 0)
     );
     lastHealingDisplayTextID = CreateInWorldText(
       VisibleTo: AllPlayers().FilteredArray((player) => player.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)),
-      Header: <"<1>+<0>", lastHealInstanceAmount, (cumulativeDamageDisplayTextID != -1 ? OFFSET : "")>,
+      Header: <"<1>+<0>", lastHealInstanceAmount, (totalDamageDisplayTextID != -1 ? OFFSET : "")>,
       Position: lastHealInstancePosition + Up() * lastInstanceYOffset,
       Scale: 1.5,
       Clipping: Clipping.DoNotClip,
@@ -96,11 +96,11 @@ if (EventHealing() > 0)
       TextColor: Color.Yellow
     );
   } else {
-    cumulativeHealing += EventHealing();
+    totalHealing += EventHealing();
   }
   Wait(LINGER_TIME_IN_SECONDS, WaitBehavior.RestartWhenTrue);
-  DestroyInWorldText(cumulativeHealingDisplayTextID);
+  DestroyInWorldText(totalHealingDisplayTextID);
   DestroyInWorldText(lastHealingDisplayTextID);
-  cumulativeHealingDisplayTextID = -1;
+  totalHealingDisplayTextID = -1;
   lastHealingDisplayTextID = -1;
 }
