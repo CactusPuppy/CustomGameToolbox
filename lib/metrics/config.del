@@ -1,4 +1,6 @@
 globalvar Boolean OptimizeMetricsForOverTime = WorkshopSettingCombo(InformationCategory, "HPS/DPS Meter Optimization", 0, ["Normal", "Over Time"], 0) == 1;
+Number[] METRICS_UPDATE_PERIODS: [1, 2, 4, 6, 10];
+globalvar Number MetricsUpdatePeriod = METRICS_UPDATE_PERIODS[WorkshopSettingCombo(InformationCategory, "HPS/DPS Meter Accuracy", 0, ["Perfect (1 Tick | Highest Script Load)", "Almost Perfect (2 Ticks | Higher Script Load)", "Good (4 Ticks | High Script Load)", "Fair (6 Ticks | Medium Script Load)", "Poor (10 Ticks | Light Script Load)"], 0)] * TICK_LENGTH;
 Number OVER_TIME_PERIOD: 0.192;
 Number PERIODS_IN_ONE_SECOND: RoundToInteger(1 / OVER_TIME_PERIOD, Rounding.Down);
 
