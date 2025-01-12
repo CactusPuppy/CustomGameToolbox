@@ -374,6 +374,11 @@ rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Auto-transit
 Event.OngoingPlayer
 if (replayState == ReplayState.REACHED_END_OF_REPLAY)
 {
+  # If recording, we should never loop, since recordings
+  if (AllPlayers().IsTrueForAny(p => [ReplayState.PREPARING_TO_RECORD, ReplayState.RECORDING].Contains(p.replayState))) {
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    return;
+  }
   WaitUntil(
     AllPlayers()
       .Filter(p => IsControllable(p)
