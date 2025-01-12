@@ -18,17 +18,18 @@ playervar Number damageDealtInPeriodNonSelf;
 rule: "[lib/damagePerSecond.ostw] Track when a player receives damage"
 Event.OnDamageTaken
 if (EventDamage() > 0)
-if (AllPlayers().Any(p => p.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS)))
+if (AllPlayers().Any(p => p.activeInfoDisplays.Contains(InfoAction.DAMAGE_DEALT_PER_SECOND_DISPLAY)
+  || p.activeInfoDisplays.Contains(InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY)))
 {
   eventTimestamp = TotalTimeElapsed();
   Victim().damageReceivedEvents = Victim().damageReceivedEvents.Append({ timestamp: eventTimestamp, amount: EventDamage(), attacker: Attacker(), victim: Victim() });
   Attacker().damageDealtEvents = Attacker().damageDealtEvents.Append({ timestamp: eventTimestamp, amount: EventDamage(), attacker: Attacker(), victim: Victim() });
 
-  if (eventTimestamp < Victim().damageReceivedEvents.First.timestamp + durationToAverageOver) {
+  if (eventTimestamp < Victim().damageReceivedEvents.First.timestamp + DURATION_TO_AVERAGE_OVER) {
     Victim().damageReceivedInPeriod += EventDamage();
     if (Attacker() != Victim()) Victim().damageReceivedInPeriodNonSelf += EventDamage();
   }
-  if (eventTimestamp < Attacker().damageDealtEvents.First.timestamp + durationToAverageOver) {
+  if (eventTimestamp < Attacker().damageDealtEvents.First.timestamp + DURATION_TO_AVERAGE_OVER) {
     Attacker().damageDealtInPeriod += EventDamage();
     if (Attacker() != Victim()) Attacker().damageDealtInPeriodNonSelf += EventDamage();
   }
@@ -37,16 +38,16 @@ if (AllPlayers().Any(p => p.activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_N
 rule: "[lib/damagePerSecond.ostw] When the head of the damage received array has expired, remove all expired events"
 Event.OngoingPlayer
 if (damageReceivedEvents.Length > 0)
-if (UpdateEveryFrame(TotalTimeElapsed()) >= damageReceivedEvents.First.timestamp + durationToAverageOver + perSecondBufferRetentionSeconds)
+if (UpdateEveryFrame(TotalTimeElapsed()) >= damageReceivedEvents.First.timestamp + DURATION_TO_AVERAGE_OVER + PER_SECOND_BUFFER_RETENTION)
 {
-  oldTimeAcceptanceThreshold = damageReceivedEvents.First.timestamp + durationToAverageOver;
+  oldTimeAcceptanceThreshold = damageReceivedEvents.First.timestamp + DURATION_TO_AVERAGE_OVER;
   // LogToInspector(<"Old time window: <0> - <1>", damageReceivedEvents.First.timestamp, oldTimeAcceptanceThreshold>);
   structArraysStartIndex = 0;
   structArraysCount = damageReceivedEvents.Length;
   // LogToInspector(<"Initial conditions | damageReceivedInPastSecond: <0> | damageReceivedInPastSecondNonSelf: <1>", damageReceivedInPastSecond, damageReceivedInPastSecondNonSelf>);
 
   # Remove expired events
-  while (damageReceivedEvents[structArraysStartIndex].timestamp + durationToAverageOver + perSecondBufferRetentionSeconds < TotalTimeElapsed() && structArraysStartIndex < damageReceivedEvents.Length) {
+  while (damageReceivedEvents[structArraysStartIndex].timestamp + DURATION_TO_AVERAGE_OVER + PER_SECOND_BUFFER_RETENTION < TotalTimeElapsed() && structArraysStartIndex < damageReceivedEvents.Length) {
     damageReceivedInPeriod = Max(0, damageReceivedInPeriod - damageReceivedEvents[structArraysStartIndex].amount);
     // LogToInspector(<"Index <0> with timestamp <1> expired, removing <2> for <3>", structArraysStartIndex, damageReceivedEvents[structArraysStartIndex].timestamp, damageReceivedEvents[structArraysStartIndex].amount, damageReceivedInPastSecond>);
     if (damageReceivedEvents[structArraysStartIndex].victim != damageReceivedEvents[structArraysStartIndex].attacker) {
@@ -59,7 +60,7 @@ if (UpdateEveryFrame(TotalTimeElapsed()) >= damageReceivedEvents.First.timestamp
   sweepNewlyValidEventsIndex = structArraysStartIndex;
   // LogToInspector(<"New start index: <2> | New time window: <0> - <1>", damageReceivedEvents[structArraysStartIndex].timestamp, damageReceivedEvents[structArraysStartIndex].timestamp + durationToAverageOver, structArraysStartIndex>);
   # Add newly valid events
-  while (damageReceivedEvents[sweepNewlyValidEventsIndex].timestamp < damageReceivedEvents[structArraysStartIndex].timestamp + durationToAverageOver && sweepNewlyValidEventsIndex < damageReceivedEvents.Length) {
+  while (damageReceivedEvents[sweepNewlyValidEventsIndex].timestamp < damageReceivedEvents[structArraysStartIndex].timestamp + DURATION_TO_AVERAGE_OVER && sweepNewlyValidEventsIndex < damageReceivedEvents.Length) {
     // LogToInspector(<"index: <0> | timestamp: <1> | damageReceivedInPastSecond: <2> | damageReceivedInPastSecondNonSelf: <3>", sweepNewlyValidEventsIndex, damageReceivedEvents[sweepNewlyValidEventsIndex].timestamp, damageReceivedInPastSecond, damageReceivedInPastSecondNonSelf>);
     # Make sure to only include NEWLY valid events
     if (damageReceivedEvents[sweepNewlyValidEventsIndex].timestamp >= oldTimeAcceptanceThreshold) {
@@ -74,23 +75,23 @@ if (UpdateEveryFrame(TotalTimeElapsed()) >= damageReceivedEvents.First.timestamp
   }
   # Slice arrays instead of doing incremental updates for perf
   damageReceivedEvents = damageReceivedEvents.Slice(structArraysStartIndex, structArraysCount);
-  MinWait();
+  Wait(MetricsUpdatePeriod);
   LoopIfConditionIsTrue();
 }
 
 rule: "[lib/damagePerSecond.ostw] When the head of the damage dealt array has expired, remove all expired events"
 Event.OngoingPlayer
 if (damageDealtEvents.Length > 0)
-if (UpdateEveryFrame(TotalTimeElapsed()) >= damageDealtEvents.First.timestamp + durationToAverageOver + perSecondBufferRetentionSeconds)
+if (UpdateEveryFrame(TotalTimeElapsed()) >= damageDealtEvents.First.timestamp + DURATION_TO_AVERAGE_OVER + PER_SECOND_BUFFER_RETENTION)
 {
-  oldTimeAcceptanceThreshold = damageDealtEvents.First.timestamp + durationToAverageOver;
+  oldTimeAcceptanceThreshold = damageDealtEvents.First.timestamp + DURATION_TO_AVERAGE_OVER;
   // LogToInspector(<"NEW RUN\nOld time window: <0> - <1>", damageDealtEvents.First.timestamp, oldTimeAcceptanceThreshold>);
   structArraysStartIndex = 0;
   structArraysCount = damageDealtEvents.Length;
   // LogToInspector(<"Initial conditions | damageReceivedInPastSecond: <0> | damageReceivedInPastSecondNonSelf: <1>", damageDealtInPastSecond, damageDealtInPastSecondNonSelf>);
 
   # Remove expired events
-  while (damageDealtEvents[structArraysStartIndex].timestamp + durationToAverageOver + perSecondBufferRetentionSeconds < TotalTimeElapsed() && structArraysStartIndex < damageDealtEvents.Length) {
+  while (damageDealtEvents[structArraysStartIndex].timestamp + DURATION_TO_AVERAGE_OVER + PER_SECOND_BUFFER_RETENTION < TotalTimeElapsed() && structArraysStartIndex < damageDealtEvents.Length) {
     damageDealtInPeriod = Max(0, damageDealtInPeriod - damageDealtEvents[structArraysStartIndex].amount);
     // LogToInspector(<"Index <0> with timestamp <1> expired, removing <2> for <3>", structArraysStartIndex, damageDealtEvents[structArraysStartIndex].timestamp, damageDealtEvents[structArraysStartIndex].amount, damageDealtInPastSecond>);
     if (damageDealtEvents[structArraysStartIndex].victim != damageDealtEvents[structArraysStartIndex].attacker) {
@@ -103,7 +104,7 @@ if (UpdateEveryFrame(TotalTimeElapsed()) >= damageDealtEvents.First.timestamp + 
   sweepNewlyValidEventsIndex = structArraysStartIndex;
   // LogToInspector(<"New start index: <2> | New time window: <0> - <1>", damageDealtEvents[structArraysStartIndex].timestamp, damageDealtEvents[structArraysStartIndex].timestamp + durationToAverageOver, structArraysStartIndex>);
   # Add newly valid events
-  while (damageDealtEvents[sweepNewlyValidEventsIndex].timestamp < damageDealtEvents[structArraysStartIndex].timestamp + durationToAverageOver && sweepNewlyValidEventsIndex < damageDealtEvents.Length) {
+  while (damageDealtEvents[sweepNewlyValidEventsIndex].timestamp < damageDealtEvents[structArraysStartIndex].timestamp + DURATION_TO_AVERAGE_OVER && sweepNewlyValidEventsIndex < damageDealtEvents.Length) {
     // LogToInspector(<"index: <0> | timestamp: <1> | damageReceivedInPastSecond: <2> | damageReceivedInPastSecondNonSelf: <3>", sweepNewlyValidEventsIndex, damageDealtEvents[sweepNewlyValidEventsIndex].timestamp, damageDealtInPastSecond, damageDealtInPastSecondNonSelf>);
     # Make sure to only include NEWLY valid events
     if (damageDealtEvents[sweepNewlyValidEventsIndex].timestamp >= oldTimeAcceptanceThreshold) {
@@ -118,6 +119,6 @@ if (UpdateEveryFrame(TotalTimeElapsed()) >= damageDealtEvents.First.timestamp + 
   }
   # Slice arrays instead of doing incremental updates for perf
   damageDealtEvents = damageDealtEvents.Slice(structArraysStartIndex, structArraysCount);
-  MinWait();
+  Wait(MetricsUpdatePeriod);
   LoopIfConditionIsTrue();
 }
