@@ -59,6 +59,13 @@ if (INSPECTOR_DISABLED)
   DisableInspectorRecording();
 }
 
+rule: "[main.ostw] If start match immediately, do so"
+if (WorkshopSettingToggle(GeneralSettingsCategory, "Start Match Immediately", true))
+{
+  Wait(3);
+  StartGameMode();
+}
+
 rule: "[main.ostw] Skip assembling heroes"
 if (IsAssemblingHeroes())
 {
