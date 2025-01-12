@@ -290,8 +290,9 @@ void ToggleThirdPerson()
 void ResetState()
 {
   UnlockAllButtons();
-  phasedOutLockCount = 0;
-  invisibilityLockCount = 0;
+  AddOneLockToAllButtons();
+  phasedOutLockCount = 1;
+  invisibilityLockCount = 1;
   CloseMenu(EventPlayer());
 }
 
