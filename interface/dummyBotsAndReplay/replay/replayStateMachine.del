@@ -29,7 +29,8 @@ rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Process repl
 Event.OngoingPlayer
 if (replayStateAction != ReplayStateAction.NONE)
 {
-  // DumpLogBuffer("Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
+  # DEBUG
+  DumpLogBuffer("Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
   switch (replayState) {
     case ReplayState.NONE:
       HandleReplayStateAction_Normal();
@@ -53,8 +54,8 @@ if (replayStateAction != ReplayStateAction.NONE)
       HandleReplayStateAction_ReachedEndOfReplay();
       break;
   }
-  // # DEBUG
-  // DumpLogBuffer("Exiting Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
+  # DEBUG
+  DumpLogBuffer("Exiting Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
   replayStateAction = ReplayStateAction.NONE;
   MinWait();
   LoopIfConditionIsTrue();
