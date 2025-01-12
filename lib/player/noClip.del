@@ -26,18 +26,33 @@ if (isNoClipActive)
   SetMoveSpeed(EventPlayer(), 0);
   AddOneLockToButton(button: Button.Jump);
   AddOneLockToButton(button: Button.Crouch);
-}
+  AddOneInvisibilityLock();
+  AddOnePhasedOutLock();
 
-rule: "[lib/player/noClip.del] Disengage noclip"
-Event.OngoingPlayer
-if (!isNoClipActive)
-{
+  WaitUntil(!isNoClipActive, 1000000);
+
   SetGravity(EventPlayer(), 100);
   EnableMovementCollisionWithEnvironment(EventPlayer());
   EnableMovementCollisionWithPlayers(EventPlayer());
   SetMoveSpeed(EventPlayer(), 100);
   RemoveOneLockFromButton(button: Button.Jump);
   RemoveOneLockFromButton(button: Button.Crouch);
+  RemoveOneInvisibilityLock();
+  RemoveOnePhasedOutLock();
+}
+
+rule: "[lib/player/noClip.del] Noclip camera"
+Event.OngoingPlayer
+if (isNoClipActive)
+if (currentMenuState == MenuState.CLOSED)
+{
+  MinWait();
+  // Stopping camera is handled by the fact that noclip must be stopped by opening menu.
+  StartCamera(
+    Player:               EventPlayer(),
+    EyePosition:          UpdateEveryFrame(EventPlayer().EyePosition()),
+    LookAtPosition:       UpdateEveryFrame(EventPlayer().EyePosition() + EventPlayer().FacingDirection()),
+    BlendSpeed:           1000);
 }
 
 rule: "Noclip propulsion"

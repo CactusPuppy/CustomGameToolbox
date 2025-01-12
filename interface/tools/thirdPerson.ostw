@@ -13,8 +13,9 @@ playervar Number thirdPersonHeight = 0;
 rule: "[interface/tools/thirdPerson.ostw] When person is in third person and their menu state becomes closed, start third person camera"
 Event.OngoingPlayer
 if (IsAlive())
-if (([Hero.Widowmaker, Hero.Ashe, Hero.Ana].Contains(HeroOf()) && IsFiringSecondary()) == false)
+if (([Hero.Widowmaker, Hero.Ashe, Hero.Ana].Contains(EffectiveHero()) && IsFiringSecondary()) == false)
 if (thirdPersonState != ThirdPersonState.OFF)
+if (!isNoClipActive)
 if (currentMenuState == MenuState.CLOSED)
 {
   MinWait();
@@ -33,6 +34,7 @@ if (currentMenuState == MenuState.CLOSED)
     LookAtPosition: RayCastHitPosition(EyePosition(), EyePosition() + FacingDirectionOf() * 200, AllPlayers(), EventPlayer(), false),
     BlendSpeed: 60
   );
+  // Stopping camera is handled by the fact that third person must be stopped by opening the menu.
 }
 
 rule: "[interface/tools/thirdPerson.ostw] During adjustment, reduce move speed"
