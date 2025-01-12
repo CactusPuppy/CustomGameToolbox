@@ -31,10 +31,10 @@ void AddOnePhasedOutLock()
 
 void RemoveOneInvisibilityLock()
 {
-  invisibilityLockCount = Max(0, invisibilityLockCount - 1);
+  invisibilityLockCount -= 1;
 }
 
 void RemoveOnePhasedOutLock()
 {
-  phasedOutLockCount = Max(0, phasedOutLockCount - 1);
+  phasedOutLockCount -= 1;
 }

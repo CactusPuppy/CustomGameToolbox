@@ -57,7 +57,7 @@ void AddOneLockToAllButtons(in Player player = EventPlayer())
 
 void RemoveOneLockFromAllButtons(in Player player = EventPlayer())
 {
-  player.buttonLocks = player.buttonLocks.Map((lockCount) => Max(0, lockCount - 1));
+  player.buttonLocks = player.buttonLocks.Map((lockCount) => lockCount - 1);
   UpdatePlayerButtonStatus(player);
 }
 
@@ -75,7 +75,7 @@ void AddOneLockToButton(in Player player = EventPlayer(), in Button button)
 
 void RemoveOneLockFromButton(in Player player = EventPlayer(), in Button button)
 {
-  player.buttonLocks[AllButtons.IndexOf(button)] = Max(0, player.buttonLocks[AllButtons.IndexOf(button)] - 1);
+  player.buttonLocks[AllButtons.IndexOf(button)] -= 1;
   if (player.buttonLocks[AllButtons.IndexOf(button)] == 0) AllowButton(player, button);
 }
 
