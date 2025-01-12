@@ -14,7 +14,7 @@ A set of tools that make custom games more useful for recreating, testing, and r
         General
         {
             Hero Limit: 1 Per Team
-            Game Mode Start: Immediately
+            Game Mode Start: Manual
             Tank Role Passive Health Bonus: Disabled
             Limit Roles: 1 Tank 2 Offense 2 Support
         }
@@ -62,7 +62,7 @@ if (INSPECTOR_DISABLED)
 rule: "[main.ostw] If start match immediately, do so"
 if (WorkshopSettingToggle(GeneralSettingsCategory, "Start Match Immediately", true))
 {
-  Wait(3);
+  Wait(2);
   StartGameMode();
 }
 
@@ -83,8 +83,9 @@ if (IsAssemblingHeroes())
 
 rule: "[main.ostw] pause match time on start of round"
 if (WorkshopSettingToggle(GeneralSettingsCategory, "Automatically Pause Match Time At Round Start", true))
-if (!IsAssemblingHeroes())
+if (IsInSetup() || IsGameInProgress())
 {
+  AbortIf(isTimePaused);
   PauseMatchTime();
   isTimePaused = true;
 }
