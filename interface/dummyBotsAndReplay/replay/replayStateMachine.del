@@ -92,6 +92,9 @@ void HandleReplayStateAction_PreparingToRecord()
       OnRecordingStart();
       break;
     case ReplayStateAction.STOP_RECORDING:
+      if (RECORD_IN_SLOW_MOTION) {
+        activeModifications[Modification.SLOW_MOTION] = false;
+      }
       DestroyInWorldText(recordingCountdownText.textID);
       RestoreBot();
       replayState = ReplayState.NONE;
@@ -103,6 +106,9 @@ void HandleReplayStateAction_Recording()
 {
   switch (replayStateAction) {
     case ReplayStateAction.STOP_RECORDING:
+      if (RECORD_IN_SLOW_MOTION) {
+        activeModifications[Modification.SLOW_MOTION] = false;
+      }
       StartEditingBots();
       CloseMenu(EventPlayer());
       RestoreBot();
@@ -170,6 +176,7 @@ void HandleReplayStateAction_ReachedEndOfReplay()
 */
 
 void OnRecordingStart() {
+  if (RECORD_IN_SLOW_MOTION) activeModifications[Modification.SLOW_MOTION] = true;
   frame = 0;
   selectedBot.changeBuffer = [
     InputChange<Any>.New(InputType.THROTTLE, ThrottleOf(EventPlayer())),
@@ -290,6 +297,9 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
     AllBotsWithRecordings().replayStateAction = ReplayStateAction.PREPARE_FOR_PLAYBACK;
   }
   recordingCountdownText = { timerValue: 3, textColor: LighterRed, textID: null };
+  if (RECORD_IN_SLOW_MOTION) {
+    activeModifications[Modification.SLOW_MOTION] = true;
+  }
 
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {

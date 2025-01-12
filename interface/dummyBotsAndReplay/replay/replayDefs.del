@@ -48,6 +48,7 @@ single struct SnapshotState {
 
 globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Loop Replay Playback", true);
 globalvar Number longestRecordingLength = 0;
+globalvar Boolean RECORD_IN_SLOW_MOTION = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Automatically Enable Slow Motion During Recording", true);
 
 playervar ResetPoint replayResetPoint;
 playervar Number frame;
