@@ -26,40 +26,60 @@ if (isNoClipActive)
   SetMoveSpeed(EventPlayer(), 0);
   AddOneLockToButton(button: Button.Jump);
   AddOneLockToButton(button: Button.Crouch);
-}
+  AddOneInvisibilityLock();
+  AddOnePhasedOutLock();
 
-rule: "[lib/player/noClip.del] Disengage noclip"
-Event.OngoingPlayer
-if (!isNoClipActive)
-{
+  WaitUntil(!isNoClipActive, 1000000);
+
   SetGravity(EventPlayer(), 100);
   EnableMovementCollisionWithEnvironment(EventPlayer());
   EnableMovementCollisionWithPlayers(EventPlayer());
   SetMoveSpeed(EventPlayer(), 100);
   RemoveOneLockFromButton(button: Button.Jump);
   RemoveOneLockFromButton(button: Button.Crouch);
+  RemoveOneInvisibilityLock();
+  RemoveOnePhasedOutLock();
 }
+
+rule: "[lib/player/noClip.del] Noclip camera"
+Event.OngoingPlayer
+if (isNoClipActive)
+if (currentMenuState == MenuState.CLOSED)
+{
+  MinWait();
+  // Stopping camera is handled by the fact that noclip must be stopped by opening menu.
+  StartCamera(
+    Player:               EventPlayer(),
+    EyePosition:          UpdateEveryFrame(EventPlayer().EyePosition()),
+    LookAtPosition:       UpdateEveryFrame(EventPlayer().EyePosition() + EventPlayer().FacingDirection()),
+    BlendSpeed:           1000);
+}
+
+Boolean NOCLIP_THROTTLING(Player p = EventPlayer()): (
+  IsButtonHeld(p, Button.Crouch)
+  || IsButtonHeld(p, Button.Jump)
+  || ThrottleOf(p) != Vector(0, 0, 0));
 
 rule: "Noclip propulsion"
 Event.OngoingPlayer
 if (isNoClipActive)
-if ((IsButtonHeld(EventPlayer(), Button.Crouch) || IsButtonHeld(EventPlayer(), Button.Jump) || ThrottleOf(EventPlayer()) != Vector(0, 0, 0)))
+if (NOCLIP_THROTTLING())
 {
     ApplyImpulse(EventPlayer(), VelocityOf(EventPlayer()) * -1, SpeedOf(EventPlayer()) * 0.03, Relative.ToWorld, ContraryMotion.Incorporate);
     if (!(IsButtonHeld(Button: Button.Crouch) && IsButtonHeld(Button: Button.Jump) && MagnitudeOf(ThrottleOf()) == 0)) {
-      ApplyImpulse(EventPlayer(), Normalize(FacingDirectionOf(EventPlayer()) * ZOf(ThrottleOf(EventPlayer())) + WorldVectorOf(Left(), EventPlayer(), LocalVector.Rotation) * XOf(ThrottleOf(EventPlayer())) + Up() * (IsButtonHeld(EventPlayer(), Button.Jump) - IsButtonHeld(EventPlayer(), Button.Crouch))), (100 + 300 * IsButtonHeld(EventPlayer(), Button.Reload) - SpeedOf(EventPlayer())) / 62.5, Relative.ToWorld, ContraryMotion.Incorporate);
+      ApplyImpulse(EventPlayer(), Normalize(FacingDirectionOf(EventPlayer()) * ZOf(ThrottleOf(EventPlayer())) + WorldVectorOf(Left(), EventPlayer(), LocalVector.Rotation) * XOf(ThrottleOf(EventPlayer())) + Up() * (IsButtonHeld(EventPlayer(), Button.Jump) - IsButtonHeld(EventPlayer(), Button.Crouch))), (100 + 300 * IsButtonHeld(EventPlayer(), Button.Reload) - SpeedOf(EventPlayer())) / 31.25, Relative.ToWorld, ContraryMotion.Incorporate);
     }
-    MinWait();
+    Wait(0.064);
     LoopIfConditionIsTrue();
 }
 
 rule: "Noclip air resistance"
 Event.OngoingPlayer
 if (isNoClipActive)
-if (!(IsButtonHeld(EventPlayer(), Button.Crouch) || IsButtonHeld(EventPlayer(), Button.Jump) || ThrottleOf(EventPlayer()) != Vector(0, 0, 0)))
+if (NOCLIP_THROTTLING() == false)
 if (SpeedOf(EventPlayer()) > 0.01)
 {
-    ApplyImpulse(EventPlayer(), VelocityOf(EventPlayer()) * -1, SpeedOf(EventPlayer()) * 0.12, Relative.ToWorld, ContraryMotion.Incorporate);
-    MinWait();
+    ApplyImpulse(EventPlayer(), VelocityOf(EventPlayer()) * -1, SpeedOf(EventPlayer()) * 0.2, Relative.ToWorld, ContraryMotion.Incorporate);
+    Wait(0.064);
     LoopIfConditionIsTrue();
 }

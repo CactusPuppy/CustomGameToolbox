@@ -173,12 +173,12 @@ if (IsModificationActive(Modification.DISABLE_SUPPORT_PASSIVE))
 
 rule: "[interface/modifications/modsMenu.ostw] Handle preventing heal passive"
 Event.OngoingPlayer
-// if (IsModificationActive(Modification.DISABLE_SUPPORT_PASSIVE))
-// if (AllSupportHeroes().Contains(IsDuplicating() ? HeroBeingDuplicated() : HeroOf()))
+if (HasSpawned())
+if (IsAlive())
 if (NormalizedHealth() < 1)
 {
   Wait(AllSupportHeroes().Contains(EffectiveHero()) ? 2.45 : MaxHealthOfType(EventPlayer(), HealthType.Shields) > 0 ? 2.95 : 4.95, WaitBehavior.AbortWhenFalse);
-  LoopIf(HasStatus(EventPlayer(), Status.Asleep) && !IsModificationActive(Modification.DISABLE_SUPPORT_PASSIVE) && !isPunchingBag);
+  LoopIf(HasStatus(EventPlayer(), Status.Asleep) || (!IsModificationActive(Modification.DISABLE_SUPPORT_PASSIVE) && !isPunchingBag));
   if (Health() <= 0.001) SetPlayerHealth(EventPlayer(), 0.002);
   Damage(EventPlayer(), null, 0.001);
   Heal(EventPlayer(), null, 0.001);

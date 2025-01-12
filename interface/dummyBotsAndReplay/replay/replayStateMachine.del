@@ -29,7 +29,8 @@ rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Process repl
 Event.OngoingPlayer
 if (replayStateAction != ReplayStateAction.NONE)
 {
-  // DumpLogBuffer("Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
+  # DEBUG
+  DumpLogBuffer("Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
   switch (replayState) {
     case ReplayState.NONE:
       HandleReplayStateAction_Normal();
@@ -53,8 +54,8 @@ if (replayStateAction != ReplayStateAction.NONE)
       HandleReplayStateAction_ReachedEndOfReplay();
       break;
   }
-  // # DEBUG
-  // DumpLogBuffer("Exiting Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
+  # DEBUG
+  DumpLogBuffer("Exiting Replay State Handler for " + EventPlayer() + ": [State " + replayState + "] [Action: " + replayStateAction + "]");
   replayStateAction = ReplayStateAction.NONE;
   MinWait();
   LoopIfConditionIsTrue();
@@ -92,6 +93,10 @@ void HandleReplayStateAction_PreparingToRecord()
       OnRecordingStart();
       break;
     case ReplayStateAction.STOP_RECORDING:
+      if (RECORD_IN_SLOW_MOTION) {
+        activeModifications[Modification.SLOW_MOTION] = false;
+      }
+      DestroyInWorldText(recordingCountdownText.textID);
       RestoreBot();
       replayState = ReplayState.NONE;
       break;
@@ -102,6 +107,11 @@ void HandleReplayStateAction_Recording()
 {
   switch (replayStateAction) {
     case ReplayStateAction.STOP_RECORDING:
+      if (RECORD_IN_SLOW_MOTION) {
+        activeModifications[Modification.SLOW_MOTION] = false;
+      }
+      StartEditingBots();
+      CloseMenu(EventPlayer());
       RestoreBot();
       replayState = ReplayState.NONE;
       OnRecordingStop();
@@ -167,6 +177,7 @@ void HandleReplayStateAction_ReachedEndOfReplay()
 */
 
 void OnRecordingStart() {
+  if (RECORD_IN_SLOW_MOTION) activeModifications[Modification.SLOW_MOTION] = true;
   frame = 0;
   selectedBot.changeBuffer = [
     InputChange<Any>.New(InputType.THROTTLE, ThrottleOf(EventPlayer())),
@@ -210,6 +221,8 @@ void OnRecordingStop() {
   # Add one more dummy frame to the end to ensure OOB doesn't happen
   SafeAppendToBigArray(selectedBot.recording, <DeltaFrame>[DeltaFrame.New([], frame)]);
   selectedBot.totalFrames = frame;
+  # If bots are prompted to start replaying when
+  if (allBotsReplayDuringRecording) AllBotsReplaying().replayStateAction = ReplayStateAction.STOP_PLAYBACK;
   SmallMessage(EventPlayer(), "  Recording complete");
 }
 
@@ -285,10 +298,13 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
     AllBotsWithRecordings().replayStateAction = ReplayStateAction.PREPARE_FOR_PLAYBACK;
   }
   recordingCountdownText = { timerValue: 3, textColor: LighterRed, textID: null };
+  if (RECORD_IN_SLOW_MOTION) {
+    activeModifications[Modification.SLOW_MOTION] = true;
+  }
 
   WaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -303,7 +319,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
   );
   SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -312,7 +328,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
   recordingCountdownText.textColor = Color.Yellow;
   SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -321,7 +337,7 @@ if (replayState == ReplayState.PREPARING_TO_RECORD)
   recordingCountdownText.textColor = Color.Green;
   SlowMoAgnosticWaitUntil(shouldAbortRecordingCountdown(), 0.8);
   if (shouldAbortRecordingCountdown()) {
-    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    replayStateAction = ReplayStateAction.STOP_RECORDING;
     SmallMessage(EventPlayer(), "  Recording aborted");
     Abort();
   }
@@ -358,6 +374,11 @@ rule: "[interface/dummyBotsAndReplay/replay/replayStateMachine.del] Auto-transit
 Event.OngoingPlayer
 if (replayState == ReplayState.REACHED_END_OF_REPLAY)
 {
+  # If recording, we should never loop, since recordings
+  if (AllPlayers().IsTrueForAny(p => [ReplayState.PREPARING_TO_RECORD, ReplayState.RECORDING].Contains(p.replayState))) {
+    replayStateAction = ReplayStateAction.STOP_PLAYBACK;
+    return;
+  }
   WaitUntil(
     AllPlayers()
       .Filter(p => IsControllable(p)
@@ -365,8 +386,7 @@ if (replayState == ReplayState.REACHED_END_OF_REPLAY)
       .IsTrueForAll(p => [ReplayState.REACHED_END_OF_REPLAY, ReplayState.NONE].Contains(p.replayState)),
     1000000);
 
-  AbortIf(replayState != ReplayState.REACHED_END_OF_REPLAY);
-  if (SHOULD_LOOP_CLIP) {
+  if (SHOULD_LOOP_CLIP && replayState == ReplayState.REACHED_END_OF_REPLAY) {
     replayStateAction = ReplayStateAction.START_PLAYBACK;
   } else {
     replayStateAction = ReplayStateAction.STOP_PLAYBACK;

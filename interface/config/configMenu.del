@@ -3,6 +3,8 @@ enum ConfigItem {
   BUTTON_SPAM_PERIOD,
   SLOW_MOTION_SPEED,
   INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY,
+  RECORD_IN_SLOW_MOTION,
+  LOOP_REPLAY,
   // PUNCHING_BAG_HEALTH_PERCENTAGE,
   // SHOULD_PUNCHIING_BAG_NAME_CHANGE,
   END_SENTINEL
@@ -12,7 +14,9 @@ String currentConfigItem: [
   "HPS/DPS Meter Optimization",
   "Button Spam Period",
   "Slow Motion Speed",
-  "Interact Destroys Deployables In Replay"
+  "Interact Destroys Deployables In Replay",
+  "Auto Enable Slow-Mo During Recording",
+  "Loop Replay Playback"
 ][currentConfigSelection];
 
 // globalvar Boolean SHOULD_PUNCHIING_BAG_NAME_CHANGE = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Should Punching Bag Name Change", true);
@@ -82,6 +86,12 @@ void ConfigMenu_ThrottleLeftRight() {
       case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
         break;
+      case ConfigItem.RECORD_IN_SLOW_MOTION:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{RECORD_IN_SLOW_MOTION}");
+        break;
+      case ConfigItem.LOOP_REPLAY:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOULD_LOOP_CLIP}");
+        break;
       // case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
       //   UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion * 100}");
       //   break;
@@ -147,6 +157,14 @@ void ConfigMenu_Left() {
       interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
       break;
+    case ConfigItem.RECORD_IN_SLOW_MOTION:
+      RECORD_IN_SLOW_MOTION = !RECORD_IN_SLOW_MOTION;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{RECORD_IN_SLOW_MOTION}");
+      break;
+    case ConfigItem.LOOP_REPLAY:
+      SHOULD_LOOP_CLIP = !SHOULD_LOOP_CLIP;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOULD_LOOP_CLIP}");
+      break;
   }
 }
 
@@ -199,6 +217,14 @@ void ConfigMenu_Right() {
     case ConfigItem.INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY:
       interactDestroysDeployableCompensation = !interactDestroysDeployableCompensation;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{interactDestroysDeployableCompensation}");
+      break;
+    case ConfigItem.RECORD_IN_SLOW_MOTION:
+      RECORD_IN_SLOW_MOTION = !RECORD_IN_SLOW_MOTION;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{RECORD_IN_SLOW_MOTION}");
+      break;
+    case ConfigItem.LOOP_REPLAY:
+      SHOULD_LOOP_CLIP = !SHOULD_LOOP_CLIP;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOULD_LOOP_CLIP}");
       break;
   }
 }

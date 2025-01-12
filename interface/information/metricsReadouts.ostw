@@ -8,9 +8,9 @@ if (activeInfoDisplays.Contains(InfoAction.HEALING_DEALT_PER_SECOND_DISPLAY))
 {
   infoDisplayEntities[InfoAction.HEALING_DEALT_PER_SECOND_DISPLAY] = CreateHudText(
     VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
-    Header: <"HPS Dealt: <0>", UpdateEveryFrame((healDealtInPeriod) / durationToAverageOver)>,
-    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((healDealtInPeriod - healDealtInPeriodNonSelf) / durationToAverageOver))>,
-    Text: <"Other: <0><1>", UpdateEveryFrame((healDealtInPeriodNonSelf) / durationToAverageOver), MANY_SPACES>,
+    Header: <"HPS Dealt: <0>", UpdateEveryFrame((healDealtInPeriod) / DURATION_TO_AVERAGE_OVER)>,
+    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((healDealtInPeriod - healDealtInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER))>,
+    Text: <"Other: <0><1>", UpdateEveryFrame((healDealtInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER), MANY_SPACES>,
     SortOrder: activeInfoDisplays.IndexOf(InfoAction.HEALING_DEALT_PER_SECOND_DISPLAY)
   );
   UpdateButtonAppearance(MenuState.INFORMATION, 1, 3, "Hide HPS Dealt", Color.Gray);
@@ -25,9 +25,9 @@ if (activeInfoDisplays.Contains(InfoAction.HEALING_RECEIVED_PER_SECOND_DISPLAY))
 {
   infoDisplayEntities[InfoAction.HEALING_RECEIVED_PER_SECOND_DISPLAY] = CreateHudText(
     VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
-    Header: <"HPS Received: <0>", UpdateEveryFrame((healReceivedInPeriod) / durationToAverageOver)>,
-    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((healReceivedInPeriod - healReceivedInPeriodNonSelf) / durationToAverageOver))>,
-    Text: <"Other: <0><1>", UpdateEveryFrame((healReceivedInPeriodNonSelf) / durationToAverageOver), MANY_SPACES>,
+    Header: <"HPS Received: <0>", UpdateEveryFrame((healReceivedInPeriod) / DURATION_TO_AVERAGE_OVER)>,
+    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((healReceivedInPeriod - healReceivedInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER))>,
+    Text: <"Other: <0><1>", UpdateEveryFrame((healReceivedInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER), MANY_SPACES>,
     SortOrder: activeInfoDisplays.IndexOf(InfoAction.HEALING_RECEIVED_PER_SECOND_DISPLAY)
   );
   UpdateButtonAppearance(MenuState.INFORMATION, 1, 4, "Hide HPS Received", Color.Gray);
@@ -42,9 +42,9 @@ if (activeInfoDisplays.Contains(InfoAction.DAMAGE_DEALT_PER_SECOND_DISPLAY))
 {
   infoDisplayEntities[InfoAction.DAMAGE_DEALT_PER_SECOND_DISPLAY] = CreateHudText(
     VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
-    Header: <"DPS Dealt: <0>", UpdateEveryFrame((damageDealtInPeriod) / durationToAverageOver)>,
-    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((damageDealtInPeriod - damageDealtInPeriodNonSelf) / durationToAverageOver))>,
-    Text: <"Other: <0><1>", UpdateEveryFrame((damageDealtInPeriodNonSelf) / durationToAverageOver), MANY_SPACES>,
+    Header: <"DPS Dealt: <0>", UpdateEveryFrame((damageDealtInPeriod) / DURATION_TO_AVERAGE_OVER)>,
+    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((damageDealtInPeriod - damageDealtInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER))>,
+    Text: <"Other: <0><1>", UpdateEveryFrame((damageDealtInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER), MANY_SPACES>,
     SortOrder: activeInfoDisplays.IndexOf(InfoAction.DAMAGE_DEALT_PER_SECOND_DISPLAY)
   );
   UpdateButtonAppearance(MenuState.INFORMATION, 3, 3, "Hide DPS Dealt", Color.Gray);
@@ -59,9 +59,9 @@ if (activeInfoDisplays.Contains(InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY))
 {
   infoDisplayEntities[InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY] = CreateHudText(
     VisibleTo: EventPlayer().currentMenuState == MenuState.CLOSED ? EventPlayer() : null,
-    Header: <"DPS Received: <0>", UpdateEveryFrame((damageReceivedInPeriod) / durationToAverageOver)>,
-    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((damageReceivedInPeriod - damageReceivedInPeriodNonSelf) / durationToAverageOver))>,
-    Text: <"Other: <0><1>", UpdateEveryFrame((damageReceivedInPeriodNonSelf) / durationToAverageOver), MANY_SPACES>,
+    Header: <"DPS Received: <0>", UpdateEveryFrame((damageReceivedInPeriod) / DURATION_TO_AVERAGE_OVER)>,
+    Subheader: <"Self: <0>", Max(0, UpdateEveryFrame((damageReceivedInPeriod - damageReceivedInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER))>,
+    Text: <"Other: <0><1>", UpdateEveryFrame((damageReceivedInPeriodNonSelf) / DURATION_TO_AVERAGE_OVER), MANY_SPACES>,
     SortOrder: activeInfoDisplays.IndexOf(InfoAction.DAMAGE_RECEIVED_PER_SECOND_DISPLAY)
   );
   UpdateButtonAppearance(MenuState.INFORMATION, 3, 4, "Hide DPS Received", Color.Gray);

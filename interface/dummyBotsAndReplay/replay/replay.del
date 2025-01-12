@@ -42,12 +42,6 @@ if (EventPlayer().replayState == ReplayState.PLAYING)
   replayStateAction = ReplayStateAction.STOP_PLAYBACK;
 }
 
-rule: "[interface/dummyBotsAndReplay/replay/replay.del] Update longest recording length when player leaves"
-Event.OnPlayerLeave
-{
-  UpdateLongestRecordingLength();
-}
-
 enum RecordingAction {
   NONE,
   PLAY,

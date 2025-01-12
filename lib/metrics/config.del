@@ -1,7 +1,9 @@
 globalvar Boolean OptimizeMetricsForOverTime = WorkshopSettingCombo(InformationCategory, "HPS/DPS Meter Optimization", 0, ["Normal", "Over Time"], 0) == 1;
-Number healOverTimePeriod: 0.192;
-Number healOverTimePeriodsInOneSecond: RoundToInteger(1 / healOverTimePeriod, Rounding.Down);
+Number[] METRICS_UPDATE_PERIODS: [1, 2, 4, 6, 10];
+globalvar Number MetricsUpdatePeriod = METRICS_UPDATE_PERIODS[WorkshopSettingCombo(InformationCategory, "HPS/DPS Meter Accuracy", 0, ["Perfect (1 Tick | Highest Script Load)", "Almost Perfect (2 Ticks | Higher Script Load)", "Good (4 Ticks | High Script Load)", "Fair (6 Ticks | Medium Script Load)", "Poor (10 Ticks | Light Script Load)"], 0)] * TICK_LENGTH;
+Number OVER_TIME_PERIOD: 0.192;
+Number PERIODS_IN_ONE_SECOND: RoundToInteger(1 / OVER_TIME_PERIOD, Rounding.Down);
 
 // Number durationToAverageOver: OptimizeMetricsForOverTime ? healOverTimePeriod * healOverTimePeriodsInOneSecond : 1;
-Number durationToAverageOver: OptimizeMetricsForOverTime ? healOverTimePeriod * 2 : 1;
-Number perSecondBufferRetentionSeconds: 0.25;
+Number DURATION_TO_AVERAGE_OVER: OptimizeMetricsForOverTime ? OVER_TIME_PERIOD * 2 : 1;
+Number PER_SECOND_BUFFER_RETENTION: 0.25;

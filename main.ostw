@@ -14,7 +14,7 @@ A set of tools that make custom games more useful for recreating, testing, and r
         General
         {
             Hero Limit: 1 Per Team
-            Game Mode Start: Immediately
+            Game Mode Start: Manual
             Tank Role Passive Health Bonus: Disabled
             Limit Roles: 1 Tank 2 Offense 2 Support
         }
@@ -36,6 +36,7 @@ A set of tools that make custom games more useful for recreating, testing, and r
 import "UndoTankHealthReduction.ostw";
 import "interface/menu.ostw";
 import "lib/logs/logs.del";
+import "lib/metrics/diagnostics.del";
 
 String GeneralSettingsCategory: "01. General";
 String HeroSettingsCategory: "02. Hero Settings";
@@ -43,28 +44,26 @@ String MenuSettingsCategory: "03. Menu Settings";
 String ModSettingsCategory: "04. Mod Settings";
 String InformationCategory: "05. Information";
 String BotAndReplaySettingsCategory: "06. Bot and Replay";
-String DebugSettingsCategory: "19. Debug";
+String DebugSettingsCategory: "99. Debug";
 
 globalvar Number i;
 
 // DEBUG: Diagnostics
-// import "./OSTWUtils/Diagnostics.del";
-// rule: "[DEBUG | main.ostw] Show diagnostics"
-// {
-//   new Diagnostics(
-//     ShowEntityCount: true,
-//     ShowTextCount: true,
-//     ShowServerLoad: true,
-//     ShowServerLoadAverage: true,
-//     ShowServerLoadPeak: true);
-//   // printMenuValues();
-// }
+Number DummyBotCount(): CountOf(FilteredArray(AllPlayers(), IsDummyBot(ArrayElement())));
+Number HumanAndAICount(): CountOf(FilteredArray(AllPlayers(), !IsDummyBot(ArrayElement())));
 
 globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugSettingsCategory, "Enable Inspector Recording", false);
 rule: "[main.ostw] Disable Inspector Recording" -100
 if (INSPECTOR_DISABLED)
 {
   DisableInspectorRecording();
+}
+
+rule: "[main.ostw] If start match immediately, do so"
+if (WorkshopSettingToggle(GeneralSettingsCategory, "Start Match Immediately", true))
+{
+  Wait(2);
+  StartGameMode();
 }
 
 rule: "[main.ostw] Skip assembling heroes"
@@ -84,8 +83,9 @@ if (IsAssemblingHeroes())
 
 rule: "[main.ostw] pause match time on start of round"
 if (WorkshopSettingToggle(GeneralSettingsCategory, "Automatically Pause Match Time At Round Start", true))
-if (!IsAssemblingHeroes())
+if (IsInSetup() || IsGameInProgress())
 {
+  AbortIf(isTimePaused);
   PauseMatchTime();
   isTimePaused = true;
 }

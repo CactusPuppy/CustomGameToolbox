@@ -219,7 +219,7 @@ void ChangeBotHero() {
   ResetHeroAvailability(EventPlayer());
   WaitUntil(HasSpawned(), 1000000);
   DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
-  MinWait();
+  Wait(0.064);
   selectedBot = CreateDummyBot(HeroOf(), tempTeamStorage, -1, tempCurrentPosition.location, tempCurrentPosition.facing);
   ForcePlayerHero(EventPlayer(), tempHeroStorage);
   MinWait();
