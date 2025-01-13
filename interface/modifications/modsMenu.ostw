@@ -9,7 +9,8 @@ enum Modification {
   FASTER_RESPAWN,
   DISABLE_GAMEMODE_COMPLETION,
   SLOW_MOTION,
-  DISABLE_SUPPORT_PASSIVE
+  DISABLE_SUPPORT_PASSIVE,
+  UNKILLABLE
 }
 
 globalvar Boolean[] activeModifications;
@@ -18,7 +19,7 @@ Modification[] ModActionGrid: ButtonActionGrid[MenuState.MODIFICATIONS];
 
 Modification[] modificationMenuButtonActions: [
   Modification.NONE,  Modification.NONE,                       Modification.NONE,                      Modification.NONE,                        Modification.NONE,
-  Modification.NONE,  Modification.FASTER_ABILITIES,           Modification.NONE,                      Modification.INCREASE_DAMAGE_DEALT,       Modification.NONE,
+  Modification.NONE,  Modification.FASTER_ABILITIES,           Modification.UNKILLABLE,                      Modification.INCREASE_DAMAGE_DEALT,       Modification.NONE,
   Modification.NONE,  Modification.REDUCE_DAMAGE_TAKEN,        Modification.SLOW_MOTION,               Modification.FASTER_RESPAWN,              Modification.NONE,
   Modification.NONE,  Modification.AUTO_REGEN_HEALTH,          Modification.DISABLE_SUPPORT_PASSIVE,   Modification.DISABLE_GAMEMODE_COMPLETION, Modification.NONE,
   Modification.NONE,  Modification.NONE,                       Modification.NONE,                      Modification.NONE,                        Modification.NONE
@@ -26,7 +27,7 @@ Modification[] modificationMenuButtonActions: [
 
 String[] modificationMenuButtonLabels: [
   "", "", "", "", "",
-  "", "Faster Abilities [OFF]", "", "Increased Damage Dealt [OFF]", "",
+  "", "Faster Abilities [OFF]", "Unkillable [OFF]", "Increased Damage Dealt [OFF]", "",
   "", "Reduced Damage Taken [OFF]", "Slow Motion [OFF]", "Faster Respawn [OFF]", "",
   "", "Auto-Regen Health [OFF]", "Self-Heal Passive [ON]", "Disable Mode Completion [OFF]", "",
   "", "", "", "", ""
@@ -34,8 +35,8 @@ String[] modificationMenuButtonLabels: [
 
 Color[] modificationMenuButtonColors: [
   null, null, null, null, null,
-  null, Color.Gray, null,       Color.Gray, null,
-  null, Color.Gray, Color.Gray, Color.Gray, null,
+  null, Color.Gray, Color.Gray,   Color.Gray, null,
+  null, Color.Gray, Color.Gray,   Color.Gray, null,
   null, Color.Gray, Color.Yellow, Color.Gray, null,
   null, null, null, null, null
 ];
@@ -58,6 +59,18 @@ if (IsModificationActive(Modification.FASTER_ABILITIES))
 }
 
 import "fasterAbilities.ostw";
+
+/** Unkillable */
+rule: "[interface/modifications/modsMenu.ostw] Handle unkillable modification"
+Event.OngoingPlayer
+if (IsModificationActive(Modification.UNKILLABLE))
+{
+  SetStatus(EventPlayer(), null, Status.Unkillable, 1000000);
+  UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 1, "Unkillable [ON]", Color.Green);
+  WaitUntil(!IsModificationActive(Modification.UNKILLABLE), 1000000);
+  ClearStatus(EventPlayer(), Status.Unkillable);
+  UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 1, "Unkillable [OFF]", Color.Gray);
+}
 
 /** Reduced Damage Taken */
 rule: "[interface/modifications/modsMenu.ostw] Handle reduced damage taken"
