@@ -12,7 +12,8 @@ enum BotEditAction {
   PIN_BOT_TO_POSITION,
   RECORD_REPLAY,
   EDIT_REPLAY,
-  DELETE_REPLAY
+  DELETE_REPLAY,
+  TOGGLE_PUNCHING_BAG
 }
 
 playervar BotEditAction selectedBotEditAction;
@@ -21,16 +22,16 @@ playervar ResetPoint pinnedPosition;
 BotEditAction[] BotEditActionGrid: ButtonActionGrid[MenuState.EDITING_DUMMY_BOT];
 
 BotEditAction[] botEditPageButtonActions: [
-  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.EDIT_BUTTON_CONTROL, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.SET_RESPAWN_POINT, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.DELETE_REPLAY, BotEditAction.EDIT_REPLAY, BotEditAction.RECORD_REPLAY, BotEditAction.CHANGE_HERO, BotEditAction.CHANGE_TEAM,
-  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.PIN_BOT_TO_POSITION, BotEditAction.NONE, BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.DELETE, BotEditAction.NONE, BotEditAction.NONE
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.EDIT_BUTTON_CONTROL, BotEditAction.NONE,                BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.SET_RESPAWN_POINT,   BotEditAction.TOGGLE_PUNCHING_BAG, BotEditAction.NONE,
+  BotEditAction.DELETE_REPLAY, BotEditAction.EDIT_REPLAY, BotEditAction.RECORD_REPLAY,       BotEditAction.CHANGE_HERO,         BotEditAction.CHANGE_TEAM,
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.PIN_BOT_TO_POSITION, BotEditAction.NONE,                BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.DELETE,              BotEditAction.NONE,                BotEditAction.NONE
 ];
 
 String[] botEditPageButtonLabels: [
   "", "", "Buttons", "", "",
-  "", "", "Set Respawn Point", "", "",
+  "", "", "Set Respawn Point", "Make Punching Bag", "",
   "Delete Replay", "Edit Replay", "Record Replay", "Change Hero", "Switch Team",
   "", "", "Pin Bot To Position", "", "",
   "", "", "Delete", "", ""
@@ -38,7 +39,7 @@ String[] botEditPageButtonLabels: [
 
 Color[] botEditPageButtonColors: [
   null, null, Color.Aqua, null, null,
-  null, null, Color.Yellow, null, null,
+  null, null, Color.Yellow, Color.Purple, null,
   Color.Gray, Color.Gray, CustomColor(186, 70, 213, 255), Color.Green, Color.Blue,
   null, null, Color.Orange, null, null,
   null, null, Color.Red, null, null
@@ -74,6 +75,11 @@ if (selectedBot != null)
     UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 1, 2, "Edit Replay", Color.Gray);
     UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 0, 2, "Delete Replay", Color.Gray);
   }
+  if (selectedBot.isPunchingBag) {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 3, 1, "Make Normal Bot", CustomColor(244, 205, 116, 255));
+  } else {
+    UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 3, 1, "Make Punching Bag", Color.Purple);
+  }
   WaitUntil(selectedBot != EvaluateOnce(selectedBot) || selectedBot.totalFrames != EvaluateOnce(selectedBot.totalFrames), 1000000);
   LoopIfConditionIsTrue();
 }
@@ -99,7 +105,7 @@ void StoreTempDataFromBot() playervar "[SUB | interface/dummyBotsAndReplay/botEd
 
 void LoadTempDataToSelectedBot() playervar "[SUB | interface/dummyBotsAndReplay/botEditPage.del] Load data from player onto bot" {
   if (wasPunchingBag) {
-    MarkLastCreatedBotAsPunchingBag();
+    MarkBotAsPunchingBag();
   }
   if (tempPinnedPosition.location != null) {
     selectedBot.pinnedPosition = tempPinnedPosition;
@@ -201,6 +207,16 @@ if (selectedBotEditAction != BotEditAction.NONE)
       selectedBot = null;
       CloseMenu(EventPlayer());
       break;
+    case BotEditAction.TOGGLE_PUNCHING_BAG:
+      # [CASE] Toggle whether bot is a punching bag
+      if (selectedBot.isPunchingBag) {
+        selectedBot.isPunchingBag = false;
+        RemoveHealthPoolFromPlayer(selectedBot.punchingBagHPPool);
+        UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 3, 1, "Make Punching Bag", Color.Purple);
+      } else {
+        MarkBotAsPunchingBag(selectedBot);
+        UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 3, 1, "Make Normal Bot", CustomColor(244, 205, 116, 255));
+      }
   }
 }
 
