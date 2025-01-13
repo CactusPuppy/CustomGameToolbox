@@ -42,9 +42,10 @@ Color[] botsReplayMenuButtonColors: [
   null, null, Color.Red, null, null
 ];
 
-void MarkLastCreatedBotAsPunchingBag() {
-  LastCreatedEntity().isPunchingBag = true;
-  AddHealthPoolToPlayer(LastCreatedEntity(), HealthType.Health, 1250, true, false);
+playervar Any punchingBagHPPool!;
+void MarkBotAsPunchingBag(Player bot = LastCreatedEntity()) {
+  bot.isPunchingBag = true;
+  bot.punchingBagHPPool = AddHealthPoolToPlayer(bot, HealthType.Health, 1250, true, false);
   // if (SHOULD_PUNCHIING_BAG_NAME_CHANGE) StartForcingDummyBotName(LastCreatedEntity(), "Punching Bag");
 }
 
@@ -85,7 +86,7 @@ if (selectedBotsReplayAction != BotsReplayAction.NONE)
       # [CASE] Create dummy bot/punching bag
       Menu_CreateBot();
       if (selectedBotsReplayAction == BotsReplayAction.CREATE_PUNCHING_BAG) {
-        MarkLastCreatedBotAsPunchingBag();
+        MarkBotAsPunchingBag();
       }
       break;
     case BotsReplayAction.EDIT_BOTS:
