@@ -49,6 +49,7 @@ single struct SnapshotState {
 globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Loop Replay Playback", true);
 globalvar Boolean RECORD_IN_SLOW_MOTION = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Automatically Enable Slow Motion During Recording", true);
 
+playervar Any replayTimecodeID!;
 playervar ResetPoint replayResetPoint;
 playervar Number frame;
 playervar Number totalFrames;
@@ -72,6 +73,9 @@ Boolean IsBotReplaying(Player p = EventPlayer()): [
 Player[] AllBotsReplaying(): AllPlayers().Filter(p => IsBotReplaying(p));
 Number MAX_ARRAY_SIZE: 1000;
 Number TICK_LENGTH: 0.016;
+Number framesToSeconds(Number frames): frames * TICK_LENGTH;
+Number secondsToMinutes(Number seconds): seconds / 60;
+String timerFmt(Number seconds): $"{Math.Floor(secondsToMinutes(seconds)) < 10 ? 0 : ''}{Math.Floor(secondsToMinutes(seconds))}:{Math.Floor(seconds % 60) < 10 ? 0 : ''}{seconds % 60}{seconds % 1 == 0 ? '.00' : ''}";
 Boolean hasRecordedClip(Player p = EventPlayer()): p.totalFrames > 0;
 Number FirstIdx(Number i): RoundToInteger(i / MAX_ARRAY_SIZE, Rounding.Down);
 Number SecondIdx(Number i): i % MAX_ARRAY_SIZE;
@@ -94,7 +98,6 @@ void DeleteRecording() playervar "[SUB | interface/dummyBotsAndReplay/replay/rep
   recording = [[]];
   replayResetPoint.location = null;
   recordingHero = null;
-  DumpLogBuffer($"DEL {TeamOf()} {SlotOf()}");
 }
 
 void TransferRecording(in Player from, in Player to) {

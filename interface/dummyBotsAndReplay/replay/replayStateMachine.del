@@ -246,6 +246,7 @@ void OnReplayStart() {
   frame = 0;
   nextFrameIndex = 0;
   currentFrame = BigArrayAccess(recording, nextFrameIndex);
+  if (SHOW_REPLAY_TIMECODES) replayTimecodeID = CreateInWorldText(AllPlayers(), UpdateEveryFrame(timerFmt(framesToSeconds(frame)) + $" | {frame}"));
 }
 
 void OnReplayEnd() {
@@ -255,6 +256,7 @@ void OnReplayEnd() {
   for (i = 0; AllButtons.Length; 1) {
     StopHoldingButton(EventPlayer(), AllButtons[i]);
   }
+  DestroyInWorldText(replayTimecodeID);
 }
 
 /*

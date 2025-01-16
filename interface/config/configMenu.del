@@ -5,6 +5,7 @@ enum ConfigItem {
   INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY,
   RECORD_IN_SLOW_MOTION,
   LOOP_REPLAY,
+  SHOW_REPLAY_TIMECODE,
   // PUNCHING_BAG_HEALTH_PERCENTAGE,
   // SHOULD_PUNCHIING_BAG_NAME_CHANGE,
   END_SENTINEL
@@ -16,7 +17,8 @@ String currentConfigItem: [
   "Slow Motion Speed",
   "Interact Destroys Deployables In Replay",
   "Auto Enable Slow-Mo During Recording",
-  "Loop Replay Playback"
+  "Loop Replay Playback",
+  "Show Replay Timecode"
 ][currentConfigSelection];
 
 // globalvar Boolean SHOULD_PUNCHIING_BAG_NAME_CHANGE = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Should Punching Bag Name Change", true);
@@ -92,6 +94,9 @@ void ConfigMenu_ThrottleLeftRight() {
       case ConfigItem.LOOP_REPLAY:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOULD_LOOP_CLIP}");
         break;
+      case ConfigItem.SHOW_REPLAY_TIMECODE:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOW_REPLAY_TIMECODES}");
+        break;
       // case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
       //   UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion * 100}");
       //   break;
@@ -165,6 +170,10 @@ void ConfigMenu_Left() {
       SHOULD_LOOP_CLIP = !SHOULD_LOOP_CLIP;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOULD_LOOP_CLIP}");
       break;
+    case ConfigItem.SHOW_REPLAY_TIMECODE:
+      SHOW_REPLAY_TIMECODES = !SHOW_REPLAY_TIMECODES;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOW_REPLAY_TIMECODES}");
+      break;
   }
 }
 
@@ -225,6 +234,10 @@ void ConfigMenu_Right() {
     case ConfigItem.LOOP_REPLAY:
       SHOULD_LOOP_CLIP = !SHOULD_LOOP_CLIP;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOULD_LOOP_CLIP}");
+      break;
+    case ConfigItem.SHOW_REPLAY_TIMECODE:
+      SHOW_REPLAY_TIMECODES = !SHOW_REPLAY_TIMECODES;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SHOW_REPLAY_TIMECODES}");
       break;
   }
 }
