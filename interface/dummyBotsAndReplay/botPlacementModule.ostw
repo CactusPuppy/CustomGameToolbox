@@ -12,7 +12,7 @@ void Menu_CreateBot() {
   );
 }
 
-globalvar Number punchingBagTargetHealthProportion = WorkshopSettingReal(BotAndReplaySettingsCategory, "Punching Bag Target Health Proportion", 0.8, 0, 1, 0.01);
+globalvar Number punchingBagTargetHealthProportion = WorkshopSettingReal(BotAndReplayCategory, "Punching Bag Target Health Proportion", 0.8, 0, 1, 0.01);
 rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Maintain punching bag health"
 Event.OngoingPlayer
 if (isPunchingBag)

@@ -1,5 +1,5 @@
 import "replayDefs.del";
-globalvar Boolean allBotsReplayDuringRecording = WorkshopSettingToggle(BotAndReplaySettingsCategory, "All Bots Replay During Recording", true);
+globalvar Boolean allBotsReplayDuringRecording = WorkshopSettingToggle(BotAndReplayCategory, "All Bots Replay During Recording", true);
 
 playervar Hero recordingHero;
 playervar Hero originalHero;

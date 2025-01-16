@@ -15,7 +15,7 @@ void CreateDiagnostic(in String Text, in Color Color, in Number SortOrder) {
 }
 
 rule: "[DEBUG | main.ostw] Show diagnostics"
-if (WorkshopSettingToggle(DebugSettingsCategory, "Show Diagnostics", true))
+if (WorkshopSettingToggle(DebugCategory, "Show Diagnostics", true))
 {
   CreateDiagnostic(
     Text:           "[ {0} ]  Server Load".Format([ServerLoad()]),

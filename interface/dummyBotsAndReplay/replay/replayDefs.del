@@ -46,8 +46,9 @@ single struct SnapshotState {
   public Boolean interact;
 }
 
-globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Loop Replay Playback", true);
-globalvar Boolean RECORD_IN_SLOW_MOTION = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Automatically Enable Slow Motion During Recording", true);
+globalvar Boolean SHOULD_LOOP_CLIP = WorkshopSettingToggle(BotAndReplayCategory, "Loop Replay Playback", true);
+globalvar Boolean RECORD_IN_SLOW_MOTION = WorkshopSettingToggle(BotAndReplayCategory, "Automatically Enable Slow Motion During Recording", true);
+globalvar Boolean SHOW_REPLAY_TIMECODES = WorkshopSettingToggle(BotAndReplayCategory, "Show Replay Timecodes", false);
 
 playervar Any replayTimecodeID!;
 playervar ResetPoint replayResetPoint;
@@ -232,7 +233,7 @@ if (replayState == ReplayState.PLAYING)
   replayStateAction = ReplayStateAction.REACHED_END_OF_REPLAY;
 }
 
-globalvar Boolean interactDestroysDeployableCompensation = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Interact Destroys Deployables In Replay", false);
+globalvar Boolean interactDestroysDeployableCompensation = WorkshopSettingToggle(BotAndReplayCategory, "Interact Destroys Deployables In Replay", false);
 
 void ProcessAllChangesInCurrentFrame() {
   for (i = 0; currentFrame.changes.Length; 1) {

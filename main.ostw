@@ -43,8 +43,8 @@ String HeroSettingsCategory: "02. Hero Settings";
 String MenuSettingsCategory: "03. Menu Settings";
 String ModSettingsCategory: "04. Mod Settings";
 String InformationCategory: "05. Information";
-String BotAndReplaySettingsCategory: "06. Bot and Replay";
-String DebugSettingsCategory: "99. Debug";
+String BotAndReplayCategory: "06. Bot and Replay";
+String DebugCategory: "99. Debug";
 
 globalvar Number i;
 
@@ -52,7 +52,7 @@ globalvar Number i;
 Number DummyBotCount(): CountOf(FilteredArray(AllPlayers(), IsDummyBot(ArrayElement())));
 Number HumanAndAICount(): CountOf(FilteredArray(AllPlayers(), !IsDummyBot(ArrayElement())));
 
-globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugSettingsCategory, "Enable Inspector Recording", false);
+globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugCategory, "Enable Inspector Recording", false);
 rule: "[main.ostw] Disable Inspector Recording" -100
 if (INSPECTOR_DISABLED)
 {

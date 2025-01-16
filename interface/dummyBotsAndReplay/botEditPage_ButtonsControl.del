@@ -3,7 +3,7 @@ Number BUTTON_CONTROL_START_Y: 1;
 Number BUTTON_CONTROL_SPACING_Y: -0.17;
 Number BUTTON_CONTROL_X: 0.75;
 
-globalvar Number BUTTON_SPAM_PERIOD = WorkshopSettingReal(BotAndReplaySettingsCategory, "Bot Button Spam Wait Time", 1, 0.1, 30, -1);
+globalvar Number BUTTON_SPAM_PERIOD = WorkshopSettingReal(BotAndReplayCategory, "Bot Button Spam Wait Time", 1, 0.1, 30, -1);
 
 playervar ButtonControlState[] buttonControlStates = ValidBotButtons.Map((_) => ButtonControlState.NONE);
 
