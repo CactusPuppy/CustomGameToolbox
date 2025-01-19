@@ -19,7 +19,7 @@ rule: "[interface/menu.ostw] Set up action grid" -100
 {
   ButtonActionGrid = [];
   ButtonActionGrid[MenuState.MAIN_MENU] = mainMenuButtonActions;
-  ButtonActionGrid[MenuState.CONFIRMING_END_GAME] = [true, true];
+  ButtonActionGrid[MenuState.CONFIRMATION_SCREEN] = [true, true];
   ButtonActionGrid[MenuState.TOOLS] = toolsMenuButtonActions;
   ButtonActionGrid[MenuState.INFORMATION] = informationMenuButtonActions;
   ButtonActionGrid[MenuState.MODIFICATIONS] = modificationMenuButtonActions;
@@ -233,8 +233,8 @@ if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
     case MenuState.MAIN_MENU:
       HandleMainMenuClick();
       break;
-    case MenuState.CONFIRMING_END_GAME:
-      HandleConfirmEndGameClick();
+    case MenuState.CONFIRMATION_SCREEN:
+      HandleConfirmationScreenClick();
       break;
     case MenuState.TOOLS:
       HandleToolsMenuClick();
@@ -274,8 +274,8 @@ if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
     OpenMenuToPage(EventPlayer(), MenuState.MAIN_MENU);
     return;
   }
-  if (currentMenuState == MenuState.CONFIRMING_END_GAME) {
-    OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
+  if (currentMenuState == MenuState.CONFIRMATION_SCREEN) {
+    confirmationState = ConfirmationState.CANCELLED;
     return;
   }
   if ([MenuState.EDITING_DUMMY_BOT_BUTTONS, MenuState.EDITING_REPLAY].Contains(currentMenuState)) {
@@ -329,7 +329,7 @@ if (AbsoluteValue(ZOf(ThrottleOf())) > 0.5) {
   }
 }
 
-MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMING_END_GAME, MenuState.EDITING_DUMMY_BOT_BUTTONS, MenuState.CONFIG];
+MenuState[] NO_AUTO_SET_INDICES_MENUS: [MenuState.CONFIRMATION_SCREEN, MenuState.EDITING_DUMMY_BOT_BUTTONS, MenuState.CONFIG];
 rule: "[interface/menu.ostw] When menu state changes, find new first selection" -1
 Event.OngoingPlayer
 if (currentMenuState != MenuState.CLOSED)

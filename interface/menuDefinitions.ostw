@@ -6,7 +6,7 @@ enum MenuState
 {
   CLOSED = 0,
   MAIN_MENU,
-  CONFIRMING_END_GAME,
+  CONFIRMATION_SCREEN,
   INFORMATION,
   MODIFICATIONS,
   TOOLS,
@@ -73,7 +73,7 @@ void CloseMenu(in Player player = EventPlayer()) {
 Color selectedColor: CustomColor(255,255,255,155 + 100 * SineFromDegrees((TotalTimeElapsed() * 720) % 360));
 Boolean isSelectingGridIndex(Player p = EventPlayer(), Number x = 0, Number y = 0): p.menuXIndex == x && p.menuYIndex == y;
 
-MenuState[] MenuStatesToHideDefaultButtonsIn: [MenuState.CLOSED, MenuState.CONFIRMING_END_GAME, MenuState.EDITING_DUMMY_BOT_BUTTONS];
+MenuState[] MenuStatesToHideDefaultButtonsIn: [MenuState.CLOSED, MenuState.CONFIRMATION_SCREEN, MenuState.EDITING_DUMMY_BOT_BUTTONS];
 Any menuButton(in Number colIndex, in Number rowIndex):
   OnScreenText.CreateOnScreenText(
     VisibleTo: MenuStatesToHideDefaultButtonsIn.Contains(LocalPlayer().currentMenuState) ? null : LocalPlayer(),

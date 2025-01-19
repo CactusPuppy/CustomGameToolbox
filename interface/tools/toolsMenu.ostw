@@ -1,6 +1,6 @@
 import "../menu.ostw";
 
-import "endGame.ostw";
+import "confirmationScreen.ostw";
 import "ruler.ostw";
 import "thirdPerson.ostw";
 import "../../lib/player/resetPoint.del";
@@ -243,9 +243,18 @@ if (IsGameInProgress())
 
 void EndGame()
 {
-  MinWait();
-  currentMenuState = MenuState.CONFIRMING_END_GAME;
-  menuXIndex = 1; menuYIndex = 0;
+  WaitForConfirmation("end the game");
+  if (confirmationState == ConfirmationState.CONFIRMED) {
+    DeclareMatchDraw();
+    WaitUntil(IsMatchComplete(), 3);
+    if (IsMatchComplete()) {
+      CloseMenu(EventPlayer());
+      return;
+    }
+    SmallMessage(EventPlayer(), "Can't seem to end the game right now. Try again in a bit!");
+  } else {
+    OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
+  }
 }
 
 void ToggleRuler()

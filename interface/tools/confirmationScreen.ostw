@@ -8,17 +8,17 @@ Number endGameBtnsHeight: 0.2;
 void CreateEndGameConfirmationScreen() {
   # Create confirm and abort buttons
   OnScreenText.CreateOnScreenText(
-    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
-    Header: "Are you sure you want to end the game?",
+    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMATION_SCREEN ? LocalPlayer() : null,
+    Header: $"Are you sure you want to {LocalPlayer().actionToConfirm}?",
     PositionX: 0,
     PositionY: 1,
     Scale: 3,
-    Reevaluation: InworldTextRev.VisibleToAndPosition,
+    Reevaluation: InworldTextRev.VisibleToPositionAndString,
     Color: Color.Rose,
     Spectators: Spectators.VisibleNever
   );
   OnScreenText.CreateOnScreenText(
-    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
+    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMATION_SCREEN ? LocalPlayer() : null,
     Header: "[YES]",
     PositionX: -endGameBtnsSpread,
     PositionY: endGameBtnsY,
@@ -28,7 +28,7 @@ void CreateEndGameConfirmationScreen() {
     Spectators: Spectators.VisibleNever
   );
   OnScreenText.CreateOnScreenText(
-    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMING_END_GAME ? LocalPlayer() : null,
+    VisibleTo: LocalPlayer().currentMenuState == MenuState.CONFIRMATION_SCREEN ? LocalPlayer() : null,
     Header: "[NO]",
     PositionX: endGameBtnsSpread,
     PositionY: endGameBtnsY,
@@ -48,23 +48,34 @@ Boolean cursorOnCancelBtn(Player p = EventPlayer()):
 
 rule: "Initiate confirmation dialog"
 Event.OngoingPlayer
-if (currentMenuState == MenuState.CONFIRMING_END_GAME)
+if (currentMenuState == MenuState.CONFIRMATION_SCREEN)
 if (IsButtonHeld(Button: Button.PrimaryFire))
 {
   menuXIndex = 1; menuYIndex = 0;
 }
 
-void HandleConfirmEndGameClick() "Handle confirm/cancel for ending game"
+void HandleConfirmationScreenClick() "Handle confirm/cancel"
 {
   if (cursorOnCancelBtn()) {
-    OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
+    confirmationState = ConfirmationState.CANCELLED;
   } else if (cursorOnConfirmBtn()) {
-    DeclareMatchDraw();
-    WaitUntil(IsMatchComplete(), 3);
-    if (IsMatchComplete()) {
-      CloseMenu(EventPlayer());
-      return;
-    }
-    SmallMessage(EventPlayer(), "Can't seem to end the game right now. Try again in a bit!");
+    confirmationState = ConfirmationState.CONFIRMED;
   }
 }
+
+enum ConfirmationState {
+  UNDECIDED,
+  CONFIRMED,
+  CANCELLED
+}
+
+playervar String actionToConfirm;
+playervar ConfirmationState confirmationState;
+
+void WaitForConfirmation(in String action, in Player p = EventPlayer()) {
+  p.actionToConfirm = action;
+  p.confirmationState = ConfirmationState.UNDECIDED;
+  OpenMenuToPage(p, MenuState.CONFIRMATION_SCREEN);
+  WaitUntil(p.confirmationState != ConfirmationState.UNDECIDED, 1000000);
+}
+
