@@ -202,10 +202,14 @@ if (selectedBotEditAction != BotEditAction.NONE)
 
     case BotEditAction.DELETE:
       # [CASE] Delete bot
-      # TODO: Ask for confirmation before deleting bot
-      DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
-      selectedBot = null;
-      CloseMenu(EventPlayer());
+      WaitForConfirmation("delete " + selectedBot);
+      if (confirmationState == ConfirmationState.CONFIRMED) {
+        DestroyDummyBot(TeamOf(selectedBot), SlotOf(selectedBot));
+        selectedBot = null;
+        CloseMenu(EventPlayer());
+      } else {
+        OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
+      }
       break;
     case BotEditAction.TOGGLE_PUNCHING_BAG:
       # [CASE] Toggle whether bot is a punching bag
@@ -368,9 +372,14 @@ void DeleteSelectedBotReplay()
     return;
   }
   if (hasRecordedClip(selectedBot)) {
-    selectedBot.recordingPlayStopFlag = RecordingAction.DELETE;
-    Wait(0.5);
-    SmallMessage(EventPlayer(), "  Replay deleted");
+    WaitForConfirmation("delete this replay");
+    if (confirmationState == ConfirmationState.CONFIRMED) {
+      selectedBot.recordingPlayStopFlag = RecordingAction.DELETE;
+      Wait(0.5);
+      SmallMessage(EventPlayer(), "  Replay deleted");
+    } else {
+      OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
+    }
   } else {
     SmallMessage(EventPlayer(), "  No replay to delete");
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
