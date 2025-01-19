@@ -1,6 +1,6 @@
 import "../menu.ostw";
 
-import "endGame.ostw";
+import "confirmationScreen.ostw";
 import "ruler.ostw";
 import "thirdPerson.ostw";
 import "../../lib/player/resetPoint.del";
@@ -222,7 +222,7 @@ void FastForward()
     UnpauseMatchTime();
     isTimePaused = false;
     Wait(0.032);
-    PauseMatchTime();
+    if (!isTimePaused) PauseMatchTime();
     isTimePaused = true;
   }
 }
@@ -243,9 +243,18 @@ if (IsGameInProgress())
 
 void EndGame()
 {
-  MinWait();
-  currentMenuState = MenuState.CONFIRMING_END_GAME;
-  menuXIndex = 1; menuYIndex = 0;
+  WaitForConfirmation("end the game");
+  if (confirmationState == ConfirmationState.CONFIRMED) {
+    DeclareMatchDraw();
+    WaitUntil(IsMatchComplete(), 3);
+    if (IsMatchComplete()) {
+      CloseMenu(EventPlayer());
+      return;
+    }
+    SmallMessage(EventPlayer(), "Can't seem to end the game right now. Try again in a bit!");
+  } else {
+    OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
+  }
 }
 
 void ToggleRuler()
@@ -298,16 +307,18 @@ void ResetState()
 
 import "./invisibility.del";
 
+playervar Boolean isInvisible!;
 void ToggleInvisibility()
 {
-  AddOneInvisibilityLock();
-  AddOnePhasedOutLock();
-  UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Disable Invisibility", Color.Red);
-  CloseMenu(EventPlayer());
-  WaitUntil(toolsActionID != ToolsAction.TOGGLE_INVISIBLE, 1000000);
-  WaitUntil(toolsActionID == ToolsAction.TOGGLE_INVISIBLE, 1000000);
-  RemoveOneInvisibilityLock();
-  RemoveOnePhasedOutLock();
-  UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Enable Invisibility", Color.Violet);
+  if (isInvisible) {
+    RemoveOneInvisibilityLock();
+    RemoveOnePhasedOutLock();
+    UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Enable Invisibility", Color.Violet);
+  } else {
+    AddOneInvisibilityLock();
+    AddOnePhasedOutLock();
+    UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Disable Invisibility", Color.Red);
+  }
+  isInvisible = !isInvisible;
   CloseMenu(EventPlayer());
 }

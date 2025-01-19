@@ -76,7 +76,7 @@ if (IsAssemblingHeroes())
     UnpauseMatchTime();
     isTimePaused = false;
     WaitUntil(!IsAssemblingHeroes(), 9999);
-    PauseMatchTime();
+    if (!isTimePaused) PauseMatchTime();
     isTimePaused = true;
   }
 }
@@ -86,7 +86,7 @@ if (WorkshopSettingToggle(GeneralSettingsCategory, "Automatically Pause Match Ti
 if (IsInSetup() || IsGameInProgress())
 {
   AbortIf(isTimePaused);
-  PauseMatchTime();
+  if (!isTimePaused) PauseMatchTime();
   isTimePaused = true;
 }
 
@@ -114,7 +114,7 @@ if (IsInSetup())
     UnpauseMatchTime();
     isTimePaused = false;
     WaitUntil(!IsInSetup(), 9999);
-    PauseMatchTime();
+    if (!isTimePaused) PauseMatchTime();
     isTimePaused = true;
   }
 }

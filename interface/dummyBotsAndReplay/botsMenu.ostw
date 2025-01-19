@@ -99,8 +99,12 @@ if (selectedBotsReplayAction != BotsReplayAction.NONE)
       break;
     case BotsReplayAction.REMOVE_ALL_BOTS:
       # [CASE] Destroy all bots
-      DestroyAllDummyBots();
-      BigMessage(AllPlayers(), "All Dummy Bots Destroyed");
+      WaitForConfirmation("delete ALL bots");
+      if (confirmationState == ConfirmationState.CONFIRMED) {
+        DestroyAllDummyBots();
+        BigMessage(AllPlayers(), "All Dummy Bots Destroyed");
+      }
+      OpenMenuToPage(EventPlayer(), MenuState.DUMMY_BOTS_AND_REPLAY);
       break;
     case BotsReplayAction.TRIGGER_ALL_REPLAYS:
       # [CASE] Initiate playback of all bots with clips
@@ -195,5 +199,11 @@ void DeleteAllReplays()
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
     return;
   }
-  AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.DELETE;
+  WaitForConfirmation("delete ALL replays");
+  if (confirmationState == ConfirmationState.CONFIRMED) {
+    AllPlayers().Filter((p) => IsControllable(p)).recordingPlayStopFlag = RecordingAction.DELETE;
+    BigMessage(EventPlayer(), "  All Replays Deleted");
+    PlayEffect(EventPlayer(), PlayEffect.BuffImpactSound, null, EventPlayer(), 100);
+  }
+  OpenMenuToPage(EventPlayer(), MenuState.DUMMY_BOTS_AND_REPLAY);
 }
