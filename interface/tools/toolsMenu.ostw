@@ -307,16 +307,18 @@ void ResetState()
 
 import "./invisibility.del";
 
+playervar Boolean isInvisible!;
 void ToggleInvisibility()
 {
-  AddOneInvisibilityLock();
-  AddOnePhasedOutLock();
-  UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Disable Invisibility", Color.Red);
-  CloseMenu(EventPlayer());
-  WaitUntil(toolsActionID != ToolsAction.TOGGLE_INVISIBLE, 1000000);
-  WaitUntil(toolsActionID == ToolsAction.TOGGLE_INVISIBLE, 1000000);
-  RemoveOneInvisibilityLock();
-  RemoveOnePhasedOutLock();
-  UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Enable Invisibility", Color.Violet);
+  if (isInvisible) {
+    RemoveOneInvisibilityLock();
+    RemoveOnePhasedOutLock();
+    UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Enable Invisibility", Color.Violet);
+  } else {
+    AddOneInvisibilityLock();
+    AddOnePhasedOutLock();
+    UpdateButtonAppearance(MenuState.TOOLS, 2, 0, "Disable Invisibility", Color.Red);
+  }
+  isInvisible = !isInvisible;
   CloseMenu(EventPlayer());
 }
