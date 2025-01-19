@@ -222,7 +222,7 @@ void FastForward()
     UnpauseMatchTime();
     isTimePaused = false;
     Wait(0.032);
-    PauseMatchTime();
+    if (!isTimePaused) PauseMatchTime();
     isTimePaused = true;
   }
 }
