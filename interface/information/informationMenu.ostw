@@ -53,6 +53,11 @@ Color[] informationMenuButtonColors: [
 
 void HandleInformationMenuClick() {
   AbortIf(InfoActionGrid[currentGridIndex()] == InfoAction.NONE);
+  if (activeInfoDisplays.Contains((InfoActionGrid[currentGridIndex()]))) {
+    activeInfoDisplays.ModRemoveByValue(InfoActionGrid[currentGridIndex()]);
+    RemoveInfoDisplayHandler();
+    return;
+  }
   if (CountOf(activeInfoDisplays) >= maxActiveDisplays) {
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 200);
     SmallMessage(EventPlayer(), <"<0> Too many active readouts (max <1>).", IconString(Icon.Warning), maxActiveDisplays>);
@@ -60,15 +65,11 @@ void HandleInformationMenuClick() {
     SmallMessage(EventPlayer(), <"<0> Remove some readouts and try again", IconString(Icon.Warning)>);
     return;
   }
+  activeInfoDisplays.ModAppend(InfoActionGrid[currentGridIndex()]);
+  AddInfoDisplayHandler();
   // LogToInspector(<"Grid Index: <0> | InfoActionGrid[<0>]: <1>", currentGridIndex(), InfoActionGrid[currentGridIndex()]>);
-  if (activeInfoDisplays.Contains((InfoActionGrid[currentGridIndex()]))) {
-    activeInfoDisplays.ModRemoveByValue(InfoActionGrid[currentGridIndex()]);
-  } else {
-    activeInfoDisplays.ModAppend(InfoActionGrid[currentGridIndex()]);
-  }
 }
 
 import "simpleInfoReadouts.ostw";
-import "metricsReadouts.ostw";
 import "statusEffects.ostw";
 import "damageNumbers.ostw";

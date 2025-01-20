@@ -29,7 +29,7 @@ rule: "[interface/menu.ostw] Set up action grid" -100
   ButtonActionGrid[MenuState.EDITING_REPLAY] = BotEditReplayActions;
   ButtonActionGrid[MenuState.CONFIG] = INTENTIONALLY_EMPTY_ACTION_GRID;
 }
-rule: "[interface/menu.ostw] Set up button label and color grid" -100
+rule: "[interface/menu.ostw] Init player" -100
 Event.OngoingPlayer
 {
   ButtonLabelGrid = [];
@@ -51,6 +51,18 @@ Event.OngoingPlayer
   ButtonColorGrid[MenuState.EDITING_DUMMY_BOT] = botEditPageButtonColors;
   ButtonColorGrid[MenuState.EDITING_REPLAY] = BotEditReplayPageButtonColors;
   ButtonColorGrid[MenuState.CONFIG] = configMenuButtonColors;
+
+  if (hideMenuOpenTooltip) {
+    WaitUntil(HasSpawned(), 1000000);
+    WaitUntil(currentMenuState != MenuState.CLOSED, 1);
+    if (currentMenuState != MenuState.CLOSED) {
+      hideMenuOpenTooltip = true;
+      Abort();
+    }
+    SmallMessage(EventPlayer(), <"   Hold <0> to open menu", InputBindingString(Button.Interact)>);
+    WaitUntil(currentMenuState != MenuState.CLOSED, 1000000);
+    hideMenuOpenTooltip = true;
+  }
 }
 
 MenuState[] mainMenuButtonActions: [
@@ -144,22 +156,6 @@ rule: "[interface/menu.ostw] Global menu setup"
   //   Text: $"shape: {numCols}, {numRows} | x: {LocalPlayer().menuXIndex} | y: {LocalPlayer().menuYIndex} | val: {currentActionGrid(LocalPlayer())[gridIndex(LocalPlayer().menuXIndex, LocalPlayer().menuYIndex)]}",
   //   Reevaluation: HudTextRev.VisibleToAndString
   // );
-}
-
-rule: "[interface/menu.ostw] Initialize player (one-time activation)"
-Event.OngoingPlayer
-{
-  if (hideMenuOpenTooltip) {
-    WaitUntil(HasSpawned(), 1000000);
-    WaitUntil(currentMenuState != MenuState.CLOSED, 1);
-    if (currentMenuState != MenuState.CLOSED) {
-      hideMenuOpenTooltip = true;
-      Abort();
-    }
-    SmallMessage(EventPlayer(), <"   Hold <0> to open menu", InputBindingString(Button.Interact)>);
-    WaitUntil(currentMenuState != MenuState.CLOSED, 1000000);
-    hideMenuOpenTooltip = true;
-  }
 }
 
 rule: "[interface/menu.ostw] Initialize player and perform cleanup"

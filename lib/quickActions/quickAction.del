@@ -1,0 +1,70 @@
+import "globalTriggers.del";
+
+globalvar (() => void)[] QuickActions = [
+  () => {},
+  () => {
+    # Set the point for the player to return to
+    menuActivationPoint = NewResetFromPlayer(EventPlayer());
+    ChangeHero();
+  },
+  () => {
+    ToggleNoClip();
+    # Must manually stop camera since we didn't deactivate noclip by using the menu
+    if (!isNoClipActive) StopCamera();
+  },
+  PlayAllReplays,
+  () => { Damage(EventPlayer(), null, 50); },
+  () => {
+    if (respawnPoint.location == null) {
+      SmallMessage(EventPlayer(), IconString(Icon.Warning) + "No respawn point set");
+      PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
+      return;
+    }
+    Respawn();
+    TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().respawnPoint);
+  },
+  () => {
+    async! ResetAllBotsToResetPoints();
+  },
+  () => {
+    ToggleBotEditMode();
+    # Must manually stop camera since we didn't deactivate noclip by using the menu
+    if (!isNoClipActive) StopCamera();
+  }
+];
+
+String[] QuickActionLabels: [
+  "None",                         // 0
+  "Change Hero",                  // 1
+  "Toggle Noclip",                // 2
+  "Play/Pause All Replays",       // 3
+  "Damage Self",                  // 4
+  "Reset Self to Respawn Point",  // 5
+  "Reset All Bot Positions",      // 6
+  "Toggle Bot Edit Mode"          // 7
+];
+
+String[] PossibleQuickTriggerLabels: [
+  "Crouch + Reload",
+  "Crouch + Melee",
+  "Crouch + Interact"
+];
+
+Button[][] PossibleQuickTriggers: [
+  [Button.Crouch, Button.Reload],
+  [Button.Crouch, Button.Melee],
+  [Button.Crouch, Button.Interact]
+];
+
+globalvar Number[] ActionSettings = [
+  WorkshopSettingCombo(QuickActionsCategory, "Crouch + Reload",   5, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Crouch + Melee",    7, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Crouch + Interact", 1, QuickActionLabels, 0)
+];
+
+rule: "[lib/quickActions/quickAction.del] Set up quick actions" {
+  for (i = 0; PossibleQuickTriggers.Length; 1) {
+    if (ActionSettings[i] > 0)
+      add_trigger(PossibleQuickTriggers[i], QuickActions[ActionSettings[i]]);
+  }
+}

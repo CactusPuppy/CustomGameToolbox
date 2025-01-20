@@ -11,13 +11,7 @@ globalvar Button[] AllButtons = [
   Button.Interact
 ];
 
-playervar Number[] buttonLocks = [];
-
-rule: "[lib/player/buttonControl.del] Initialize buttonLocks array"
-Event.OngoingPlayer
-{
-  buttonLocks[CountOf(AllButtons)] = 0;
-}
+playervar Number[] buttonLocks = AllButtons.Map(_ => 0);
 
 rule: "[lib/player/buttonControl.del] MONKEY PATCH - For Winston, disable secondary fire instead of just disallowing button (because disallow doesn't work on Winston)"
 Event.OngoingPlayer

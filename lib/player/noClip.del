@@ -47,7 +47,7 @@ if (isNoClipActive)
 if (currentMenuState == MenuState.CLOSED)
 {
   MinWait();
-  // Stopping camera is handled by the fact that noclip must be stopped by opening menu.
+  # Stopping camera is handled by the fact that noclip must be stopped by opening menu.
   StartCamera(
     Player:               EventPlayer(),
     EyePosition:          UpdateEveryFrame(EventPlayer().EyePosition()),
