@@ -147,25 +147,21 @@ void ChangeHero()
   ResetHeroAvailability(EventPlayer());
   WaitUntil(HasSpawned(), 9999);
   StopForcingPlayerPosition();
-  StartForcingPlayerPosition(EventPlayer(), EventPlayer().menuActivationPoint.location, true);
-  Wait(0.064);
-  WaitUntil(DistanceBetween(EventPlayer(), EventPlayer().menuActivationPoint.location) < 0.05
-    && AngleBetweenVectors(EventPlayer().FacingDirection(), menuActivationPoint.facing) < 0.1, 1);
+  TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().menuActivationPoint);
   CloseMenu(EventPlayer());
 }
 
 void ToggleNoClip()
 {
   if (isNoClipActive) {
-    isNoClipActive = false;
     # Set new button look
     UpdateButtonAppearance(MenuState.TOOLS, 3, 1, "Enable NoClip", Color.Green);
 
   } else {
-    isNoClipActive = true;
     # Set new button look
     UpdateButtonAppearance(MenuState.TOOLS, 3, 1, "Disable NoClip", Color.Red);
   }
+  isNoClipActive = !isNoClipActive;
   CloseMenu(EventPlayer());
 }
 
