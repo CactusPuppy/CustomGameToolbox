@@ -14,9 +14,12 @@ single struct Trigger
     Boolean b(Number i, Boolean next = true): (i >= toHold.Length || (IsButtonHeld(EventPlayer(), toHold[i]) && next));
 }
 
+globalvar Boolean TRIGGERS_ENABLED = WorkshopSettingToggle(QuickActionsCategory, "Quick Actions Enabled", false, -1);
+
 // This is the rule that checks players for triggers and executes them
 rule: 'Check players for triggers'
 Event.OngoingPlayer
+if(TRIGGERS_ENABLED)
 if(IsControllable() == false)
 if(IsAlive() && has_triggers())
 if(anyTriggersHeld(_watch_triggers))
