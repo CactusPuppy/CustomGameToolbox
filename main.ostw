@@ -37,6 +37,7 @@ import "UndoTankHealthReduction.ostw";
 import "interface/menu.ostw";
 import "lib/logs/logs.del";
 import "lib/metrics/diagnostics.del";
+import "lib/quickActions/quickAction.del";
 
 String GeneralSettingsCategory: "01. General";
 String HeroSettingsCategory: "02. Hero Settings";
