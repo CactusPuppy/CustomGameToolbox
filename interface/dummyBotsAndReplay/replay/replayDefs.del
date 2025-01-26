@@ -221,9 +221,9 @@ rule: "[interface/dummyBotsAndReplay/replay/replayDefs.del] When bot is in playi
 Event.OngoingPlayer
 if (replayState == ReplayState.PLAYING)
 {
-  Wait(TICK_LENGTH * playbackOffset, WaitBehavior.AbortWhenFalse);
-  for (frame = 0; totalFrames; 1) {
-    if (frame >= currentFrame.frame) {
+  // Wait(TICK_LENGTH * playbackOffset, WaitBehavior.AbortWhenFalse);
+  for (frame = -playbackOffset; totalFrames; 1) {
+    if (frame >= 0 && frame >= currentFrame.frame) {
       ProcessAllChangesInCurrentFrame();
       nextFrameIndex += 1;
       currentFrame = BigArrayAccess(recording, nextFrameIndex);
