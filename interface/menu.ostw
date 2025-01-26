@@ -198,11 +198,12 @@ if (currentMenuState != MenuState.CLOSED)
   if (!isNoClipActive) SetGravity(EventPlayer(), 100);
   SetAimSpeed(EventPlayer(), 100);
   # Give a leniency period for buttons to be let go of
-  Wait(0.25, WaitBehavior.RestartWhenTrue);
+  Wait(0.25);
   RemoveOneLockFromAllButtons();
   RemoveOneInvisibilityLock();
   RemoveOnePhasedOutLock();
   // ClearStatus(EventPlayer(), Status.Asleep);
+  LoopIfConditionIsTrue();
 }
 
 rule: "[interface/menu.ostw] When player holds Interact long enough, toggle menu"
@@ -223,7 +224,14 @@ rule: "[interface/menu.ostw] Primary fire to select current item"
 Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.PrimaryFire))
 {
-  AbortIf(currentMenuState == MenuState.CLOSED);
+  AbortIf(IsControllable());
+  # Extra-menu primary fire handling
+  if (currentMenuState == MenuState.CLOSED) {
+    if (IsAlive() && playerRulerState == RulerState.PLACING) RulerHandlePFire();
+
+    if (botControlMode == BotControlMode.Edit) BotPlacementPFire();
+    return;
+  }
   AbortIf(currentActionGrid() != INTENTIONALLY_EMPTY_ACTION_GRID && currentActionItem() == 0);
   switch (currentMenuState) {
     case MenuState.MAIN_MENU:
@@ -260,7 +268,13 @@ rule: "[interface/menu.ostw] Secondary fire to go back"
 Event.OngoingPlayer
 if (IsButtonHeld(EventPlayer(), Button.SecondaryFire))
 {
-  AbortIf(currentMenuState == MenuState.CLOSED);
+  AbortIf(IsControllable());
+  if (currentMenuState == MenuState.CLOSED) {
+    if (IsAlive() && playerRulerState == RulerState.PLACING) RulerHandleSFire();
+
+    if (botControlMode == BotControlMode.Edit) BotPlacementSFire();
+    return;
+  }
   if (currentMenuState == MenuState.MAIN_MENU) {
     CloseMenu(EventPlayer());
     return;

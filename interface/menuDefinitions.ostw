@@ -65,8 +65,8 @@ void OpenMenuToPage(in Player player = EventPlayer(), in MenuState menuState = M
 }
 
 void CloseMenu(in Player player = EventPlayer()) {
-  # Avoid having input count for something else by allowing other modules to read that an input was processed in the menu.
-  MinWait();
+  // # Avoid having input count for something else by allowing other modules to read that an input was processed in the menu.
+  // MinWait();
   player.currentMenuState = MenuState.CLOSED;
 }
 

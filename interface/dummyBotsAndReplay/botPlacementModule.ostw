@@ -40,15 +40,11 @@ if (botControlMode == BotControlMode.Edit)
 
 playervar SelectionEntity selectedControl;
 playervar Number selectionSetDistance;
-rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Handle left-click"
-Event.OngoingPlayer
-if (IsDummyBot() == false)
-if (botControlMode == BotControlMode.Edit)
-if (EventPlayer().IsButtonHeld(Button.PrimaryFire))
+void BotPlacementPFire() playervar "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Handle left-click"
 {
-  AbortIf(!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED));
+  if (!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED)) return;
   selectedControl = getClosestSelectionEntity(EventPlayer());
-  AbortIf(selectedControl.Id == 0);
+  if (selectedControl.Id == 0) return;
   if (getAllMovableTargetsAsSelectionEntities().Map((e) => e.Id).Contains(selectedControl.Id)) {
     # Check if the bot is currently pinned to a position
     if (selectedControl.Owner.pinnedPosition.location != null) {
@@ -107,22 +103,15 @@ if (EventPlayer().IsButtonHeld(Button.PrimaryFire))
 }
 
 playervar Player selectedBot;
-rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Handle right-click"
-Event.OngoingPlayer
-if (IsDummyBot() == false)
-if (botControlMode == BotControlMode.Edit)
-if (EventPlayer().IsButtonHeld(Button.SecondaryFire))
+void BotPlacementSFire() playervar "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Handle right-click"
 {
-  AbortIf(!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED));
+  if (!(HasSpawned() && IsAlive() && currentMenuState == MenuState.CLOSED)) return;
   selectedControl = getClosestSelectionEntity(EventPlayer());
   if (selectedControl.Id == 0 || selectedControl.ControlType != BotControlType.DummyBot){
     selectedControl = null;
     return;
   }
   selectedBot = selectedControl.Owner;
-  # Prevent menu logic running later in the tick from assuming we meant to close the menu
-  # due to the menu state being open and a secondary fire input being detected
-  MinWait();
   OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
 }
 

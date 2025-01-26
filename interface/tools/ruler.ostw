@@ -68,26 +68,16 @@ if (playerRulerState != RulerState.HIDDEN)
   DestroyInWorldText(rulerEffects[4]);
 }
 
-rule: "[interface/tools/ruler.ostw] Handle player setting first point"
-Event.OngoingPlayer
-if (IsAlive())
-if (playerRulerState == RulerState.PLACING)
-if (IsButtonHeld(Button: Button.PrimaryFire))
+void RulerHandlePFire() playervar "[interface/tools/ruler.ostw] Handle player setting first point"
 {
-  AbortIf(currentMenuState != MenuState.CLOSED);
   isMovingPosition1 = true;
   WaitUntil(!IsButtonHeld(Button: Button.PrimaryFire), 99999);
   isMovingPosition1 = false;
   position1 = RayCastHitPosition(EyePosition(), EyePosition() + 5 * FacingDirectionOf(), AllPlayers(), EventPlayer(), true);
 }
 
-rule: "[interface/tools/ruler.ostw] Handle player setting second point"
-Event.OngoingPlayer
-if (IsAlive())
-if (playerRulerState == RulerState.PLACING)
-if (IsButtonHeld(Button: Button.SecondaryFire))
+void RulerHandleSFire() playervar "[interface/tools/ruler.ostw] Handle player setting second point"
 {
-  AbortIf(currentMenuState != MenuState.CLOSED);
   isMovingPosition2 = true;
   WaitUntil(!IsButtonHeld(Button: Button.SecondaryFire), 99999);
   isMovingPosition2 = false;
