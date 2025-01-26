@@ -198,11 +198,12 @@ if (currentMenuState != MenuState.CLOSED)
   if (!isNoClipActive) SetGravity(EventPlayer(), 100);
   SetAimSpeed(EventPlayer(), 100);
   # Give a leniency period for buttons to be let go of
-  Wait(0.25, WaitBehavior.RestartWhenTrue);
+  Wait(0.25);
   RemoveOneLockFromAllButtons();
   RemoveOneInvisibilityLock();
   RemoveOnePhasedOutLock();
   // ClearStatus(EventPlayer(), Status.Asleep);
+  LoopIfConditionIsTrue();
 }
 
 rule: "[interface/menu.ostw] When player holds Interact long enough, toggle menu"
