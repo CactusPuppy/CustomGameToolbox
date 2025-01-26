@@ -24,6 +24,7 @@ if(IsControllable() == false)
 if(IsAlive() && has_triggers())
 if(anyTriggersHeld(_watch_triggers))
 {
+    AbortIf(currentMenuState != MenuState.CLOSED);
     foreach(Trigger t in _watch_triggers) {
         if (t.isTriggerHeld())
         {
