@@ -248,9 +248,8 @@ void EndGame()
       return;
     }
     SmallMessage(EventPlayer(), "Can't seem to end the game right now. Try again in a bit!");
-  } else {
-    OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
   }
+  OpenMenuToPage(EventPlayer(), MenuState.TOOLS);
 }
 
 void ToggleRuler()
