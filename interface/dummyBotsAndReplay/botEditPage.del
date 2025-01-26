@@ -377,9 +377,8 @@ void DeleteSelectedBotReplay()
       selectedBot.recordingPlayStopFlag = RecordingAction.DELETE;
       Wait(0.5);
       SmallMessage(EventPlayer(), "  Replay deleted");
-    } else {
-      OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
     }
+    OpenMenuToPage(EventPlayer(), MenuState.EDITING_DUMMY_BOT);
   } else {
     SmallMessage(EventPlayer(), "  No replay to delete");
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 100);
