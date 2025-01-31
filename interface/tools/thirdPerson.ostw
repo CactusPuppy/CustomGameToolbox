@@ -1,4 +1,5 @@
 import "toolsMenu.ostw";
+import "../../OSTWUtils/Math.del";
 
 enum ThirdPersonState {
   OFF,
@@ -6,112 +7,176 @@ enum ThirdPersonState {
   ON
 }
 playervar ThirdPersonState thirdPersonState;
-playervar Number thirdPersonDirection = 1;
-playervar Number thirdPersonZoom = -2.5;
-playervar Number thirdPersonHeight = 0;
+playervar Vector baseFacingDirection;
+playervar Number thirdPersonHeight;
+playervar Number thirdPersonDistance;
+playervar Number thirdPersonPosAngle;
+playervar Number thirdPersonFacPolar;
+playervar Number thirdPersonFacAzim;
+
+Vector DesiredThirdPersonCamPosition(Player p = EventPlayer()): EyePosition(p)
+  + WorldVectorOf(
+      DirectionFromAngles(p.thirdPersonPosAngle, 0) * p.thirdPersonDistance
+        + p.thirdPersonHeight * Up(),
+      p,
+      LocalVector.Rotation);
+
+Vector ThirdPersonCamPosition(Player p = EventPlayer()): RayCastHitPosition(
+      StartPOS: EyePosition(),
+      EndPOS: DesiredThirdPersonCamPosition(),
+      PlayersToInclude: AllPlayers(),
+      PlayersToExclude: EventPlayer(),
+      IncludePlayerOwnedObjects: false);
+
+Vector ThirdPersonCamFacing(Player p = EventPlayer()): WorldVectorOf(
+  DirectionFromAngles(p.thirdPersonPosAngle-p.thirdPersonFacAzim, p.thirdPersonFacPolar),
+  p,
+  LocalVector.Rotation);
 
 rule: "[interface/tools/thirdPerson.ostw] When person is in third person and their menu state becomes closed, start third person camera"
 Event.OngoingPlayer
 if (IsAlive())
-if (([Hero.Widowmaker, Hero.Ashe, Hero.Ana].Contains(EffectiveHero()) && IsFiringSecondary()) == false)
 if (thirdPersonState != ThirdPersonState.OFF)
 if (!isNoClipActive)
 if (currentMenuState == MenuState.CLOSED)
 {
   MinWait();
-  # Code borrowed from workshop.codes/third-person
+  # Code borrowed from workshop.codes/5AXEZ
   StartCamera(
     Player: EventPlayer(),
-    EyePosition: RayCastHitPosition(
-      StartPOS: EyePosition(),
-      EndPOS: EyePosition()
-        + WorldVectorOf(Vector(thirdPersonDirection * Min(thirdPersonZoom / 2.5, -0.75), 0, 0), EventPlayer(), LocalVector.Rotation)
-        + FacingDirectionOf() * thirdPersonZoom
-        + CrossProduct(FacingDirectionOf(), WorldVectorOf(Left(), EventPlayer(), LocalVector.Rotation)) * thirdPersonHeight,
-      PlayersToInclude: AllPlayers(),
-      PlayersToExclude: EventPlayer(),
-      IncludePlayerOwnedObjects: false),
-    LookAtPosition: RayCastHitPosition(EyePosition(), EyePosition() + FacingDirectionOf() * 200, AllPlayers(), EventPlayer(), false),
-    BlendSpeed: 60
+    EyePosition: ThirdPersonCamPosition(),
+    LookAtPosition: ThirdPersonCamPosition() + ThirdPersonCamFacing(),
+    BlendSpeed: 25
   );
   // Stopping camera is handled by the fact that third person must be stopped by opening the menu.
+  if (thirdPersonState == ThirdPersonState.ON) {
+    StartTransformingThrottle(EventPlayer(), 1, 1, ThirdPersonCamFacing());
+  }
 }
 
-rule: "[interface/tools/thirdPerson.ostw] During adjustment, reduce move speed"
+playervar Boolean adjustingFlag!;
+
+rule: "[interface/tools/thirdPerson.ostw] Handle entering and exiting adjustment"
 Event.OngoingPlayer
 if (thirdPersonState == ThirdPersonState.ADJUSTING)
 {
-  SetMoveSpeed(EventPlayer(), 0.01);
+  adjustingFlag = false;
+  thirdPersonHeight = 0;
+  thirdPersonDistance = 2;
+  thirdPersonPosAngle = 0;
+  thirdPersonFacPolar = 0;
+  thirdPersonFacAzim = 180;
+  MinWait();
+  ForceThrottle(EventPlayer(), 0.9, 1, 0.9, 1, 0.9, 1);
+  StartFacing(EventPlayer(), DirectionFromAngles(HorizontalAngleFromDirection(FacingDirectionOf()), 0), 1000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+  SetFacing(EventPlayer(), DirectionFromAngles(HorizontalAngleFromDirection(FacingDirectionOf()), 0));
+  SetMoveSpeed(EventPlayer(), 0);
+  Wait(0.5);
+  StopFacing();
+  ForceThrottle(EventPlayer(), 0, 0.7, 0, 0.7, 0, 0.7);
+  adjustingFlag = true;
+  baseFacingDirection = FacingDirectionOf();
+
+  Wait(0.064);
+  thirdPersonFacPolar = 0;
+  ChaseVariableAtRate(thirdPersonFacAzim,
+      thirdPersonFacAzim
+        - AngleDifference(
+          HorizontalAngleFromDirection(baseFacingDirection),
+          HorizontalAngleFromDirection(FacingDirectionOf())),
+    1000,
+    RateChaseReevaluation.DestinationAndRate);
+  ChaseVariableAtRate(thirdPersonFacPolar,
+    Math.Clamp(
+      thirdPersonFacPolar
+        + AngleDifference(
+          VerticalAngleFromDirection(baseFacingDirection),
+          VerticalAngleFromDirection(FacingDirectionOf())),
+      min: -89.5,
+      max: 89.5),
+    1000,
+    RateChaseReevaluation.DestinationAndRate);
   AddOneLockToButton(EventPlayer(), Button.Jump);
   AddOneLockToButton(EventPlayer(), Button.Crouch);
-  WaitUntil(thirdPersonState != ThirdPersonState.ADJUSTING, 1000000);
+  while (thirdPersonState == ThirdPersonState.ADJUSTING) {
+    WaitUntil(baseFacingDirection != UpdateEveryFrame(FacingDirectionOf())
+      || thirdPersonState != ThirdPersonState.ADJUSTING, 1000000);
+    if (thirdPersonState == ThirdPersonState.ADJUSTING) {
+      SetFacing(EventPlayer(), baseFacingDirection);
+      if (AbsoluteValue(thirdPersonFacAzim) > 180) thirdPersonFacAzim += ((thirdPersonFacAzim > 0) ? -360 : 360);
+      Wait(0.15);
+    }
+  }
+  StopForcingThrottle(EventPlayer());
+  StopChasingVariable(thirdPersonFacAzim);
+  StopChasingVariable(thirdPersonFacPolar);
   SetMoveSpeed(EventPlayer(), 100);
+  SetAimSpeed(EventPlayer(), 100);
   RemoveOneLockFromButton(EventPlayer(), Button.Jump);
   RemoveOneLockFromButton(EventPlayer(), Button.Crouch);
+  StartTransformingThrottle(EventPlayer(), 1, 1, ThirdPersonCamFacing());
 }
 
-rule: "[interface/tools/thirdPerson.ostw] While adjusting, use Z Component of Throttle to adjust zoom"
+rule: "[interface/tools/thirdPerson.ostw] While adjusting, use Z Component of Throttle to adjust distance"
 Event.OngoingPlayer
 if (thirdPersonState == ThirdPersonState.ADJUSTING)
+if (adjustingFlag)
 if (IsAlive())
 if (currentMenuState == MenuState.CLOSED)
 if (AbsoluteValue(ZOf(ThrottleOf())) >= 0.5)
 {
-  if (ZOf(ThrottleOf()) > 0) {
-    thirdPersonZoom = Min(thirdPersonZoom + 0.1, -0.5);
-  } else {
-    thirdPersonZoom = Max(thirdPersonZoom - 0.1, -5);
-  }
-  Wait(0.064);
-  LoopIfConditionIsTrue();
+  ChaseVariableAtRate(thirdPersonDistance, ZOf(ThrottleOf()) > 0 ? 0.1 : 7, 1, RateChaseReevaluation.DestinationAndRate);
+  WaitUntil(
+    thirdPersonState != ThirdPersonState.ADJUSTING
+    || !adjustingFlag
+    || IsDead()
+    || currentMenuState != MenuState.CLOSED
+    || AbsoluteValue(ZOf(ThrottleOf())) < 0.5,
+    1000000
+  );
+  StopChasingVariable(thirdPersonDistance);
 }
 
-rule: "[interface/tools/thirdPerson.ostw] While adjusting, use X Component of Throttle to adjust direction"
+rule: "[interface/tools/thirdPerson.ostw] While adjusting, use X Component of Throttle to adjust angle"
 Event.OngoingPlayer
 if (thirdPersonState == ThirdPersonState.ADJUSTING)
+if (adjustingFlag)
 if (IsAlive())
 if (currentMenuState == MenuState.CLOSED)
 if (AbsoluteValue(XOf(ThrottleOf())) >= 0.5)
 {
-  if (XOf(ThrottleOf()) > 0) {
-    thirdPersonDirection = Max(thirdPersonDirection - 0.1, -2);
-  } else {
-    thirdPersonDirection = Min(thirdPersonDirection + 0.1, 2);
+  ChaseVariableAtRate(thirdPersonPosAngle, XOf(ThrottleOf()) > 0 ? -1000000 : 1000000, 30, RateChaseReevaluation.DestinationAndRate);
+  while (thirdPersonState == ThirdPersonState.ADJUSTING
+    && adjustingFlag
+    && IsAlive()
+    && currentMenuState == MenuState.CLOSED
+    && AbsoluteValue(XOf(ThrottleOf())) >= 0.5) {
+      if (AbsoluteValue(thirdPersonPosAngle) > 180) {
+        thirdPersonPosAngle += ((thirdPersonPosAngle > 0) ? -360 : 360);
+      }
+      MinWait();
   }
-  Wait(0.064);
-  LoopIfConditionIsTrue();
+  StopChasingVariable(thirdPersonPosAngle);
 }
 
-rule: "[interface/tools/thirdPerson.ostw] While adjusting, use jump to increase height"
+Number VerticalCameraScalarFromPlayer(Player p = EventPlayer()):
+  1 * IsButtonHeld(p, Button.Jump)
+  + -1 * IsButtonHeld(p, Button.Crouch);
+
+rule: "[interface/tools/thirdPerson.ostw] While adjusting, use jump/crouch to increase/decrease height"
 Event.OngoingPlayer
 if (thirdPersonState == ThirdPersonState.ADJUSTING)
+if (adjustingFlag)
 if (IsAlive())
 if (currentMenuState == MenuState.CLOSED)
-if (IsButtonHeld(EventPlayer(), Button.Jump))
+if (IsButtonHeld(EventPlayer(), Button.Jump) || IsButtonHeld(EventPlayer(), Button.Crouch))
 {
-  thirdPersonHeight = Min(thirdPersonHeight + 0.1, 5);
-  Wait(0.064);
-  LoopIfConditionIsTrue();
-}
-
-rule: "[interface/tools/thirdPerson.ostw] While adjusting, use crouch to decrease height"
-Event.OngoingPlayer
-if (thirdPersonState == ThirdPersonState.ADJUSTING)
-if (IsAlive())
-if (currentMenuState == MenuState.CLOSED)
-if (IsButtonHeld(EventPlayer(), Button.Crouch))
-{
-  thirdPersonHeight = Max(thirdPersonHeight - 0.1, -2);
-  Wait(0.064);
-  LoopIfConditionIsTrue();
-}
-
-rule: "[interface/tools/thirdPerson.ostw] Stop third person during certain conditions"
-Event.OngoingPlayer
-if ([Hero.Widowmaker, Hero.Ashe, Hero.Ana].Contains(HeroOf()))
-if (IsFiringSecondary())
-if (thirdPersonState != ThirdPersonState.OFF)
-if (currentMenuState == MenuState.CLOSED)
-{
-  StopCamera();
+  ChaseVariableAtRate(thirdPersonHeight, 5 * VerticalCameraScalarFromPlayer(), 0.6 * AbsoluteValue(VerticalCameraScalarFromPlayer()), RateChaseReevaluation.DestinationAndRate);
+  WaitUntil(thirdPersonState != ThirdPersonState.ADJUSTING
+    || !adjustingFlag
+    || IsDead()
+    || currentMenuState != MenuState.CLOSED
+    || !(IsButtonHeld(EventPlayer(), Button.Jump) || IsButtonHeld(EventPlayer(), Button.Crouch)),
+    1000);
+  StopChasingVariable(thirdPersonHeight);
 }
