@@ -42,21 +42,13 @@ if (WorkshopSettingToggle(DebugCategory, "Show Diagnostics", false))
     Color:          Colors.StepGradient(gradientColors, DummyBotCount() / (12 - HumanAndAICount())),
     SortOrder:      6);
   CreateDiagnostic(
-    Text:           <"Invis Lock Count: <0>", LocalPlayer().invisibilityLockCount>,
-    Color:          LocalPlayer().invisibilityLockCount > 0
-                      ? Color.Green
-                      : LocalPlayer().invisibilityLockCount < 0
-                        ? Color.Red
-                        : Color.White,
+    Text:           <"DIST: <0> | ANG: <1>", LocalPlayer().thirdPersonDistance, LocalPlayer().thirdPersonPosAngle>,
+    Color:          Color.White,
     SortOrder:      7
   );
   CreateDiagnostic(
-    Text:           <"Phased Out Count: <0>", LocalPlayer().phasedOutLockCount>,
-    Color:          LocalPlayer().phasedOutLockCount > 0
-                      ? Color.Green
-                      : LocalPlayer().phasedOutLockCount < 0
-                        ? Color.Red
-                        : Color.White,
+    Text:           <"POLAR: <0> | AZIM: <1>", LocalPlayer().thirdPersonFacPolar, LocalPlayer().thirdPersonFacAzim>,
+    Color:          Color.White,
     SortOrder:      8
   );
 }
