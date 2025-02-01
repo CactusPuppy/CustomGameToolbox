@@ -77,7 +77,10 @@ String[] PossibleQuickTriggerLabels: [
   "Crouch + Interact",
   "Ability 1 + Interact",
   "Ability 2 + Interact",
-  "Ultimate + Interact"
+  "Ultimate + Interact",
+  "Ability 1 + Reload",
+  "Ability 2 + Reload",
+  "Ultimate + Reload"
 ];
 
 Button[][] PossibleQuickTriggers: [
@@ -86,7 +89,10 @@ Button[][] PossibleQuickTriggers: [
   [Button.Crouch, Button.Interact],
   [Button.Ability1, Button.Interact],
   [Button.Ability2, Button.Interact],
-  [Button.Ultimate, Button.Interact]
+  [Button.Ultimate, Button.Interact],
+  [Button.Ability1, Button.Reload],
+  [Button.Ability2, Button.Reload],
+  [Button.Ultimate, Button.Reload]
 ];
 
 globalvar Number[] ActionSettings = [
@@ -95,7 +101,10 @@ globalvar Number[] ActionSettings = [
   WorkshopSettingCombo(QuickActionsCategory, "Crouch + Interact", 8, QuickActionLabels, 0),
   WorkshopSettingCombo(QuickActionsCategory, "Ability 1 + Interact", 9, QuickActionLabels, 0),
   WorkshopSettingCombo(QuickActionsCategory, "Ability 2 + Interact", 6, QuickActionLabels, 0),
-  WorkshopSettingCombo(QuickActionsCategory, "Ultimate + Interact", 1, QuickActionLabels, 0)
+  WorkshopSettingCombo(QuickActionsCategory, "Ultimate + Interact", 1, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Ability 1 + Reload", 0, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Ability 2 + Reload", 0, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Ultimate + Reload", 0, QuickActionLabels, 0)
 ];
 
 rule: "[lib/quickActions/quickAction.del] Set up quick actions" {
