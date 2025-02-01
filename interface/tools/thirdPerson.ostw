@@ -1,5 +1,6 @@
 import "toolsMenu.ostw";
 import "../../OSTWUtils/Math.del";
+import "../../lib/utils/String.del";
 
 enum ThirdPersonState {
   OFF,
@@ -37,11 +38,13 @@ rule: "[lib/tools/thirdPerson.ostw] Third Person Adjustment Instructions"
 {
   CreateHudText(
     VisibleTo: AllPlayers().Filter(p => p.thirdPersonState == ThirdPersonState.ADJUSTING),
+    Subheader: MANY_SPACES,
     Text: <"<0>\n<1>",
       $"[{IconString(Icon.ArrowUp)}/{IconString(Icon.ArrowDown)}] Zoom In/Out",
       $"[{IconString(Icon.ArrowLeft)}/{IconString(Icon.ArrowRight)}] Orbit Camera">);
   CreateHudText(
     VisibleTo: AllPlayers().Filter(p => p.thirdPersonState == ThirdPersonState.ADJUSTING),
+    Subheader: MANY_SPACES,
     Text: <"<0>\n<1>",
       $"[{InputBindingString(Button.Jump)}] Move Up",
       $"[{StringLength(<'<0>', InputBindingString(Button.Crouch)>) ? InputBindingString(Button.Crouch) : 'Crouch'}] Move Down">);
@@ -63,6 +66,10 @@ if (currentMenuState == MenuState.CLOSED)
     BlendSpeed: 25
   );
   // Stopping camera is handled by the fact that third person must be stopped by opening the menu.
+  # Forcing the throttle prevents the player model from animating while player provides inputs.
+  if (thirdPersonState == ThirdPersonState.ADJUSTING) {
+    ForceThrottle(EventPlayer(), 0.9, 1, 0.9, 1, 0.9, 1);
+  }
   if (thirdPersonState == ThirdPersonState.ON) {
     StartTransformingThrottle(EventPlayer(), 1, 1, ThirdPersonCamFacing());
   }
@@ -81,13 +88,13 @@ if (thirdPersonState == ThirdPersonState.ADJUSTING)
   thirdPersonFacPolar = 0;
   thirdPersonFacAzim = 180;
   MinWait();
+  # Forcing the throttle prevents the player model from animating while player provides inputs.
   ForceThrottle(EventPlayer(), 0.9, 1, 0.9, 1, 0.9, 1);
   StartFacing(EventPlayer(), DirectionFromAngles(HorizontalAngleFromDirection(FacingDirectionOf()), 0), 1000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
   SetFacing(EventPlayer(), DirectionFromAngles(HorizontalAngleFromDirection(FacingDirectionOf()), 0));
   SetMoveSpeed(EventPlayer(), 0);
   Wait(0.5);
   StopFacing();
-  ForceThrottle(EventPlayer(), 0, 0.7, 0, 0.7, 0, 0.7);
   adjustingFlag = true;
   baseFacingDirection = FacingDirectionOf();
 
@@ -137,7 +144,7 @@ if (thirdPersonState == ThirdPersonState.ADJUSTING)
 if (adjustingFlag)
 if (IsAlive())
 if (currentMenuState == MenuState.CLOSED)
-if (AbsoluteValue(ZOf(ThrottleOf())) >= 0.5)
+if (AbsoluteValue(ZOf(ThrottleOf())) > 0)
 {
   ChaseVariableAtRate(thirdPersonDistance, ZOf(ThrottleOf()) > 0 ? 0.1 : 7, 1, RateChaseReevaluation.DestinationAndRate);
   WaitUntil(
@@ -145,7 +152,7 @@ if (AbsoluteValue(ZOf(ThrottleOf())) >= 0.5)
     || !adjustingFlag
     || IsDead()
     || currentMenuState != MenuState.CLOSED
-    || AbsoluteValue(ZOf(ThrottleOf())) < 0.5,
+    || AbsoluteValue(ZOf(ThrottleOf())) == 0,
     1000000
   );
   StopChasingVariable(thirdPersonDistance);
@@ -157,14 +164,14 @@ if (thirdPersonState == ThirdPersonState.ADJUSTING)
 if (adjustingFlag)
 if (IsAlive())
 if (currentMenuState == MenuState.CLOSED)
-if (AbsoluteValue(XOf(ThrottleOf())) >= 0.5)
+if (AbsoluteValue(XOf(ThrottleOf())) > 0.9)
 {
   ChaseVariableAtRate(thirdPersonPosAngle, XOf(ThrottleOf()) > 0 ? -1000000 : 1000000, 30, RateChaseReevaluation.DestinationAndRate);
   while (thirdPersonState == ThirdPersonState.ADJUSTING
     && adjustingFlag
     && IsAlive()
     && currentMenuState == MenuState.CLOSED
-    && AbsoluteValue(XOf(ThrottleOf())) >= 0.5) {
+    && AbsoluteValue(XOf(ThrottleOf())) >= 0.9) {
       if (AbsoluteValue(thirdPersonPosAngle) > 180) {
         thirdPersonPosAngle += ((thirdPersonPosAngle > 0) ? -360 : 360);
       }
