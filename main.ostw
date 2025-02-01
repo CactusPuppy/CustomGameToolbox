@@ -50,9 +50,9 @@ String DebugCategory: "99. Debug";
 globalvar Number i;
 
 // DEBUG: Diagnostics
-// import "lib/metrics/diagnostics.del";
-// Number DummyBotCount(): CountOf(FilteredArray(AllPlayers(), IsDummyBot(ArrayElement())));
-// Number HumanAndAICount(): CountOf(FilteredArray(AllPlayers(), !IsDummyBot(ArrayElement())));
+import "lib/metrics/diagnostics.del";
+Number DummyBotCount(): CountOf(FilteredArray(AllPlayers(), IsDummyBot(ArrayElement())));
+Number HumanAndAICount(): CountOf(FilteredArray(AllPlayers(), !IsDummyBot(ArrayElement())));
 
 globalvar Boolean INSPECTOR_DISABLED! = !WorkshopSettingToggle(DebugCategory, "Enable Inspector Recording", false);
 rule: "[main.ostw] Disable Inspector Recording" -100
