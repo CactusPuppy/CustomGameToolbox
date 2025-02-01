@@ -167,6 +167,7 @@ if (currentMenuState != MenuState.CLOSED)
   // cursor = new Cursor();
   # Note that we store it for reevaluation, because changing heroes causes a respawn which overwrites non-reeval force pos and facing
   menuActivationPoint = NewResetFromPlayer(EventPlayer());
+  StopTransformingThrottle();
   SetAimSpeed(EventPlayer(), 0);
   StartFacing(EventPlayer(), menuActivationPoint.facing, 1000, Relative.ToWorld, FacingRev.None);
   StartForcingPlayerPosition(EventPlayer(), menuActivationPoint.location, false);

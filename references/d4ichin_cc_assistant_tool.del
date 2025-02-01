@@ -1,0 +1,4291 @@
+// Import code: 5AXEZ
+globalvar define y;
+globalvar define debug;
+globalvar define guide_cnt;
+globalvar define start_flg;
+globalvar define adjust_wait_time;
+globalvar define adjust_tracking_flg;
+globalvar define adjust_param;
+globalvar define adjust_param_y;
+globalvar define check_interact_time;
+globalvar define update_replay_data_flg;
+globalvar define camera_dummy_bot_slot;
+globalvar define opt_interact_holdtime;
+globalvar define escape_point;
+globalvar define opt_txt_size;
+globalvar define opt_txt_right_pos;
+globalvar define opt_ef_size;
+globalvar define opt_slowmotion_flg;
+globalvar define fc_configured_flg;
+globalvar define status_time;
+globalvar define center_menu_txt;
+globalvar define status_name_list;
+globalvar define stat_name_cnt;
+globalvar define camera_mode;
+globalvar define camera_activate_all;
+globalvar define camera_len;
+globalvar define camera_degree;
+globalvar define fc_blend_speed;
+globalvar define slowmotion_speed;
+globalvar define opt_bot_status;
+globalvar define bot_status_value;
+globalvar define zoom_param;
+globalvar define manual_page_num;
+globalvar define green_screen_map_flg;
+globalvar define assemble_time;
+globalvar define game_started_flg;
+globalvar define tracking_pos;
+globalvar define fixed_pos;
+globalvar define adjust_fixed_flg;
+globalvar define camera_mode_list;
+globalvar define additional_adjust;
+globalvar define adjust_time_max;
+globalvar define restore_max_recordtime;
+globalvar define drone_camera_rectime;
+globalvar define camera_bot_slot;
+globalvar define fc_min_dec_speed;
+globalvar define bot_team_name;
+globalvar define center_menu_cnt;
+globalvar define txt_view_id;
+globalvar define common_opt_txt_init;
+globalvar define fc_max_acc_speed;
+globalvar define fc_velocity_change_time;
+globalvar define common_opt_txt_list;
+globalvar define fc_aim_speed;
+globalvar define fc_camera_speed;
+globalvar define opt_fast_move_mode;
+globalvar define fc_camera_status;
+globalvar define button_list_camera;
+globalvar define finish_drone_camera_flg;
+globalvar define record_master_time;
+globalvar define record_start_flg;
+globalvar define accuracy_flg;
+globalvar define replay_start_flg;
+globalvar define record_hero;
+globalvar define edit_slot;
+globalvar define max_record_time;
+globalvar define manual_page_num_max;
+globalvar define opt_record_type;
+globalvar define opt_replay_type;
+globalvar define STAT_ACT;
+globalvar define STAT_TIM;
+globalvar define opt_team_type;
+globalvar define copy_from_player;
+globalvar define wait_lead_flg;
+globalvar define wait_adjust_time;
+globalvar define menu_degree_interval;
+globalvar define button_list_normal;
+globalvar define opt_recstop_flg;
+globalvar define bot_status_list;
+globalvar define camera_set_slot;
+globalvar define control_map_list;
+globalvar define loop_cnt;
+globalvar define opt_menu_start_degree;
+globalvar define description_text_data;
+globalvar define space_txt;
+globalvar define menu_line_num;
+globalvar define separate_txt;
+globalvar define common_menu_idx;
+globalvar define common_menu_txt;
+globalvar define common_menu_color;
+globalvar define push_button_color;
+globalvar define adjust_degree_x;
+globalvar define adjust_degree_y;
+globalvar define base_face_pos;
+globalvar define horizontal_speed;
+globalvar define common_menu_sub_txt;
+globalvar define fixed_speed_data;
+globalvar define circling_data;
+globalvar define camera_test_flg;
+globalvar define adjust_circling_flg;
+globalvar define circling_degree;
+globalvar define circling_len;
+globalvar define circling_degree_x;
+globalvar define circling_degree_y;
+globalvar define circling_y;
+globalvar define circling_degree_param;
+globalvar define nameplate_flg;
+globalvar define adjust_end_flg;
+globalvar define judge_add_speed_len;
+playervar define spawn_flg;
+playervar define current_hero;
+playervar define teleport_pos;
+playervar define change_hero_flg;
+playervar define input_throttle;
+playervar define spawn_face_pos;
+playervar define replay_force_stop_flg;
+playervar define dead_status_flg;
+playervar define bot_type;
+playervar define opt_status_value;
+playervar define status_cnt;
+playervar define status_list;
+playervar define make_effect_id;
+playervar define lock_pos_flg;
+playervar define initialize_camera_flg;
+playervar define weapon_status;
+playervar define weapon_cnt;
+playervar define all_initialize_complete_flg;
+playervar define face_vec_status;
+playervar define throttle_status;
+playervar define slot_number;
+playervar define edit_status;
+playervar define face_vec_cnt;
+playervar define throttle_cnt;
+playervar define fc_camera_enable_flg;
+playervar define rec_start_life;
+playervar define record_max_time;
+playervar define replay_master_time;
+playervar define p_replay_start_flg;
+playervar define face_vec_status2;
+playervar define face_vec_status3;
+playervar define face_vec_status4;
+playervar define rec_start_position_vec;
+playervar define rec_start_face_vec;
+playervar define replay_target_flg;
+playervar define opt_edit_status;
+playervar define weapon_bullet_num;
+playervar define current_face_vec_num;
+playervar define botpos_cnt;
+playervar define botpos_status;
+playervar define botpos_start_flg;
+playervar define botpos_status2;
+playervar define botpos_status3;
+playervar define botpos_status4;
+playervar define current_botpos_num;
+playervar define rec_start_form;
+playervar define rec_start_weapon;
+playervar define botpos_enable_status;
+playervar define replay_initialized_flg;
+playervar define button_high_status;
+playervar define button_high_cnt;
+playervar define mapped_high_list;
+playervar define mapped_high_cnt;
+playervar define access_array_high_num;
+playervar define status_enable_flg;
+playervar define fc_replay_cnt;
+playervar define throttle_status2;
+playervar define throttle_status3;
+playervar define throttle_status4;
+playervar define fc_dest_addy_param;
+playervar define fc_adjust_param;
+playervar define p_fc_velocity_change_time;
+playervar define fc_addy_param;
+playervar define fc_down_flg;
+playervar define p_fc_max_acc_speed;
+playervar define p_fc_aim_speed;
+playervar define p_fc_camera_speed;
+playervar define p_fc_min_dec_speed;
+playervar define fc_activate_camera_flg;
+playervar define fc_dest_adjust_param;
+playervar define fc_latest_camera_pos;
+playervar define fc_latest_face_pos;
+playervar define common_opt_txt_group;
+playervar define opt_layer;
+playervar define opt_view_flg;
+playervar define menu_current_idx;
+playervar define common_opt_txt_name;
+playervar define opt_change_layer;
+playervar define p_txt_view_id;
+playervar define p_center_menu_txt;
+playervar define current_menu_item_list;
+playervar define menu_item_color;
+playervar define center_menu_color;
+playervar define common_opt_txt_view;
+playervar define opt_p_list;
+playervar define menu_item_x_pos;
+playervar define adjust_txt_pos;
+playervar define opt_p_list_temp;
+playervar define menu_degree_list;
+playervar define latest_y_eye_pos;
+playervar define base_eye_pos;
+playervar define menu_degree;
+playervar define opt_interact_flg;
+playervar define current_force_throttle;
+playervar define default_force_throttle;
+playervar define adjust_lock_flg;
+playervar define menu_item_x_pos_ptn;
+playervar define parameter_mode_type;
+playervar define description_txt;
+playervar define lock_open_menu_flg;
+playervar define opt_mutex_flg;
+playervar define keep_select_menu_y_pos;
+playervar define camera_bot_first_spawn_pos;
+
+rule: "[basic] Global Action"
+{
+    DisableInspectorRecording();
+    DisableMusic();
+    MinWait();
+    initialize_data1();
+    MinWait();
+    initialize_data2();
+    MinWait();
+    initialize_menu_data();
+    MinWait();
+    initialize_data_replay();
+    MinWait();
+    initialize_hud();
+    MinWait();
+    make_center_menu();
+    MinWait();
+    init_debug();
+}
+
+void init_debug() "[basic] Sub: init_debug"
+{
+    // CreateHudText(HostPlayer(), null, null, <"\r\ndebug : <0> , <1> , <2>", ThrottleOf(HostPlayer()), HostPlayer().input_throttle, XOf(ThrottleOf(HostPlayer())) * 1000>, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+void initialize_data1() "[basic] Sub: initialize_data1"
+{
+    adjust_param = WorkshopSettingReal("Adjust Perspective Parameters", "Move Up/Down Speed", 0.06, 0.01, 1, 0) * 0.1;
+    zoom_param = WorkshopSettingReal("Adjust Perspective Parameters", "Zoom In/Out Speed", 0.06, 0.01, 1, 0) * 0.1;
+    slowmotion_speed = WorkshopSettingInteger("Adjust Perspective Parameters", "Slow motion Percentage", 20, 10, 100, 2);
+    horizontal_speed = WorkshopSettingReal("Adjust Perspective Parameters", "Move Left/Right Speed", 0.5, 0.01, 2, 0);
+    y = 1;
+    circling_y = 1;
+    adjust_param_y = 0.1;
+    status_time = 9999;
+    camera_len = 2;
+    camera_degree = 90;
+    circling_len = 2;
+    circling_degree = 90;
+    status_name_list = ["None", "Nano Boost", "Burning", "Damage Boosted", "Overloading", "Wraith Form", "Primal Rage", "Sound Barrier", "Immortality Field", "Piledriver", "Hacked", "Frozen", "Asleep", "Stunned", "Knocked Down", "Echo Cloning", "Kill"];
+    MinWait();
+    opt_bot_status = ["Friendly", "Enemy", "Destroy Bot"];
+    bot_status_value = opt_bot_status[0];
+    assemble_time = WorkshopSettingInteger("Timer", "Change Skin Timer", 15, 5, 120, 0);
+    check_map();
+    MinWait();
+    camera_mode_list = ["Tracking", "Fixed", "Circling", "Drone"];
+    adjust_time_max = 0.5;
+    camera_mode = camera_mode_list[0];
+    bot_status_list = ["Enable", "Disable", "Switch Team", "Delete"];
+    opt_mutex_flg = false;
+    tracking_pos = [];
+    fixed_pos = [];
+    circling_data = ["Left", 0.25, null, false];
+    judge_add_speed_len = 1.75;
+}
+
+void initialize_data2() "[basic] Sub: initialize_data2"
+{
+    camera_bot_slot = 6;
+    drone_camera_rectime = WorkshopSettingInteger("Replay Camera Settings", "Drone Recording Time (sec)", 15, 1, 60, 0);
+    fc_min_dec_speed = WorkshopSettingReal("Replay Camera Settings", "Minimum Deceleration Speed", 0.005, 0, 100, 1);
+    fc_max_acc_speed = WorkshopSettingReal("Replay Camera Settings", "Maximum Acceleration Speed", 0.1, 0.02, 100, 2);
+    fc_velocity_change_time = WorkshopSettingReal("Replay Camera Settings", "Velocity Change Time", 0.5, 0.1, 100, 3);
+    fc_aim_speed = WorkshopSettingInteger("Replay Camera Settings", "Aim Speed (%)", 200, 10, 1000, 4);
+    MinWait();
+    fc_camera_speed = WorkshopSettingReal("Replay Camera Settings", "Camera Movement Speed", 0.025, 0.01, 100, 5);
+    fc_blend_speed = WorkshopSettingInteger("Replay Camera Settings", "Camera Blend Speed", 15, 0, 100, 0);
+    adjust_wait_time = 0.05;
+    button_list_camera = [null, Button.PrimaryFire, Button.SecondaryFire, Button.Jump, Button.Crouch];
+    camera_dummy_bot_slot = 7;
+    escape_point = Vector(0, 500, 0);
+    control_map_list = [Map.Busan, Map.Ilios, Map.Lijiang_Tower, Map.Lijiang_Tower, Map.Nepal, Map.Oasis, Map.Colosseo, Map.Esperanca, Map.New_Queen_Street];
+    fixed_speed_data = [0.005, 2, 1, 200, 0.1, 15];
+}
+
+void initialize_menu_data() "[basic] Sub: initialize_menu_data"
+{
+    manual_page_num = 1;
+    manual_page_num_max = 2;
+    opt_menu_start_degree = 10;
+    menu_degree_interval = 2.25;
+    opt_ef_size = 0.035;
+    opt_txt_size = [1.05, 0.9, 0.975, 2, 0.85, 1.25];
+    check_interact_time = 0.25;
+    opt_txt_right_pos = -0.325;
+    MinWait();
+    description_text_data = [];
+    space_txt = "";
+    menu_line_num = 16;
+    common_opt_txt_init = [];
+    common_opt_txt_list = [null, "Main Menu", "Parameter", "Dummy Bot", "Option", null, "Create Dummy Bot", "Edit Dummy Bot", null];
+    MinWait();
+    separate_txt = "-------------------------------------------------------------------------------------";
+    common_menu_idx = [null, "Start", null, "Setting Type"];
+    common_menu_txt = ["Exit Menu", "Start Camera", separate_txt, null, separate_txt];
+    common_menu_sub_txt = ["Back", null, separate_txt, null, separate_txt];
+    common_menu_color = [Color.White, Color.Yellow, Color.White, Color.White, Color.White];
+    push_button_color = CustomColor(0, 255, 127, 255);
+}
+
+void initialize_data_replay() "[basic] Sub: initialize_data (Replay)"
+{
+    max_record_time = WorkshopSettingInteger("Bot Recording Settings", "Recording Time (sec)", 10, 5, 60, 0);
+    accuracy_flg = WorkshopSettingCombo("Bot Recording Settings", "Recording Accuracy", 0, ["Normal", "High"], 0);
+    opt_record_type = "Enemy";
+    bot_team_name = Team.Team2;
+    MinWait();
+    replay_start_flg = true;
+    opt_replay_type = "ON";
+    STAT_TIM = 1;
+    opt_team_type = Team.Team2;
+    button_list_normal = [null, Button.PrimaryFire, Button.SecondaryFire, Button.Ability1, Button.Ability2, Button.Ultimate, Button.Interact, Button.Jump, Button.Crouch, Button.Melee, Button.Reload];
+    MinWait();
+}
+
+void initialize_hud() "[basic] Sub: initialize_hud"
+{
+    CreateHudText(LocalPlayer() != HostPlayer() ? LocalPlayer() : null, null, null, <"Press [<0>] to change hero", InputBindingString(Button.Interact)>, Location.Top, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(adjust_tracking_flg == true || adjust_circling_flg == true ? HostPlayer() : null, null, null, <"\r\nZoom In : [ <0> ]\r\n Zoom Out : [ <1> ]", IconString(Icon.ArrowUp), IconString(Icon.ArrowDown)>, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText(LocalPlayer().description_txt[4] == true ? null : (fc_camera_status != "Camera Replay" && start_flg == false) == true || IsButtonHeld(HostPlayer(), Button.Interact) == true ? HostPlayer() : null, null, null, LocalPlayer().opt_view_flg == true ? <"Press <0> to select the menu", <"[Left] [<0>] [Right]", InputBindingString(Button.Interact)>> : <"Hold [<0>] for <1> seconds to display the menu", InputBindingString(Button.Interact), check_interact_time>, Location.Top, 0, Color.White, Color.White, IsButtonHeld(HostPlayer(), Button.Interact) == true && LocalPlayer().opt_view_flg == false && opt_interact_holdtime >= (start_flg == false || opt_slowmotion_flg == false ? check_interact_time : check_interact_time * 1 / slowmotion_speed) ? Color.Rose : Color.White, HudTextRev.VisibleToStringAndColor, Spectators.DefaultVisibility);
+    CreateHudText((fc_camera_status == "Camera Test" || fc_camera_status == "Camera Recording") == true ? HostPlayer() : null, null, null, <"\r\nAcceleration : [ <0> ]\r\n Deceleration : [ <1> ]", InputBindingString(Button.SecondaryFire), InputBindingString(Button.PrimaryFire)>, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    MinWait();
+    CreateHudText((fc_camera_status == "Camera Test" || fc_camera_status == "Camera Recording") == true ? HostPlayer() : null, null, null, <"\r\nMove Forward : [ <0> ]\r\n Move Back : [ <1> ]", IconString(Icon.ArrowUp), IconString(Icon.ArrowDown)>, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText((adjust_tracking_flg == true || adjust_circling_flg == true || fc_camera_status == "Camera Test" || fc_camera_status == "Camera Recording") == true ? HostPlayer() : null, null, null, <"\r\nMove left : [ <0> ]\r\n Move right : [ <1> ]", IconString(Icon.ArrowLeft), IconString(Icon.ArrowRight)>, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateHudText((adjust_tracking_flg == true || adjust_circling_flg == true || fc_camera_status == "Camera Test" || fc_camera_status == "Camera Recording") == true ? HostPlayer() : null, null, null, <"\r\nMove up : [ <0> ]\r\n Move down : [ <1> ]", InputBindingString(Button.Jump), InputBindingString(Button.Crouch)>, Location.Right, 0, Color.White, Color.White, Color.White, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+    CreateProgressBarHudText(record_start_flg == true ? HostPlayer() : null, 100 - record_master_time / max_record_time * 100, <"Remaining recording time (<0> sec)", RoundToInteger(max_record_time - record_master_time, Rounding.Nearest)>, Location.Top, 0.001, Color.Aqua, Color.White, ProgressBarHudEvaluation.VisibleToValuesAndColor, Spectators.DefaultVisibility);
+    CreateHudText(LocalPlayer().description_txt[0] == true ? LocalPlayer() : null, null, null, <"<0> <1> <2>", LocalPlayer().description_txt[1], LocalPlayer().description_txt[3] != null ? <"[<0>]", InputBindingString(LocalPlayer().description_txt[3])> : "", LocalPlayer().description_txt[2] != null ? LocalPlayer().description_txt[2] : "">, Location.Top, 1, Color.White, Color.White, Color.Yellow, HudTextRev.VisibleToAndString, Spectators.DefaultVisibility);
+}
+
+rule: "[basic] disable scoring"
+if (IsGameInProgress() == true)
+{
+    DisableScoring();
+}
+
+rule: "[basic] Assemble Heroes Time"
+if (IsAssemblingHeroes() == true)
+{
+    if (game_started_flg == true)
+    {
+        SetMatchTime(assemble_time);
+    }
+    else
+    {
+        SetMatchTime(0);
+        game_started_flg = true;
+    }
+}
+
+rule: "[basic] Reset Game Timer"
+if (IsGameInProgress() == true)
+if (MatchTime() < 600)
+if (CurrentGameMode() == GameMode.TeamDeathmatch)
+{
+    SetMatchTime(900);
+}
+
+void slowmotion_set() "[basic] Sub: slowmotion_set"
+{
+    if (opt_slowmotion_flg == true)
+    {
+        SetSlowMotion(slowmotion_speed);
+    }
+}
+
+void slowmotion_cancel() "[basic] Sub: slowmotion_cancel"
+{
+    if (opt_slowmotion_flg == true)
+    {
+        SetSlowMotion(100);
+    }
+}
+
+void check_map() "[basic] Sub: check_map"
+{
+    if (CurrentMap() == Map.Workshop_Green_Screen)
+    {
+        green_screen_map_flg = true;
+    }
+    else
+    {
+        green_screen_map_flg = false;
+    }
+}
+
+void debug_log() "[basic] Sub: debug_log"
+{
+    LogToInspector(<"log <0>", debug>);
+    debug += 1;
+    MinWait();
+}
+
+rule: "[basic] join player"
+Event.OnPlayerJoin
+{
+    DisableNameplates(AllPlayers(Team.All), EventPlayer());
+}
+
+rule: "[basic] Reset Game Timer Normal Mode (Wait Start Battle)"
+if (IsAssemblingHeroes() == false)
+if (IsGameInProgress() == false)
+if (MatchTime() < 600)
+if (CurrentGameMode() != GameMode.TeamDeathmatch)
+{
+    WaitUntil(CountOf(control_map_list) > 0, 5);
+    if (ArrayContains(control_map_list, CurrentMap()) == true)
+    {
+        SetMatchTime(0);
+        WaitUntil(IsGameInProgress() == true, 5);
+    }
+    else
+    {
+        SetMatchTime(0);
+        WaitUntil(IsGameInProgress() == true, 5);
+    }
+}
+
+rule: "[basic] Reset Game Timer Normal Mode (Active Battle)"
+if (IsAssemblingHeroes() == false)
+if (IsGameInProgress() == true)
+if (MatchTime() < 600)
+if (CurrentGameMode() != GameMode.TeamDeathmatch)
+{
+    if (ArrayContains(control_map_list, CurrentMap()) == true)
+    {
+        SetMatchTime(900);
+    }
+    else
+    {
+        SetMatchTime(900);
+    }
+}
+
+void disable_game_settings() "[player] Sub: disable_game_settings"
+{
+    DisableMovementCollisionWithPlayers(EventPlayer());
+    DisableGameModeHud(EventPlayer());
+    DisableGameModeInworldUI(EventPlayer());
+    DisableAnnouncer();
+    DisableTextChat(EventPlayer());
+    DisableNameplates(EventPlayer(), AllPlayers(Team.All));
+    DisableKillFeed(EventPlayer());
+    DisableMessages(EventPlayer());
+}
+
+rule: "[player] initialize player"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()) == true)
+if (IsDummyBot(EventPlayer()) == false)
+if (IsAlive(EventPlayer()) == true)
+{
+    SetWeapon(EventPlayer(), 1);
+    if (spawn_flg == false)
+    {
+        disable_game_settings();
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        StartForcingPlayerOutlines(EventPlayer(), AllPlayers(Team.All), false, Color.White, OutlineType.Always);
+        common_opt_txt_view = [];
+        opt_change_layer = [];
+        menu_item_x_pos_ptn = [];
+        status_list = status_name_list;
+        opt_status_value = status_name_list[0];
+        StartDamageModification(EventPlayer(), AllPlayers(Team.All), 1, DamageModificationRev.ReceiversDamagersAndDamagePercent);
+        spawn_flg = true;
+        if (EventPlayer() == HostPlayer())
+        {
+            if (green_screen_map_flg == true)
+            {
+                menu_start();
+            }
+        }
+    }
+    else
+    {
+        if (EventPlayer() == HostPlayer())
+        {
+            menu_start();
+        }
+        else
+        {
+            if (teleport_pos != null)
+            {
+                Teleport(EventPlayer(), teleport_pos);
+                Wait(0.1, WaitBehavior.IgnoreCondition);
+                SetFacing(EventPlayer(), spawn_face_pos, Relative.ToWorld);
+                Wait(0.1, WaitBehavior.IgnoreCondition);
+                teleport_pos = null;
+            }
+            change_hero_flg = false;
+        }
+    }
+}
+
+rule: "[player] ult_charge"
+Event.OngoingPlayer
+if (UltimateChargePercent(EventPlayer()) < 100)
+if (IsUsingUltimate(EventPlayer()) == false)
+if (HasStatus(EventPlayer(), Status.Hacked) == false)
+if (IsAlive(EventPlayer()) == true)
+{
+    SetUltimateCharge(EventPlayer(), 100);
+}
+
+rule: "[player] enable movement collision with environment"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == false)
+if (opt_view_flg == false)
+if (HasSpawned(EventPlayer()) == true)
+if (start_flg == false)
+if (adjust_tracking_flg == false)
+if (adjust_circling_flg == false)
+if (green_screen_map_flg == false)
+if (IsMoving(EventPlayer()) == true)
+if (IsAlive(EventPlayer()) == true)
+if (record_start_flg == false)
+{
+    DisableMovementCollisionWithEnvironment(EventPlayer(), false);
+}
+
+rule: "[player] opt change player speed on"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (IsDummyBot(EventPlayer()) == false)
+if (HasSpawned(EventPlayer()) == true)
+if (opt_view_flg == false)
+if (start_flg == false)
+if (adjust_tracking_flg == false)
+if (adjust_circling_flg == false)
+if (spawn_flg == true)
+if (fc_camera_status != "Camera Replay")
+{
+    opt_fast_move_mode = true;
+}
+
+rule: "[player] recovery life"
+Event.OnDamageTaken
+if (IsDummyBot(EventPlayer()) == false)
+{
+    SetPlayerHealth(EventPlayer(), MaxHealth(EventPlayer()));
+}
+
+rule: "[player/bot] dead hero"
+Event.OnDeath
+if (change_hero_flg != true)
+{
+    if (IsDummyBot(EventPlayer()) == true)
+    {
+        teleport_pos = PositionOf(EventPlayer());
+        if ((TeamOf(EventPlayer()) == Team.Team2 && SlotOf(EventPlayer()) == camera_bot_slot && record_start_flg == true) == true)
+        {
+            opt_recstop_flg = true;
+        }
+        if (p_replay_start_flg == true)
+        {
+            replay_force_stop_flg = true;
+        }
+        if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Kill")])
+        {
+            if (dead_status_flg == false)
+            {
+                dead_status_flg = true;
+            }
+            Abort();
+        }
+        else
+        {
+            if (EventWasEnvironment() == true)
+            {
+                Teleport(EventPlayer(), NearestWalkablePosition(EventPlayer()));
+            }
+        }
+        Resurrect(EventPlayer());
+        SetStatus(EventPlayer(), null, Status.Unkillable, 9999);
+    }
+    else
+    {
+        Wait(5, WaitBehavior.IgnoreCondition);
+        if (teleport_pos == null)
+        {
+            if (EventWasEnvironment() == true)
+            {
+                teleport_pos = NearestWalkablePosition(PositionOf(EventPlayer()));
+            }
+            else
+            {
+                teleport_pos = PositionOf(EventPlayer());
+            }
+        }
+        Resurrect(EventPlayer());
+    }
+}
+
+rule: "[player/bot] stun status loop"
+Event.OngoingPlayer
+if (HasStatus(EventPlayer(), Status.Stunned) == true)
+if (HasStatus(EventPlayer(), Status.Asleep) == false)
+if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Stunned")])
+{
+    WaitUntil(HasStatus(EventPlayer(), Status.Stunned) == false, 5);
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    if (IsDummyBot(EventPlayer()) == true)
+    {
+        SetStatus(EventPlayer(), null, Status.Stunned, 5);
+        MinWait();
+        LoopIf(opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Stunned")]);
+    }
+    else
+    {
+        if (opt_view_flg == false)
+        {
+            SetStatus(EventPlayer(), null, Status.Stunned, 5);
+            MinWait();
+            Loop();
+        }
+    }
+}
+
+rule: "[bot] spawn_replay_bot_initialize"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()) == true)
+if (IsDummyBot(EventPlayer()) == true)
+if (bot_type == 1)
+{
+    StartForcingPlayerOutlines(EventPlayer(), AllPlayers(Team.All), false, Color.White, OutlineType.Default);
+    DisableNameplates(EventPlayer(), AllPlayers(Team.All));
+    SetStatus(EventPlayer(), null, Status.Unkillable, 9999);
+    MinWait();
+    current_hero = HeroOf(EventPlayer());
+    opt_edit_status = "Delete";
+    edit_status = "Enable";
+    slot_number = SlotOf(EventPlayer());
+    MinWait();
+    copy_from_player = [TeamOf(HostPlayer()), SlotOf(HostPlayer())];
+    copy_replay_data();
+    status_list = bot_status_list;
+    ModifyVariable(status_list, Operation.AppendToArray, status_name_list);
+    status_cnt = IndexOfArrayValue(status_list, "Delete");
+    SetRespawnMaxTime(EventPlayer(), 15);
+    replay_target_flg = true;
+}
+
+rule: "[bot] enable status for dummy bot"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (status_enable_flg == true)
+{
+    PlayersInSlot(edit_slot, opt_team_type).opt_status_value = PlayersInSlot(edit_slot, opt_team_type).status_list[PlayersInSlot(edit_slot, opt_team_type).status_cnt];
+    opt_status_reset();
+    discard_effect();
+    status_set();
+    status_enable_flg = false;
+}
+
+rule: "[bot] dummybot death loop"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (dead_status_flg == true)
+{
+    WaitUntil(IsDead(EventPlayer()) == false, 10);
+    if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Kill")])
+    {
+        if (IsDead(EventPlayer()) == true)
+        {
+            Resurrect(EventPlayer());
+        }
+        else
+        {
+            Wait(0.1, WaitBehavior.IgnoreCondition);
+        }
+        Teleport(EventPlayer(), teleport_pos);
+        WaitUntil(IsAlive(EventPlayer()) == true, 10);
+        Wait(0.25, WaitBehavior.IgnoreCondition);
+        Kill(EventPlayer(), null);
+        Loop();
+    }
+    dead_status_flg = false;
+}
+
+rule: "[bot] reset dummy bot hp"
+Event.OngoingPlayer
+if (Health(EventPlayer()) == 1)
+if (IsDummyBot(EventPlayer()) == true)
+{
+    SetPlayerHealth(EventPlayer(), MaxHealth(EventPlayer()));
+}
+
+rule: "[bot] enemy bots hp"
+Event.OnDamageTaken
+if (IsDummyBot(EventPlayer()) == true)
+if (IsAlive(EventPlayer()) == true)
+{
+    SetPlayerHealth(EventPlayer(), MaxHealth(EventPlayer()));
+}
+
+disabled rule: "[bot] friendly bots hp"
+Event.OngoingPlayer
+Team.Team1
+if (IsDummyBot(EventPlayer()) == true)
+if (IsAlive(EventPlayer()) == true)
+if (Health(EventPlayer()) != MaxHealth(EventPlayer()) / 1.6)
+if (SlotOf(EventPlayer()) != camera_bot_slot)
+if (SlotOf(EventPlayer()) != camera_dummy_bot_slot)
+{
+    SetPlayerHealth(EventPlayer(), MaxHealth(EventPlayer()) / 1.6);
+    if ((HeroOf(EventPlayer()) == Hero.Mercy || HealthOfType(EventPlayer(), HealthType.Shields) != 0) == true)
+    {
+        Wait(0.5, WaitBehavior.IgnoreCondition);
+    }
+    else
+    {
+        MinWait();
+    }
+    LoopIfConditionIsTrue();
+}
+
+rule: "[camera] camera pos x"
+Event.OngoingPlayer
+if ((adjust_tracking_flg == true || adjust_circling_flg == true) == true)
+if (EventPlayer() == HostPlayer())
+if (HostPlayer().input_throttle != Vector(0, 0, 0))
+if (adjust_lock_flg == false)
+{
+    if ((input_throttle == Right() || input_throttle == Right() + Forward() || input_throttle == Right() + Backward()) == true)
+    {
+        adjust_left();
+    }
+    else if ((input_throttle == Left() || input_throttle == Left() + Forward() || input_throttle == Left() + Backward()) == true)
+    {
+        adjust_right();
+    }
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "[camera] camera pos y"
+Event.OngoingPlayer
+if ((adjust_tracking_flg == true || adjust_circling_flg == true) == true)
+if ((IsButtonHeld(EventPlayer(), Button.Crouch) == true || IsButtonHeld(EventPlayer(), Button.Jump) == true) == true)
+if (EventPlayer() == HostPlayer())
+if (adjust_lock_flg == false)
+{
+    if (adjust_tracking_flg == true)
+    {
+        if (camera_len > judge_add_speed_len)
+        {
+            additional_adjust = 0.035;
+        }
+    }
+    else
+    {
+        if (circling_len > judge_add_speed_len)
+        {
+            additional_adjust = 0.035;
+        }
+    }
+    if (IsButtonHeld(EventPlayer(), Button.Jump) == true)
+    {
+        if (adjust_tracking_flg == true)
+        {
+            y += adjust_param + additional_adjust;
+        }
+        else
+        {
+            circling_y += adjust_param + additional_adjust;
+        }
+    }
+    else if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+    {
+        if (adjust_tracking_flg == true)
+        {
+            y -= adjust_param + additional_adjust;
+        }
+        else
+        {
+            circling_y -= adjust_param + additional_adjust;
+        }
+    }
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "[camera] camera pos z"
+Event.OngoingPlayer
+if ((adjust_tracking_flg == true || adjust_circling_flg == true) == true)
+if (EventPlayer() == HostPlayer())
+if (HostPlayer().input_throttle != Vector(0, 0, 0))
+if (adjust_lock_flg == false)
+{
+    if (adjust_tracking_flg == true)
+    {
+        if (camera_len > judge_add_speed_len)
+        {
+            additional_adjust = 0.035;
+        }
+    }
+    else
+    {
+        if (circling_len > judge_add_speed_len)
+        {
+            additional_adjust = 0.035;
+        }
+    }
+    if ((input_throttle == Forward() || input_throttle == Left() + Forward() || input_throttle == Right() + Forward()) == true)
+    {
+        if (adjust_tracking_flg == true)
+        {
+            if (camera_len - zoom_param >= 0)
+            {
+                camera_len -= zoom_param + additional_adjust;
+            }
+            else
+            {
+                camera_len = 0;
+            }
+        }
+        else
+        {
+            if (circling_len - zoom_param >= 0)
+            {
+                circling_len -= zoom_param + additional_adjust;
+            }
+            else
+            {
+                circling_len = 0;
+            }
+        }
+    }
+    else if ((input_throttle == Backward() || input_throttle == Left() + Backward() || input_throttle == Right() + Backward()) == true)
+    {
+        if (adjust_tracking_flg == true)
+        {
+            camera_len += zoom_param + additional_adjust;
+        }
+        else
+        {
+            circling_len += zoom_param + additional_adjust;
+        }
+    }
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+rule: "[camera] judge adjust lock"
+Event.OngoingPlayer
+if ((adjust_tracking_flg == true || adjust_circling_flg == true) == true)
+if (EventPlayer() == HostPlayer())
+if (HostPlayer().input_throttle != Vector(0, 0, 0))
+if ((HeroOf(EventPlayer()) == Hero.JunkerQueen && IsUsingUltimate(EventPlayer()) == true || HeroOf(EventPlayer()) == Hero.Reinhardt && IsUsingAbility1(EventPlayer()) == true) == true)
+{
+    adjust_lock_flg = true;
+    WaitUntil((HeroOf(EventPlayer()) == Hero.JunkerQueen && IsUsingUltimate(EventPlayer()) == false || HeroOf(EventPlayer()) == Hero.Reinhardt && IsUsingAbility1(EventPlayer()) == false) == true, 9999);
+    adjust_lock_flg = false;
+    MinWait();
+    LoopIfConditionIsTrue();
+}
+
+void adjust_left() "[camera] Sub: adjust_left"
+{
+    if (adjust_tracking_flg == true)
+    {
+        ChaseVariableAtRate(camera_degree, camera_degree - horizontal_speed, 1000 * MagnitudeOf(XOf(ThrottleOf(EventPlayer()))), RateChaseReevaluation.DestinationAndRate);
+        WaitUntil(XOf(HostPlayer().input_throttle) >= 0, 99999);
+        StopChasingVariable(camera_degree);
+    }
+    else
+    {
+        ChaseVariableAtRate(circling_degree, circling_degree - horizontal_speed, 1000 * MagnitudeOf(XOf(ThrottleOf(EventPlayer()))), RateChaseReevaluation.DestinationAndRate);
+        WaitUntil(XOf(HostPlayer().input_throttle) >= 0, 99999);
+        StopChasingVariable(circling_degree);
+    }
+}
+
+void adjust_right() "[camera] Sub: adjust_right"
+{
+    if (adjust_tracking_flg == true)
+    {
+        ChaseVariableAtRate(camera_degree, camera_degree + horizontal_speed, 1000 * MagnitudeOf(XOf(ThrottleOf(EventPlayer()))), RateChaseReevaluation.DestinationAndRate);
+        WaitUntil(XOf(HostPlayer().input_throttle) <= 0, 99999);
+        StopChasingVariable(camera_degree);
+    }
+    else
+    {
+        ChaseVariableAtRate(circling_degree, circling_degree + horizontal_speed, 1000 * MagnitudeOf(XOf(ThrottleOf(EventPlayer()))), RateChaseReevaluation.DestinationAndRate);
+        WaitUntil(XOf(HostPlayer().input_throttle) <= 0, 99999);
+        StopChasingVariable(circling_degree);
+    }
+}
+
+void adjust_auto_circling() "[camera] Sub: adjust_auto_circling"
+{
+    if (circling_data[0] == "Left")
+    {
+        ChaseVariableAtRate(circling_degree_param, circling_degree_param - (opt_slowmotion_flg == true ? circling_data[1] * 100 / slowmotion_speed : circling_data[1]), 1000 * 1, RateChaseReevaluation.DestinationAndRate);
+        WaitUntil(start_flg == false, 99999);
+        StopChasingVariable(circling_degree_param);
+    }
+    else
+    {
+        ChaseVariableAtRate(circling_degree_param, circling_degree_param + (opt_slowmotion_flg == true ? circling_data[1] * 100 / slowmotion_speed : circling_data[1]), 1000 * 1, RateChaseReevaluation.DestinationAndRate);
+        WaitUntil(start_flg == false, 99999);
+        StopChasingVariable(circling_degree_param);
+    }
+}
+
+void adjust_tracking_xy() "[camera] camera adjust additional degree"
+{
+    adjust_end_flg = false;
+    ChaseVariableAtRate(adjust_degree_x, adjust_lock_flg == true ? adjust_degree_x : adjust_degree_x + AngleDifference(HorizontalAngleFromDirection(base_face_pos), HorizontalAngleFromDirection(FacingDirectionOf(EventPlayer()))) / 1, 1000, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(adjust_degree_y, adjust_lock_flg == true ? adjust_degree_y : adjust_degree_y + AngleDifference(VerticalAngleFromDirection(base_face_pos), VerticalAngleFromDirection(FacingDirectionOf(EventPlayer()))) / 50 * -1, 1000, RateChaseReevaluation.DestinationAndRate);
+    while (adjust_tracking_flg == true)
+    {
+        WaitUntil(base_face_pos != UpdateEveryFrame(FacingDirectionOf(EventPlayer())) || adjust_tracking_flg == false, 9999);
+        if (adjust_tracking_flg == true)
+        {
+            SetFacing(EventPlayer(), base_face_pos, Relative.ToWorld);
+            Wait(0.15, WaitBehavior.IgnoreCondition);
+        }
+    }
+    StopChasingVariable(adjust_degree_x);
+    StopChasingVariable(adjust_degree_y);
+    adjust_end_flg = true;
+}
+
+void adjust_circling_xy() "[camera] camera adjust additional degree (circling)"
+{
+    adjust_end_flg = false;
+    ChaseVariableAtRate(circling_degree_x, adjust_lock_flg == true ? circling_degree_x : circling_degree_x + AngleDifference(HorizontalAngleFromDirection(base_face_pos), HorizontalAngleFromDirection(FacingDirectionOf(EventPlayer()))) / 1, 1000, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(circling_degree_y, adjust_lock_flg == true ? circling_degree_y : circling_degree_y + AngleDifference(VerticalAngleFromDirection(base_face_pos), VerticalAngleFromDirection(FacingDirectionOf(EventPlayer()))) / 50 * -1, 1000, RateChaseReevaluation.DestinationAndRate);
+    while (adjust_circling_flg == true)
+    {
+        WaitUntil(base_face_pos != UpdateEveryFrame(FacingDirectionOf(EventPlayer())) || adjust_circling_flg == false, 9999);
+        if (adjust_circling_flg == true)
+        {
+            SetFacing(EventPlayer(), base_face_pos, Relative.ToWorld);
+            Wait(0.15, WaitBehavior.IgnoreCondition);
+        }
+    }
+    StopChasingVariable(circling_degree_x);
+    StopChasingVariable(circling_degree_y);
+    adjust_end_flg = true;
+}
+
+void camera_on() "[camera] Sub: camera_on"
+{
+    if (adjust_tracking_flg == true)
+    {
+        StartCamera(EventPlayer(), UpdateEveryFrame(WorldVectorOf(Vector(camera_len * CosineFromDegrees(camera_degree), y, camera_len * SineFromDegrees(camera_degree)), EventPlayer(), LocalVector.RotationAndTranslation)), UpdateEveryFrame(WorldVectorOf(Vector(camera_len * CosineFromDegrees(camera_degree) + camera_len * CosineFromDegrees(camera_degree - 180 - adjust_degree_x), adjust_degree_y, camera_len * SineFromDegrees(camera_degree) + camera_len * SineFromDegrees(camera_degree - 180 - adjust_degree_x)), EventPlayer(), LocalVector.RotationAndTranslation)), 25);
+        DisallowButton(EventPlayer(), Button.Jump);
+        DisallowButton(EventPlayer(), Button.Crouch);
+        SetJumpEnabled(EventPlayer(), false);
+        SetCrouchEnabled(EventPlayer(), false);
+    }
+    else if (adjust_circling_flg == true)
+    {
+        StartCamera(EventPlayer(), UpdateEveryFrame(WorldVectorOf(Vector(circling_len * CosineFromDegrees(circling_degree), circling_y, circling_len * SineFromDegrees(circling_degree)), EventPlayer(), LocalVector.RotationAndTranslation)), UpdateEveryFrame(WorldVectorOf(Vector(circling_len * CosineFromDegrees(circling_degree) + circling_len * CosineFromDegrees(circling_degree - 180 - circling_degree_x), circling_degree_y, circling_len * SineFromDegrees(circling_degree) + circling_len * SineFromDegrees(circling_degree - 180 - circling_degree_x)), EventPlayer(), LocalVector.RotationAndTranslation)), 25);
+        DisallowButton(EventPlayer(), Button.Jump);
+        DisallowButton(EventPlayer(), Button.Crouch);
+        SetJumpEnabled(EventPlayer(), false);
+        SetCrouchEnabled(EventPlayer(), false);
+    }
+    else
+    {
+        SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), 0, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Tracking")])
+        {
+            StartCamera(camera_activate_all == true ? FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false) : HostPlayer(), UpdateEveryFrame(WorldVectorOf(Vector(camera_len * CosineFromDegrees(camera_degree), y, camera_len * SineFromDegrees(camera_degree)), EventPlayer(), LocalVector.RotationAndTranslation)), UpdateEveryFrame(WorldVectorOf(Vector(tracking_pos[0], tracking_pos[1], tracking_pos[2]), EventPlayer(), LocalVector.RotationAndTranslation)), 0);
+        }
+        else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Fixed")])
+        {
+            StartCamera(camera_activate_all == true ? FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false) : HostPlayer(), fixed_pos[0], RayCastHitPosition(fixed_pos[0], fixed_pos[0] + fixed_pos[1] * 0.1, AllPlayers(Team.All), null, false), 0);
+        }
+        else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Circling")])
+        {
+            circling_degree_param = circling_degree;
+            StartCamera(camera_activate_all == true ? FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false) : HostPlayer(), UpdateEveryFrame(WorldVectorOf(Vector(circling_len * CosineFromDegrees(circling_degree_param), circling_y, circling_len * SineFromDegrees(circling_degree_param)), EventPlayer(), LocalVector.RotationAndTranslation)), UpdateEveryFrame(WorldVectorOf(Vector(circling_len * CosineFromDegrees(circling_degree_param) + circling_len * CosineFromDegrees(circling_degree_param - 180 - circling_degree_x), circling_degree_y, circling_len * SineFromDegrees(circling_degree_param) + circling_len * SineFromDegrees(circling_degree_param - 180 - circling_degree_x)), EventPlayer(), LocalVector.RotationAndTranslation)), 25);
+            async! adjust_auto_circling();
+        }
+    }
+}
+
+rule: "[camera] additional adjust param"
+if (adjust_tracking_flg == true)
+if (camera_len > judge_add_speed_len)
+{
+    additional_adjust = 0.035;
+    WaitUntil((camera_len < judge_add_speed_len || adjust_tracking_flg == false) == true, 99999);
+    additional_adjust = 0;
+}
+
+rule: "[camera] additional adjust param circle"
+if (adjust_circling_flg == true)
+if (circling_len > judge_add_speed_len)
+{
+    additional_adjust = 0.035;
+    WaitUntil((circling_len < judge_add_speed_len || adjust_circling_flg == false) == true, 99999);
+    additional_adjust = 0;
+}
+
+void free_camera_start_recording() "[camera] Sub: free_camera recording start"
+{
+    record_master_time = 0;
+    HostPlayer().current_face_vec_num = 1;
+    HostPlayer().current_botpos_num = 1;
+    data_reset_cnt();
+    data_reset_status();
+    restore_max_recordtime = max_record_time;
+    max_record_time = drone_camera_rectime;
+    HostPlayer().record_max_time = max_record_time;
+    record_hero = HeroOf(PlayersInSlot(camera_bot_slot, Team.Team1));
+    MinWait();
+    check_sync();
+    HostPlayer().rec_start_position_vec = PositionOf(PlayersInSlot(camera_bot_slot, Team.Team1));
+    HostPlayer().rec_start_face_vec = FacingDirectionOf(HostPlayer());
+    BigMessage(HostPlayer(), "Start Recording");
+    ChaseVariableAtRate(record_master_time, max_record_time, 1, RateChaseReevaluation.None);
+    MinWait();
+    record_start_flg = true;
+}
+
+rule: "[camera] spawn_camera_bot_initialize"
+Event.OngoingPlayer
+if (HasSpawned(EventPlayer()) == true)
+if (IsDummyBot(EventPlayer()) == true)
+if (bot_type == 2)
+{
+    if (SlotOf(EventPlayer()) == camera_bot_slot)
+    {
+        DisableNameplates(EventPlayer(), AllPlayers(Team.All));
+        ForceThrottle(EventPlayer(), 0, 0.7, 0, 0.7, 0, 0.7);
+        SetInvisible(EventPlayer(), InvisibleTo.All);
+        SetGravity(EventPlayer(), 0);
+        MinWait();
+        camera_bot_first_spawn_pos = PositionOf(EventPlayer());
+        fc_latest_camera_pos = camera_bot_first_spawn_pos;
+        StartForcingPlayerPosition(PlayersInSlot(camera_bot_slot, Team.Team1), escape_point, false);
+        StartForcingDummyBotName(EventPlayer(), "Camera Bot");
+    }
+    else
+    {
+        StartForcingDummyBotName(EventPlayer(), "Dummy Bot");
+    }
+    DisableMovementCollisionWithPlayers(EventPlayer());
+    DisableMovementCollisionWithEnvironment(EventPlayer(), false);
+    StartForcingPlayerOutlines(EventPlayer(), AllPlayers(Team.All), false, Color.White, OutlineType.Default);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    MinWait();
+    slot_number = SlotOf(EventPlayer());
+}
+
+void fc_initialize() "[camera] Sub: fc_initialize"
+{
+    get_fc_global_param();
+    SetGravity(EventPlayer(), 0);
+    SetAbility1Enabled(EventPlayer(), false);
+    SetAbility2Enabled(EventPlayer(), false);
+    SetUltimateAbilityEnabled(EventPlayer(), false);
+    SetJumpEnabled(EventPlayer(), false);
+    SetCrouchEnabled(EventPlayer(), false);
+    SetPrimaryFireEnabled(EventPlayer(), false);
+    SetSecondaryFireEnabled(EventPlayer(), false);
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    SetAimSpeed(EventPlayer(), p_fc_aim_speed);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    if (EventPlayer() == HostPlayer())
+    {
+        ForceThrottle(EventPlayer(), 0, 0.7, 0, 0.7, 0, 0.7);
+        SetMoveSpeed(EventPlayer(), 0);
+        fc_latest_face_pos = Vector(XOf(FacingDirectionOf(EventPlayer())), 0, ZOf(FacingDirectionOf(EventPlayer())));
+        HostPlayer().fc_latest_camera_pos = PositionOf(HostPlayer());
+        if (adjust_fixed_flg == true && fixed_pos[1] != null)
+        {
+            SetFacing(EventPlayer(), fixed_pos[1], Relative.ToWorld);
+        }
+        else if (adjust_fixed_flg == false && PlayersInSlot(camera_bot_slot, Team.Team1).fc_latest_face_pos != null)
+        {
+            SetFacing(EventPlayer(), PlayersInSlot(camera_bot_slot, Team.Team1).fc_latest_face_pos, Relative.ToWorld);
+        }
+        else
+        {
+            SetFacing(EventPlayer(), WorldVectorOf(Vector(0, 0, -1), EventPlayer(), LocalVector.Rotation), Relative.ToWorld);
+        }
+    }
+    else
+    {
+        StopForcingPlayerPosition(EventPlayer());
+        Teleport(EventPlayer(), rec_start_position_vec);
+        WaitUntil(PositionOf(EventPlayer()) == rec_start_position_vec, 5);
+        camera_set_slot = EventPlayer();
+        camera_set();
+    }
+    fc_camera_enable_flg = true;
+}
+
+void fc_camera_end() "[camera] Sub: fc_camera_end"
+{
+    StopForcingThrottle(HostPlayer());
+    SetInvisible(PlayersInSlot(camera_dummy_bot_slot, Team.Team1), InvisibleTo.All);
+    StopForcingPlayerPosition(HostPlayer());
+    MinWait();
+    Teleport(HostPlayer(), HostPlayer().fc_latest_camera_pos);
+    StopChasingVariable(HostPlayer().fc_adjust_param);
+    StopChasingVariable(HostPlayer().fc_addy_param);
+    MinWait();
+    if (adjust_fixed_flg == true)
+    {
+        fixed_pos[2] = PositionOf(PlayersInSlot(camera_bot_slot, Team.Team1));
+    }
+    else
+    {
+        PlayersInSlot(camera_bot_slot, Team.Team1).fc_latest_camera_pos = PositionOf(PlayersInSlot(camera_bot_slot, Team.Team1));
+    }
+    MinWait();
+    SetInvisible(HostPlayer(), InvisibleTo.None);
+    SetGravity(HostPlayer(), 100);
+    SetAbility1Enabled(HostPlayer(), true);
+    MinWait();
+    SetAbility2Enabled(HostPlayer(), true);
+    SetUltimateAbilityEnabled(HostPlayer(), true);
+    SetJumpEnabled(HostPlayer(), true);
+    SetCrouchEnabled(HostPlayer(), true);
+    SetPrimaryFireEnabled(HostPlayer(), true);
+    MinWait();
+    SetSecondaryFireEnabled(HostPlayer(), true);
+    SetAimSpeed(HostPlayer(), 100);
+    ClearStatus(HostPlayer(), Status.PhasedOut);
+    if (adjust_fixed_flg == true)
+    {
+        fixed_pos[0] = EyePosition(PlayersInSlot(camera_bot_slot, Team.Team1));
+        fixed_pos[1] = FacingDirectionOf(PlayersInSlot(camera_bot_slot, Team.Team1));
+    }
+    else
+    {
+        PlayersInSlot(camera_bot_slot, Team.Team1).fc_latest_face_pos = FacingDirectionOf(PlayersInSlot(camera_bot_slot, Team.Team1));
+    }
+    SetFacing(HostPlayer(), HostPlayer().fc_latest_face_pos, Relative.ToWorld);
+    StartForcingPlayerPosition(PlayersInSlot(camera_dummy_bot_slot, Team.Team1), escape_point, false);
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    StartForcingPlayerPosition(PlayersInSlot(camera_bot_slot, Team.Team1), escape_point, false);
+    AllPlayers(Team.All).fc_camera_enable_flg = false;
+}
+
+rule: "[camera] upspeed"
+Event.OngoingPlayer
+if (fc_camera_enable_flg == true)
+{
+    WaitUntil(fc_camera_enable_flg == false || (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == true && IsButtonHeld(EventPlayer(), Button.PrimaryFire) == false) == true, 99999);
+    if (fc_camera_enable_flg == false)
+    {
+        Abort();
+    }
+    HostPlayer().fc_dest_adjust_param = HostPlayer().p_fc_max_acc_speed;
+    if (IsButtonHeld(EventPlayer(), Button.Jump) == true)
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed;
+    }
+    else if (IsButtonHeld(EventPlayer(), Button.Crouch) == true)
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed * -1;
+    }
+    WaitUntil(IsButtonHeld(EventPlayer(), Button.SecondaryFire) == false, 99999);
+    if (IsButtonHeld(EventPlayer(), Button.PrimaryFire) == false)
+    {
+        HostPlayer().fc_dest_adjust_param = HostPlayer().p_fc_camera_speed;
+    }
+    else
+    {
+        HostPlayer().fc_dest_adjust_param = HostPlayer().p_fc_min_dec_speed;
+    }
+    Loop();
+}
+
+rule: "[camera] downspeed"
+Event.OngoingPlayer
+if (fc_camera_enable_flg == true)
+{
+    WaitUntil((fc_camera_enable_flg == false || IsButtonHeld(EventPlayer(), Button.PrimaryFire) == true) == true, 99999);
+    if (fc_camera_enable_flg == false)
+    {
+        Abort();
+    }
+    HostPlayer().fc_down_flg = true;
+    MinWait();
+    HostPlayer().fc_dest_adjust_param = HostPlayer().p_fc_min_dec_speed;
+    if (IsButtonHeld(EventPlayer(), Button.Jump))
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_min_dec_speed;
+    }
+    else if (IsButtonHeld(EventPlayer(), Button.Crouch))
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_min_dec_speed * -1;
+    }
+    else
+    {
+        HostPlayer().fc_dest_addy_param = 0;
+    }
+    WaitUntil(IsButtonHeld(EventPlayer(), Button.PrimaryFire) == false, 99999);
+    if (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == false)
+    {
+        HostPlayer().fc_dest_adjust_param = HostPlayer().p_fc_camera_speed;
+    }
+    else
+    {
+        HostPlayer().fc_dest_adjust_param = HostPlayer().p_fc_max_acc_speed * (IsButtonHeld(EventPlayer(), Button.Crouch) ? -1 : 1);
+    }
+    HostPlayer().fc_down_flg = false;
+    Loop();
+}
+
+rule: "[camera] jump"
+Event.OngoingPlayer
+if (fc_camera_enable_flg == true)
+{
+    WaitUntil((fc_camera_enable_flg == false || IsButtonHeld(EventPlayer(), Button.Jump) == true) == true, 99999);
+    if (fc_camera_enable_flg == false)
+    {
+        Abort();
+    }
+    if (HostPlayer().fc_down_flg == false)
+    {
+        if (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == false)
+        {
+            HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed * 0.5;
+        }
+        else
+        {
+            HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed;
+        }
+    }
+    else
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_min_dec_speed;
+    }
+    WaitUntil(IsButtonHeld(EventPlayer(), Button.Jump) == false, 99999);
+    if (IsButtonHeld(EventPlayer(), Button.Crouch) == false)
+    {
+        HostPlayer().fc_dest_addy_param = 0;
+    }
+    else
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed * 0.5 * -1;
+    }
+    Loop();
+}
+
+rule: "[camera] crouch"
+Event.OngoingPlayer
+if (fc_camera_enable_flg == true)
+{
+    WaitUntil((fc_camera_enable_flg == false || IsButtonHeld(EventPlayer(), Button.Crouch) == true) == true, 99999);
+    if (fc_camera_enable_flg == false)
+    {
+        Abort();
+    }
+    if (HostPlayer().fc_down_flg == false)
+    {
+        if (IsButtonHeld(EventPlayer(), Button.SecondaryFire) == false)
+        {
+            HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed * 0.5 * -1;
+        }
+        else
+        {
+            HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed * -1;
+        }
+    }
+    else
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_min_dec_speed * -1;
+    }
+    WaitUntil(IsButtonHeld(EventPlayer(), Button.Crouch) == false, 99999);
+    if (IsButtonHeld(EventPlayer(), Button.Jump) == false)
+    {
+        HostPlayer().fc_dest_addy_param = 0;
+    }
+    else
+    {
+        HostPlayer().fc_dest_addy_param = HostPlayer().p_fc_camera_speed * 0.5;
+    }
+    Loop();
+}
+
+rule: "[camera] replay camera activate"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (fc_activate_camera_flg == true)
+{
+    fc_replay_cnt = 0;
+    all_initialize_complete_flg = false;
+    replay_force_stop_flg = true;
+    replay_target_flg = true;
+    Wait(0.2, WaitBehavior.IgnoreCondition);
+    fc_activate_camera_flg = false;
+}
+
+rule: "[camera] rec_all_buttons_camera"
+Event.OngoingPlayer
+if (record_start_flg == true)
+if (EventPlayer() == HostPlayer())
+if (fc_camera_status == "Camera Recording")
+{
+    ModifyVariable(HostPlayer().button_high_status, Operation.AppendToArray, [[record_master_time, MappedArray(button_list_camera, IsButtonHeld(EventPlayer(), ArrayElement()))]]);
+    while (true)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || button_high_status[CountOf(button_high_status) - 1][1] != MappedArray(button_list_camera, IsButtonHeld(EventPlayer(), ArrayElement())) == true), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().button_high_status, Operation.AppendToArray, [[record_master_time, MappedArray(button_list_camera, IsButtonHeld(EventPlayer(), ArrayElement()))]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+}
+
+rule: "[camera] replay_all_buttons"
+Event.OngoingPlayer
+if (replay_target_flg == true)
+if (p_replay_start_flg == true)
+if (bot_type == 2)
+{
+    for (button_high_cnt = 1; CountOf(button_high_status); 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= button_high_status[button_high_cnt][0]), 99999);
+        AbortIfConditionIsFalse();
+        mapped_high_list = FilteredArray(MappedArray(button_high_status[button_high_cnt][1], button_high_status[button_high_cnt - 1][1][CurrentArrayIndex()] != ArrayElement() ? CurrentArrayIndex() : -1), ArrayElement() != -1);
+        for (mapped_high_cnt = 0; CountOf(mapped_high_list); 1)
+        {
+            access_array_high_num = mapped_high_cnt;
+            if (button_high_status[button_high_cnt][1][mapped_high_list[access_array_high_num]] == true)
+            {
+                StartHoldingButton(EventPlayer(), button_list_camera[mapped_high_list[access_array_high_num]]);
+            }
+            else
+            {
+                StopHoldingButton(EventPlayer(), button_list_camera[mapped_high_list[access_array_high_num]]);
+            }
+        }
+    }
+}
+
+rule: "[camera] initialize_camera_ind"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (SlotOf(EventPlayer()) == camera_bot_slot)
+if (initialize_camera_flg == true)
+{
+    StartFacing(EventPlayer(), UpdateEveryFrame(FacingDirectionOf(HostPlayer())), 100000000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+    StopForcingPlayerPosition(EventPlayer());
+    if (adjust_fixed_flg == true && fixed_pos[2] != null)
+    {
+        Teleport(EventPlayer(), fixed_pos[2]);
+        WaitUntil(PositionOf(EventPlayer()) == fixed_pos[2], 5);
+    }
+    else if (adjust_fixed_flg != true && fc_latest_camera_pos != camera_bot_first_spawn_pos)
+    {
+        Teleport(EventPlayer(), fc_latest_camera_pos);
+        WaitUntil(PositionOf(EventPlayer()) == fc_latest_camera_pos, 5);
+    }
+    else
+    {
+        Teleport(EventPlayer(), WorldVectorOf(Vector(0, 0, adjust_fixed_flg == true ? 2 : -2), HostPlayer(), LocalVector.RotationAndTranslation));
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+    }
+    camera_set_slot = HostPlayer();
+    camera_set();
+    initialize_camera_flg = false;
+    StartForcingPlayerPosition(HostPlayer(), escape_point, false);
+}
+
+void camera_dummy_bot_set() "[camera] Sub: camera_dummy_bot_set"
+{
+    if (EntityExists(PlayersInSlot(camera_dummy_bot_slot, Team.Team1)) == false)
+    {
+        CreateDummyBot(HeroOf(EventPlayer()), Team.Team1, camera_dummy_bot_slot, HostPlayer().fc_latest_camera_pos, HostPlayer().fc_latest_face_pos);
+        WaitUntil(EntityExists(PlayersInSlot(camera_dummy_bot_slot, Team.Team1)) == true, 99999);
+    }
+    else
+    {
+        StopForcingPlayerPosition(PlayersInSlot(camera_dummy_bot_slot, Team.Team1));
+        MinWait();
+        Teleport(PlayersInSlot(camera_dummy_bot_slot, Team.Team1), HostPlayer().fc_latest_camera_pos);
+        SetInvisible(PlayersInSlot(camera_dummy_bot_slot, Team.Team1), InvisibleTo.None);
+    }
+    SetFacing(PlayersInSlot(camera_dummy_bot_slot, Team.Team1), HostPlayer().fc_latest_face_pos, Relative.ToWorld);
+    SetGravity(PlayersInSlot(camera_dummy_bot_slot, Team.Team1), 100);
+}
+
+rule: "[camera] finish_drone_camera"
+Event.OngoingPlayer
+if (finish_drone_camera_flg == true)
+if (EventPlayer() == HostPlayer())
+{
+    finish_drone_camera_flg = false;
+    menu_start();
+}
+
+rule: "[camera] change camera dummy bot"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (SlotOf(EventPlayer()) == camera_dummy_bot_slot)
+if (HeroOf(EventPlayer()) != HeroOf(HostPlayer()))
+{
+    DestroyDummyBot(Team.Team1, SlotOf(EventPlayer()));
+}
+
+void camera_set() "[camera] Sub: camera_set"
+{
+    StartForcingPlayerPosition(EventPlayer(), WorldVectorOf(Vector((MagnitudeOf(ThrottleOf(camera_set_slot)) > 1 ? 1 : MagnitudeOf(ThrottleOf(camera_set_slot))) * HostPlayer().fc_adjust_param * SineFromDegrees(HorizontalAngleFromDirection(ThrottleOf(camera_set_slot))), ZOf(ThrottleOf(camera_set_slot)) == 0 ? HostPlayer().fc_addy_param : (MagnitudeOf(ThrottleOf(camera_set_slot)) > 1 ? 1 : MagnitudeOf(ThrottleOf(camera_set_slot))) * HostPlayer().fc_adjust_param * (ZOf(ThrottleOf(camera_set_slot)) > 0 ? SineFromDegrees(VerticalFacingAngleOf(camera_set_slot) * -1) * ZOf(ThrottleOf(camera_set_slot)) : SineFromDegrees(VerticalFacingAngleOf(camera_set_slot)) * ZOf(ThrottleOf(camera_set_slot)) * -1) + HostPlayer().fc_addy_param, (MagnitudeOf(ThrottleOf(camera_set_slot)) > 1 ? 1 : MagnitudeOf(ThrottleOf(camera_set_slot))) * HostPlayer().fc_adjust_param * CosineFromDegrees(HorizontalAngleFromDirection(ThrottleOf(camera_set_slot))) * (1 - MagnitudeOf(VerticalFacingAngleOf(camera_set_slot)) / 89)), EventPlayer(), LocalVector.RotationAndTranslation), true);
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    StartCamera(camera_activate_all == true ? FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false) : HostPlayer(), UpdateEveryFrame(EyePosition(EventPlayer())), UpdateEveryFrame(RayCastHitPosition(EyePosition(EventPlayer()), EyePosition(EventPlayer()) + FacingDirectionOf(EventPlayer()) * 0.1, AllPlayers(Team.All), EventPlayer(), false)), fc_blend_speed);
+    MinWait();
+    ChaseVariableAtRate(HostPlayer().fc_adjust_param, HostPlayer().fc_dest_adjust_param, HostPlayer().p_fc_velocity_change_time, RateChaseReevaluation.DestinationAndRate);
+    ChaseVariableAtRate(HostPlayer().fc_addy_param, HostPlayer().fc_dest_addy_param, HostPlayer().p_fc_velocity_change_time, RateChaseReevaluation.DestinationAndRate);
+}
+
+void common_adjust_around_pos() "[camera] Sub: common_adjust_around_pos"
+{
+    camera_on();
+    menu_clear();
+    SetMoveSpeed(EventPlayer(), 0);
+    SetAimSpeed(EventPlayer(), 30);
+    ForceThrottle(EventPlayer(), 0.9, 1, 0.9, 1, 0.9, 1);
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    default_force_throttle = ThrottleOf(EventPlayer());
+    set_adjust_description();
+}
+
+void data_reset_cnt() "[replay] data_reset_cnt"
+{
+    face_vec_cnt = 0;
+    throttle_cnt = 0;
+    botpos_cnt = 0;
+}
+
+void data_reset_status() "[replay] data_reset_status"
+{
+    HostPlayer().throttle_status = [];
+    HostPlayer().throttle_status2 = [];
+    HostPlayer().throttle_status3 = [];
+    HostPlayer().throttle_status4 = [];
+    HostPlayer().face_vec_status = [];
+    MinWait();
+    HostPlayer().face_vec_status2 = [];
+    HostPlayer().face_vec_status3 = [];
+    HostPlayer().face_vec_status4 = [];
+    HostPlayer().botpos_status = [];
+    HostPlayer().botpos_status2 = [];
+    MinWait();
+    HostPlayer().botpos_status3 = [];
+    HostPlayer().botpos_status4 = [];
+    HostPlayer().botpos_enable_status = [];
+    HostPlayer().button_high_status = [];
+    HostPlayer().weapon_status = [];
+}
+
+rule: "[replay] stop_recording"
+Event.OngoingPlayer
+if (record_start_flg == true)
+if ((record_master_time >= max_record_time || opt_recstop_flg == true) == true)
+if (EventPlayer() == HostPlayer())
+{
+    StopChasingVariable(record_master_time);
+    if (botpos_start_flg == true)
+    {
+        HostPlayer().botpos_start_flg = false;
+    }
+    record_start_flg = false;
+    if (opt_recstop_flg == false)
+    {
+        BigMessage(HostPlayer(), "Finish Recording");
+    }
+    else
+    {
+        BigMessage(HostPlayer(), "Stop Recording");
+        HostPlayer().record_max_time = record_master_time;
+        opt_recstop_flg = false;
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    if (fc_camera_status != "Camera Recording")
+    {
+        CreateDummyBot(record_hero, bot_team_name, -1, HostPlayer().rec_start_position_vec, HostPlayer().rec_start_face_vec);
+    }
+    else
+    {
+        if (EntityExists(PlayersInSlot(camera_bot_slot, Team.Team1)) == true)
+        {
+            update_replay_data_flg = true;
+        }
+        else
+        {
+            CreateDummyBot(Hero.Zenyatta, Team.Team2, camera_bot_slot, HostPlayer().rec_start_position_vec, HostPlayer().rec_start_face_vec);
+        }
+        max_record_time = restore_max_recordtime;
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    menu_start();
+    record_master_time = 0;
+    check_sync();
+}
+
+rule: "[replay] update_replay_data"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (SlotOf(EventPlayer()) == camera_bot_slot)
+if (update_replay_data_flg == true)
+{
+    copy_from_player = [TeamOf(HostPlayer()), SlotOf(HostPlayer())];
+    copy_replay_data();
+    update_replay_data_flg = false;
+}
+
+rule: "[replay] rec_all_buttons"
+Event.OngoingPlayer
+if (record_start_flg == true)
+if (EventPlayer() == HostPlayer())
+if (fc_camera_status != "Camera Recording")
+{
+    ModifyVariable(HostPlayer().button_high_status, Operation.AppendToArray, [[record_master_time, MappedArray(button_list_normal, IsButtonHeld(EventPlayer(), ArrayElement()))]]);
+    while (true)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || button_high_status[CountOf(button_high_status) - 1][1] != MappedArray(button_list_normal, IsButtonHeld(EventPlayer(), ArrayElement())) == true), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().button_high_status, Operation.AppendToArray, [[record_master_time, MappedArray(button_list_normal, IsButtonHeld(EventPlayer(), ArrayElement()))]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+}
+
+rule: "[replay] rec_throttle_vec"
+Event.OngoingPlayer
+if (record_start_flg == true)
+if (EventPlayer() == HostPlayer())
+{
+    ModifyVariable(HostPlayer().throttle_status, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().throttle_status) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || ThrottleOf(EventPlayer()) != throttle_status[CountOf(throttle_status) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().throttle_status, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    ModifyVariable(HostPlayer().throttle_status2, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().throttle_status2) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || ThrottleOf(EventPlayer()) != throttle_status2[CountOf(throttle_status2) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().throttle_status2, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    ModifyVariable(HostPlayer().throttle_status3, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().throttle_status3) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || ThrottleOf(EventPlayer()) != throttle_status3[CountOf(throttle_status3) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().throttle_status3, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    ModifyVariable(HostPlayer().throttle_status4, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().throttle_status4) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || ThrottleOf(EventPlayer()) != throttle_status4[CountOf(throttle_status4) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().throttle_status4, Operation.AppendToArray, [[ThrottleOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+}
+
+rule: "[replay] rec_face_vec"
+Event.OngoingPlayer
+if (record_start_flg == true)
+if (EventPlayer() == HostPlayer())
+{
+    ModifyVariable(HostPlayer().face_vec_status, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().face_vec_status) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || FacingDirectionOf(HostPlayer()) != face_vec_status[CountOf(face_vec_status) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().face_vec_status, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    ModifyVariable(HostPlayer().face_vec_status2, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().face_vec_status2) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || FacingDirectionOf(HostPlayer()) != face_vec_status2[CountOf(face_vec_status2) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().face_vec_status2, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    ModifyVariable(HostPlayer().face_vec_status3, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().face_vec_status3) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || FacingDirectionOf(HostPlayer()) != face_vec_status3[CountOf(face_vec_status3) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().face_vec_status3, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    ModifyVariable(HostPlayer().face_vec_status4, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+    while (CountOf(HostPlayer().face_vec_status4) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || FacingDirectionOf(HostPlayer()) != face_vec_status4[CountOf(face_vec_status4) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().face_vec_status4, Operation.AppendToArray, [[FacingDirectionOf(HostPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+}
+
+rule: "[replay] rec_position_vec"
+Event.OngoingPlayer
+if (record_start_flg == true)
+if (HostPlayer().botpos_start_flg == true)
+if (EventPlayer() == HostPlayer())
+{
+    ModifyVariable(HostPlayer().botpos_status, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, false]]);
+    while (CountOf(HostPlayer().botpos_status) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || PositionOf(EventPlayer()) != botpos_status[CountOf(botpos_status) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            if (HostPlayer().botpos_start_flg == true)
+            {
+                ModifyVariable(HostPlayer().botpos_status, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, true]]);
+            }
+            else
+            {
+                ModifyVariable(HostPlayer().botpos_status, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, false]]);
+            }
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    while (CountOf(HostPlayer().botpos_status2) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || PositionOf(EventPlayer()) != botpos_status2[CountOf(botpos_status2) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            if (HostPlayer().botpos_start_flg == true)
+            {
+                ModifyVariable(HostPlayer().botpos_status2, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, true]]);
+            }
+            else
+            {
+                ModifyVariable(HostPlayer().botpos_status2, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, false]]);
+            }
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    while (CountOf(HostPlayer().botpos_status3) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || PositionOf(EventPlayer()) != botpos_status3[CountOf(botpos_status3) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            if (HostPlayer().botpos_start_flg == true)
+            {
+                ModifyVariable(HostPlayer().botpos_status3, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, true]]);
+            }
+            else
+            {
+                ModifyVariable(HostPlayer().botpos_status3, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, false]]);
+            }
+        }
+        else
+        {
+            Abort();
+        }
+    }
+    while (CountOf(HostPlayer().botpos_status4) < 999)
+    {
+        WaitUntil(UpdateEveryFrame(record_start_flg == false || PositionOf(EventPlayer()) != botpos_status4[CountOf(botpos_status4) - 1][STAT_ACT]), max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            if (HostPlayer().botpos_start_flg == true)
+            {
+                ModifyVariable(HostPlayer().botpos_status4, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, true]]);
+            }
+            else
+            {
+                ModifyVariable(HostPlayer().botpos_status4, Operation.AppendToArray, [[PositionOf(EventPlayer()), record_master_time, false]]);
+            }
+        }
+        else
+        {
+            Abort();
+        }
+    }
+}
+
+rule: "[replay] replay_initialize_ind"
+Event.OngoingPlayer
+if (replay_start_flg == true)
+if (replay_target_flg == true)
+if (p_replay_start_flg == false)
+if (IsAlive(EventPlayer()) == true)
+if (replay_initialized_flg == false)
+{
+    if (bot_type == 1)
+    {
+        replay_initialize();
+    }
+    else if (bot_type == 2)
+    {
+        if (fc_replay_cnt == 0)
+        {
+            replay_initialize();
+            fc_replay_cnt += 1;
+        }
+        else
+        {
+            finish_drone_camera_flg = true;
+            replay_target_flg = false;
+            fc_replay_cnt = 0;
+        }
+    }
+}
+
+void replay_initialize() "[replay] Sub: replay_initialize"
+{
+    StartForcingPlayerPosition(EventPlayer(), rec_start_position_vec, false);
+    StopFacing(EventPlayer());
+    ForceThrottle(EventPlayer(), 0, 0, 0, 0, 0, 0);
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    StopForcingPlayerPosition(EventPlayer());
+    Teleport(EventPlayer(), rec_start_position_vec);
+    SetFacing(EventPlayer(), rec_start_face_vec, Relative.ToWorld);
+    replay_master_time = 0;
+    current_face_vec_num = 1;
+    current_botpos_num = 1;
+    SetPlayerHealth(EventPlayer(), rec_start_life);
+    MinWait();
+    SetAmmo(EventPlayer(), 0, weapon_bullet_num[0]);
+    SetAmmo(EventPlayer(), 1, weapon_bullet_num[1]);
+    data_reset_cnt();
+    reset_form_weapon();
+    wait_lead_check();
+    StopForcingThrottle(EventPlayer());
+    if (bot_type == 2)
+    {
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        fc_initialize();
+    }
+    MinWait();
+    replay_initialized_flg = true;
+}
+
+rule: "[replay] replay_start_bot"
+Event.OngoingPlayer
+if (replay_start_flg == true)
+if (replay_target_flg == true)
+if (p_replay_start_flg == false)
+if (IsAlive(EventPlayer()) == true)
+if (replay_initialized_flg == true)
+if (replay_master_time == 0)
+{
+    check_sync();
+    p_replay_start_flg = true;
+    MinWait();
+    ChaseVariableAtRate(replay_master_time, record_max_time + 0.001, 1, RateChaseReevaluation.None);
+}
+
+rule: "[replay] replay_stop_bot"
+Event.OngoingPlayer
+if (p_replay_start_flg == true)
+if ((replay_master_time > record_max_time || replay_force_stop_flg) == true)
+if (replay_target_flg == true)
+if (replay_initialized_flg == true)
+{
+    replay_end();
+}
+
+void replay_end() "[replay] Sub: replay_end"
+{
+    StopChasingVariable(replay_master_time);
+    p_replay_start_flg = false;
+    ForceThrottle(EventPlayer(), 0, 0, 0, 0, 0, 0);
+    Wait(0.5, WaitBehavior.IgnoreCondition);
+    StopFacing(EventPlayer());
+    StopThrottleInDirection(EventPlayer());
+    StopForcingPlayerPosition(EventPlayer());
+    StopHoldingButton(EventPlayer(), Button.PrimaryFire);
+    StopHoldingButton(EventPlayer(), Button.SecondaryFire);
+    StopHoldingButton(EventPlayer(), Button.Ability1);
+    StopHoldingButton(EventPlayer(), Button.Ability2);
+    MinWait();
+    StopHoldingButton(EventPlayer(), Button.Ultimate);
+    StopHoldingButton(EventPlayer(), Button.Interact);
+    StopHoldingButton(EventPlayer(), Button.Jump);
+    StopHoldingButton(EventPlayer(), Button.Crouch);
+    StopHoldingButton(EventPlayer(), Button.Melee);
+    StopHoldingButton(EventPlayer(), Button.Reload);
+    CancelPrimaryAction(EventPlayer());
+    if ((IsUsingUltimate(EventPlayer()) == true || HasStatus(EventPlayer(), Status.Asleep) || HasStatus(EventPlayer(), Status.Hacked) || HasStatus(EventPlayer(), Status.KnockedDown) || HasStatus(EventPlayer(), Status.Frozen)) == true)
+    {
+        ClearStatus(EventPlayer(), Status.Unkillable);
+        Kill(EventPlayer(), null);
+    }
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    replay_initialized_flg = false;
+}
+
+void check_sync() "[replay] Sub: check_sync"
+{
+    if (replay_start_flg == true)
+    {
+        if (EventPlayer() == HostPlayer())
+        {
+            replay_start_flg = false;
+            replay_force_stop();
+            Wait(0.25, WaitBehavior.IgnoreCondition);
+            replay_start_flg = true;
+            MinWait();
+            WaitUntil(CountOf(FilteredArray(MappedArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == true && ArrayElement().replay_force_stop_flg == true && ArrayElement().replay_target_flg == true), ArrayElement() == true)) == 0, 5);
+            AllPlayers(Team.All).all_initialize_complete_flg = true;
+        }
+        else if (replay_force_stop_flg == true)
+        {
+            replay_force_stop_flg = false;
+            WaitUntil(all_initialize_complete_flg == true, 5);
+            all_initialize_complete_flg = false;
+        }
+    }
+}
+
+void replay_force_stop() "[replay] Sub: replay_force_stop"
+{
+    FilteredArray(AllPlayers(Team.All), (IsDummyBot(ArrayElement()) == true && ArrayElement().replay_force_stop_flg == false && ArrayElement().replay_target_flg == true) == true).replay_force_stop_flg = true;
+}
+
+void wait_lead_check() "[replay] Sub: wait_lead_check"
+{
+    if (wait_lead_flg == false)
+    {
+        wait_lead_flg = true;
+        wait_adjust_time = 0.25;
+        ChaseVariableOverTime(wait_adjust_time, 0, 0.25, TimeChaseReevaluation.DestinationAndDuration);
+        WaitUntil(wait_adjust_time == 0, 1);
+        wait_lead_flg = false;
+    }
+    else
+    {
+        WaitUntil(wait_adjust_time == 0, 1);
+    }
+}
+
+rule: "[replay] replay_all_buttons"
+Event.OngoingPlayer
+if (replay_target_flg == true)
+if (p_replay_start_flg == true)
+if (bot_type == 1)
+{
+    for (button_high_cnt = 1; CountOf(button_high_status); 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= button_high_status[button_high_cnt][0]), 99999);
+        AbortIfConditionIsFalse();
+        mapped_high_list = FilteredArray(MappedArray(button_high_status[button_high_cnt][1], button_high_status[button_high_cnt - 1][1][CurrentArrayIndex()] != ArrayElement() ? CurrentArrayIndex() : -1), ArrayElement() != -1);
+        for (mapped_high_cnt = 0; CountOf(mapped_high_list); 1)
+        {
+            access_array_high_num = mapped_high_cnt;
+            if (button_high_status[button_high_cnt][1][mapped_high_list[access_array_high_num]] == true)
+            {
+                StartHoldingButton(EventPlayer(), button_list_normal[mapped_high_list[access_array_high_num]]);
+            }
+            else
+            {
+                StopHoldingButton(EventPlayer(), button_list_normal[mapped_high_list[access_array_high_num]]);
+            }
+        }
+    }
+}
+
+rule: "[replay] replay_throttle_vec"
+Event.OngoingPlayer
+if (throttle_status != [])
+if (replay_target_flg == true)
+if (p_replay_start_flg == true)
+{
+    throttle_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status[throttle_cnt][STAT_TIM]), 99999);
+    throttle_cnt = 1;
+    StartThrottleInDirection(EventPlayer(), UpdateEveryFrame(throttle_status[throttle_cnt - 1][STAT_ACT]), UpdateEveryFrame(MagnitudeOf(throttle_status[throttle_cnt - 1][STAT_ACT])), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.DirectionAndMagnitude);
+    for (throttle_cnt = 1; CountOf(throttle_status); 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status[throttle_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+    if (throttle_status2 == [])
+    {
+        Abort();
+    }
+    throttle_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status2[throttle_cnt][STAT_TIM]), 99999);
+    throttle_cnt = 1;
+    StartThrottleInDirection(EventPlayer(), UpdateEveryFrame(throttle_status2[throttle_cnt - 1][STAT_ACT]), UpdateEveryFrame(MagnitudeOf(throttle_status2[throttle_cnt - 1][STAT_ACT])), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.DirectionAndMagnitude);
+    for (throttle_cnt = 1; CountOf(throttle_status2); 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status2[throttle_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+    if (throttle_status3 == [])
+    {
+        Abort();
+    }
+    throttle_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status3[throttle_cnt][STAT_TIM]), 99999);
+    throttle_cnt = 1;
+    StartThrottleInDirection(EventPlayer(), UpdateEveryFrame(throttle_status3[throttle_cnt - 1][STAT_ACT]), UpdateEveryFrame(MagnitudeOf(throttle_status3[throttle_cnt - 1][STAT_ACT])), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.DirectionAndMagnitude);
+    for (throttle_cnt = 1; CountOf(throttle_status3); 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status3[throttle_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+    if (throttle_status4 == [])
+    {
+        Abort();
+    }
+    throttle_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status4[throttle_cnt][STAT_TIM]), 99999);
+    throttle_cnt = 1;
+    StartThrottleInDirection(EventPlayer(), UpdateEveryFrame(throttle_status4[throttle_cnt - 1][STAT_ACT]), UpdateEveryFrame(MagnitudeOf(throttle_status4[throttle_cnt - 1][STAT_ACT])), Relative.ToPlayer, ThrottleBehavior.ReplaceExistingThrottle, ThrottleRev.DirectionAndMagnitude);
+    for (throttle_cnt = 1; CountOf(throttle_status4); 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= throttle_status4[throttle_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+}
+
+rule: "[replay] replay_face_vec"
+Event.OngoingPlayer
+if (face_vec_status != [])
+if (replay_target_flg == true)
+if (p_replay_start_flg == true)
+{
+    face_vec_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status[face_vec_cnt][STAT_TIM]), 99999);
+    face_vec_cnt = 1;
+    StartFacing(EventPlayer(), UpdateEveryFrame(face_vec_status[face_vec_cnt - 1][STAT_ACT]), 100000000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+    for (face_vec_cnt = 1; CountOf(face_vec_status) - 1; 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status[face_vec_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+    StopFacing(EventPlayer());
+    if (face_vec_status2 == [])
+    {
+        Abort();
+    }
+    face_vec_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status2[face_vec_cnt][STAT_TIM]), 99999);
+    face_vec_cnt = 1;
+    StartFacing(EventPlayer(), face_vec_status2[face_vec_cnt - 1][STAT_ACT], 100000000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+    for (face_vec_cnt = 1; CountOf(face_vec_status2) - 1; 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status2[face_vec_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+    StopFacing(EventPlayer());
+    if (face_vec_status3 == [])
+    {
+        Abort();
+    }
+    face_vec_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status3[face_vec_cnt][STAT_TIM]), 99999);
+    face_vec_cnt = 1;
+    StartFacing(EventPlayer(), face_vec_status3[face_vec_cnt - 1][STAT_ACT], 100000000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+    for (face_vec_cnt = 1; CountOf(face_vec_status3) - 1; 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status3[face_vec_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+    StopFacing(EventPlayer());
+    if (face_vec_status4 == [])
+    {
+        Abort();
+    }
+    face_vec_cnt = 0;
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status4[face_vec_cnt][STAT_TIM]), 99999);
+    face_vec_cnt = 1;
+    StartFacing(EventPlayer(), face_vec_status4[face_vec_cnt - 1][STAT_ACT], 100000000, Relative.ToWorld, FacingRev.DirectionAndTurnRate);
+    for (face_vec_cnt = 1; CountOf(face_vec_status4) - 1; 1)
+    {
+        WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= face_vec_status4[face_vec_cnt][STAT_TIM]), 99999);
+        AbortIfConditionIsFalse();
+    }
+    StopFacing(EventPlayer());
+}
+
+rule: "[replay] replay_position_vec"
+Event.OngoingPlayer
+if (botpos_status != [])
+if (replay_target_flg == true)
+if (p_replay_start_flg == true)
+{
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status[botpos_cnt][STAT_TIM]), 99999);
+    AbortIfConditionIsFalse();
+    for (botpos_cnt = 1; CountOf(botpos_status); 1)
+    {
+        if (botpos_status[botpos_cnt][2] != botpos_status[botpos_cnt - 1][2])
+        {
+            if (botpos_status[botpos_cnt][2] == true)
+            {
+                StartForcingPlayerPosition(EventPlayer(), botpos_status[botpos_cnt], true);
+            }
+            else
+            {
+                StopForcingPlayerPosition(EventPlayer());
+            }
+        }
+        if (botpos_cnt + 1 < CountOf(botpos_status))
+        {
+            WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status[botpos_cnt + 1][STAT_TIM]), 99999);
+            AbortIfConditionIsFalse();
+        }
+    }
+    StopForcingPlayerPosition(EventPlayer());
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status2[0][STAT_TIM]), 99999);
+    AbortIfConditionIsFalse();
+    for (botpos_cnt = 1; CountOf(botpos_status2); 1)
+    {
+        if (botpos_status2[botpos_cnt][2] != botpos_status2[botpos_cnt - 1][2])
+        {
+            if (botpos_status2[botpos_cnt][2] == true)
+            {
+                StartForcingPlayerPosition(EventPlayer(), botpos_status2[botpos_cnt], true);
+            }
+            else
+            {
+                StopForcingPlayerPosition(EventPlayer());
+            }
+        }
+        if (botpos_cnt + 1 < CountOf(botpos_status2))
+        {
+            WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status2[botpos_cnt + 1][STAT_TIM]), 99999);
+            AbortIfConditionIsFalse();
+        }
+    }
+    StopForcingPlayerPosition(EventPlayer());
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status3[0][STAT_TIM]), 99999);
+    AbortIfConditionIsFalse();
+    for (botpos_cnt = 1; CountOf(botpos_status3); 1)
+    {
+        if (botpos_status3[botpos_cnt][2] != botpos_status3[botpos_cnt - 1][2])
+        {
+            if (botpos_status3[botpos_cnt][2] == true)
+            {
+                StartForcingPlayerPosition(EventPlayer(), botpos_status3[botpos_cnt], true);
+            }
+            else
+            {
+                StopForcingPlayerPosition(EventPlayer());
+            }
+        }
+        if (botpos_cnt + 1 < CountOf(botpos_status3))
+        {
+            WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status3[botpos_cnt + 1][STAT_TIM]), 99999);
+            AbortIfConditionIsFalse();
+        }
+    }
+    StopForcingPlayerPosition(EventPlayer());
+    WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status4[0][STAT_TIM]), 99999);
+    AbortIfConditionIsFalse();
+    for (botpos_cnt = 1; CountOf(botpos_status4); 1)
+    {
+        if (botpos_status4[botpos_cnt][2] != botpos_status4[botpos_cnt - 1][2])
+        {
+            if (botpos_status4[botpos_cnt][2] == true)
+            {
+                StartForcingPlayerPosition(EventPlayer(), botpos_status4[botpos_cnt], true);
+            }
+            else
+            {
+                StopForcingPlayerPosition(EventPlayer());
+            }
+        }
+        if (botpos_cnt + 1 < CountOf(botpos_status4))
+        {
+            WaitUntil(UpdateEveryFrame(p_replay_start_flg == false || replay_master_time >= botpos_status4[botpos_cnt + 1][STAT_TIM]), 99999);
+            AbortIfConditionIsFalse();
+        }
+    }
+    StopForcingPlayerPosition(EventPlayer());
+}
+
+void reset_form_weapon() "[replay] Sub: reset_form_weapon"
+{
+    if (HeroOf(EventPlayer()) == Hero.Dva)
+    {
+        if (rec_start_form != IsInAlternateForm(EventPlayer()))
+        {
+            StartHoldingButton(EventPlayer(), Button.Ultimate);
+            WaitUntil(rec_start_form == IsInAlternateForm(EventPlayer()), 99999);
+            StopHoldingButton(EventPlayer(), Button.Ultimate);
+        }
+    }
+    else if (HeroOf(EventPlayer()) == Hero.WreckingBall)
+    {
+        if (rec_start_form != IsInAlternateForm(EventPlayer()))
+        {
+            StartHoldingButton(EventPlayer(), Button.Ability1);
+            WaitUntil(rec_start_form == IsInAlternateForm(EventPlayer()), 99999);
+            StopHoldingButton(EventPlayer(), Button.Ability1);
+        }
+    }
+    else if (HeroOf(EventPlayer()) == Hero.Torbjorn)
+    {
+        if (rec_start_weapon != Weapon(EventPlayer()))
+        {
+            SetWeapon(EventPlayer(), rec_start_weapon);
+            WaitUntil(rec_start_weapon == Weapon(EventPlayer()), 99999);
+        }
+    }
+    else if (HeroOf(EventPlayer()) == Hero.Mercy)
+    {
+        if (rec_start_weapon != Weapon(EventPlayer()))
+        {
+            SetWeapon(EventPlayer(), rec_start_weapon);
+            WaitUntil(rec_start_weapon == Weapon(EventPlayer()), 99999);
+        }
+    }
+    else if (HeroOf(EventPlayer()) == Hero.Lucio)
+    {
+        if (rec_start_form != IsInAlternateForm(EventPlayer()))
+        {
+            StartHoldingButton(EventPlayer(), Button.Ability1);
+            WaitUntil(rec_start_form == IsInAlternateForm(EventPlayer()), 99999);
+            StopHoldingButton(EventPlayer(), Button.Ability1);
+        }
+    }
+}
+
+rule: "[replay] replay bot status triggered"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if ((HasStatus(EventPlayer(), Status.KnockedDown) == true || HasStatus(EventPlayer(), Status.Asleep) == true || HasStatus(EventPlayer(), Status.Frozen) == true || HasStatus(EventPlayer(), Status.Stunned) == true) == true)
+if (replay_target_flg == true)
+if (p_replay_start_flg == true)
+{
+    StopChasingVariable(replay_master_time);
+    lock_pos_flg = true;
+    WaitUntil((HasStatus(EventPlayer(), Status.KnockedDown) == true || HasStatus(EventPlayer(), Status.Asleep) == true || HasStatus(EventPlayer(), Status.Frozen) == true || HasStatus(EventPlayer(), Status.Stunned) == true) == false, 9999);
+    lock_pos_flg = false;
+    ChaseVariableAtRate(replay_master_time, record_max_time + 0.001, 1, RateChaseReevaluation.None);
+}
+
+rule: "[replay] rec_weapon_status"
+Event.OngoingPlayer
+if (record_start_flg == true)
+if (EventPlayer() == HostPlayer())
+if (rec_start_weapon != Weapon(EventPlayer()))
+{
+    ModifyVariable(HostPlayer().weapon_status, Operation.AppendToArray, [[Weapon(EventPlayer()), record_master_time]]);
+    while (true)
+    {
+        WaitUntil(record_start_flg == false || Weapon(EventPlayer()) != weapon_status[CountOf(weapon_status) - 1][STAT_ACT], max_record_time + 1);
+        if (record_start_flg == true)
+        {
+            ModifyVariable(HostPlayer().weapon_status, Operation.AppendToArray, [[Weapon(EventPlayer()), record_master_time]]);
+        }
+        else
+        {
+            Abort();
+        }
+    }
+}
+
+rule: "[replay] replay_weapon_status"
+Event.OngoingPlayer
+if (weapon_status != [])
+if (replay_target_flg == true)
+if (p_replay_start_flg == true)
+{
+    for (weapon_cnt = 0; CountOf(weapon_status); 1)
+    {
+        WaitUntil(p_replay_start_flg == false || replay_master_time >= weapon_status[weapon_cnt][STAT_TIM], 99999);
+        AbortIfConditionIsFalse();
+        SetWeapon(EventPlayer(), weapon_status[weapon_cnt][STAT_ACT]);
+    }
+}
+
+rule: "[replay] dummy_bot_type"
+Event.OngoingPlayer
+if (IsDummyBot(EventPlayer()) == true)
+if (HasSpawned(EventPlayer()) == true)
+if (bot_type == 0)
+{
+    if ((fc_camera_status != "Camera Recording" && fc_camera_status != "Camera Test") == true)
+    {
+        if (SlotOf(EventPlayer()) == camera_dummy_bot_slot)
+        {
+            bot_type = 2;
+        }
+        else
+        {
+            bot_type = 1;
+        }
+    }
+    else
+    {
+        bot_type = 2;
+    }
+}
+
+rule: "[menu][core] option_vec_update"
+Event.OngoingPlayer
+if (opt_view_flg == true)
+if (HasSpawned(EventPlayer()) == true)
+if (latest_y_eye_pos != YOf(EyePosition(EventPlayer())))
+if (IsInAir(EventPlayer()) == false)
+{
+    Wait(0.05, WaitBehavior.IgnoreCondition);
+    latest_y_eye_pos = YOf(EyePosition(EventPlayer()));
+    menu_degree_list = [];
+    opt_p_list_temp = [];
+    base_eye_pos = LocalVectorOf(EyePosition(EventPlayer()), EventPlayer(), Transformation.RotationAndTranslation);
+    for (menu_degree = opt_menu_start_degree; opt_menu_start_degree + menu_degree_interval * menu_line_num; menu_degree_interval)
+    {
+        ModifyVariable(menu_degree_list, Operation.AppendToArray, menu_degree);
+        if (HeroOf(EventPlayer()) == Hero.Winston)
+        {
+            ModifyVariable(opt_p_list_temp, Operation.AppendToArray, Vector(0, YOf(base_eye_pos) - 0.18 + 1 * SineFromDegrees(menu_degree), ZOf(base_eye_pos) + 1 * CosineFromDegrees(menu_degree)));
+        }
+        else
+        {
+            ModifyVariable(opt_p_list_temp, Operation.AppendToArray, Vector(0, YOf(base_eye_pos) - 0 + 1 * SineFromDegrees(menu_degree), ZOf(base_eye_pos) + 1 * CosineFromDegrees(menu_degree)));
+        }
+        MinWait();
+    }
+    opt_p_list = opt_p_list_temp;
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][core] check current_menu_idx"
+Event.OngoingPlayer
+if (opt_view_flg == true)
+if (VerticalFacingAngleOf(EventPlayer()) <= (opt_menu_start_degree - menu_degree_interval) * -1)
+if (CountOf(FilteredArray(menu_degree_list, AbsoluteValue(ArrayElement() - AbsoluteValue(VerticalFacingAngleOf(EventPlayer()))) < menu_degree_interval / 2)) > 0)
+if (IndexOfArrayValue(menu_degree_list, FilteredArray(menu_degree_list, AbsoluteValue(ArrayElement() - AbsoluteValue(VerticalFacingAngleOf(EventPlayer()))) < menu_degree_interval / 2)[0]) != menu_current_idx)
+{
+    menu_current_idx = IndexOfArrayValue(menu_degree_list, FilteredArray(menu_degree_list, AbsoluteValue(ArrayElement() - AbsoluteValue(VerticalFacingAngleOf(EventPlayer()))) < menu_degree_interval / 2)[0]);
+    MinWait();
+    SetMoveSpeed(EventPlayer(), 0);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][core] opt_start"
+Event.OngoingPlayer
+if (IsButtonHeld(HostPlayer(), Button.Interact) == true)
+if (opt_view_flg == false)
+if (IsDummyBot(EventPlayer()) == false)
+if (EventPlayer() == HostPlayer())
+if (IsAlive(EventPlayer()) == true)
+if (description_txt[4] == false)
+{
+    Wait(start_flg == true && opt_slowmotion_flg == true ? 0.1 * 1 / slowmotion_speed : 0.1, WaitBehavior.IgnoreCondition);
+    ChaseVariableAtRate(opt_interact_holdtime, 1, 1, RateChaseReevaluation.DestinationAndRate);
+    Wait(start_flg == true && opt_slowmotion_flg == true ? 0.1 * 1 / slowmotion_speed : 0.1, WaitBehavior.IgnoreCondition);
+    WaitUntil(IsButtonHeld(EventPlayer(), Button.Interact) == false, check_interact_time);
+    StopChasingVariable(opt_interact_holdtime);
+    if (opt_interact_holdtime >= (start_flg == false || opt_slowmotion_flg == false ? check_interact_time : check_interact_time * 1 / slowmotion_speed))
+    {
+        wait_end_interact();
+        if (record_start_flg == false)
+        {
+            menu_start();
+        }
+        else if (record_start_flg == true && opt_recstop_flg == false)
+        {
+            opt_recstop_flg = true;
+        }
+    }
+    MinWait();
+    opt_interact_holdtime = 0;
+}
+
+rule: "[menu][core] opt_interact_check"
+Event.OngoingPlayer
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+if (opt_view_flg == true)
+{
+    opt_interact_check();
+}
+
+void opt_interact_check() "[menu][core] Sub: opt_interact_check"
+{
+    wait_end_interact();
+    opt_interact_flg = true;
+    MinWait();
+    opt_interact_flg = false;
+}
+
+rule: "[menu][core] adjust menu type"
+Event.OngoingPlayer
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (menu_current_idx == IndexOfArrayValue(common_menu_idx, "Setting Type"))
+{
+    if (input_throttle == Right())
+    {
+        if (IndexOfArrayValue(common_opt_txt_list, LastOf(common_opt_txt_group)) < IndexOfArrayValue(common_opt_txt_list, common_opt_txt_name) + 1)
+        {
+        }
+        else
+        {
+            opt_change_layer[IndexOfArrayValue(common_opt_txt_list, common_opt_txt_group[IndexOfArrayValue(common_opt_txt_group, common_opt_txt_name) + 1])] = true;
+        }
+    }
+    else
+    {
+        if (IndexOfArrayValue(common_opt_txt_list, common_opt_txt_group[0]) > IndexOfArrayValue(common_opt_txt_list, common_opt_txt_name) - 1)
+        {
+        }
+        else
+        {
+            opt_change_layer[IndexOfArrayValue(common_opt_txt_list, common_opt_txt_group[IndexOfArrayValue(common_opt_txt_group, common_opt_txt_name) - 1])] = true;
+        }
+    }
+}
+
+void opt_sight_reset() "[menu][core] Sub: opt_sight_reset"
+{
+    if (keep_select_menu_y_pos != null)
+    {
+        SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), keep_select_menu_y_pos, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+        keep_select_menu_y_pos = null;
+    }
+    else
+    {
+        SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), 0.3, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+    }
+}
+
+void make_center_menu() "[menu][core] Sub: make_center_menu"
+{
+    for (center_menu_cnt = 0; menu_line_num; 1)
+    {
+        if (center_menu_cnt != 3)
+        {
+            CreateInWorldText(LocalPlayer().p_center_menu_txt[EvaluateOnce(center_menu_cnt)] != null ? LocalPlayer() : null, LocalPlayer().p_center_menu_txt[EvaluateOnce(center_menu_cnt)], WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(center_menu_cnt)] + (LocalPlayer().adjust_txt_pos[EvaluateOnce(center_menu_cnt)] != null ? LocalPlayer().adjust_txt_pos[EvaluateOnce(center_menu_cnt)] : Vector(0, 0, 0)), LocalPlayer(), LocalVector.RotationAndTranslation), EvaluateOnce(center_menu_cnt) == 0 ? opt_txt_size[1] : opt_txt_size[0], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, LocalPlayer().center_menu_color[EvaluateOnce(center_menu_cnt)], Spectators.DefaultVisibility);
+        }
+        MinWait();
+    }
+    for (center_menu_cnt = 0; 4; 1)
+    {
+        CreateInWorldText(LocalPlayer().current_menu_item_list[EvaluateOnce(center_menu_cnt)] != null ? LocalPlayer() : null, LocalPlayer().current_menu_item_list[EvaluateOnce(center_menu_cnt)], WorldVectorOf(LocalPlayer().opt_p_list[3] + LocalPlayer().menu_item_x_pos[EvaluateOnce(center_menu_cnt)], LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, LocalPlayer().menu_item_color[EvaluateOnce(center_menu_cnt)], Spectators.DefaultVisibility);
+        MinWait();
+    }
+    for (center_menu_cnt = 0; menu_line_num; 1)
+    {
+        CreateBeamEffect(LocalPlayer().opt_view_flg == true && LocalPlayer().opt_p_list[EvaluateOnce(center_menu_cnt)] != null ? LocalPlayer() : null, BeamType.GrappleBeam, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(center_menu_cnt)] + Vector(-0.5, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(center_menu_cnt)] + Vector(0.5, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), Color.Team1, EffectRev.VisibleToPositionAndRadius);
+        MinWait();
+    }
+    for (loop_cnt = 0; menu_line_num + 3; 1)
+    {
+        CreateEffect(LocalPlayer().opt_view_flg == true ? LocalPlayer() : null, Effect.Ring, Color.Black, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(center_menu_cnt) - 1] + Vector(0, 0, -0.05), LocalPlayer(), LocalVector.RotationAndTranslation), 0.1 + EvaluateOnce(loop_cnt * 0.02), EffectRev.VisibleToPositionAndRadius);
+        MinWait();
+    }
+}
+
+void disable_current_menu() "[menu][core] Sub: disable_current_menu"
+{
+    center_menu_color = [];
+    p_center_menu_txt = [];
+    MinWait();
+    adjust_txt_pos = [];
+    current_menu_item_list = [];
+    common_opt_txt_view[p_txt_view_id] = null;
+}
+
+void get_menu_index() "[menu][core] Sub: get_menu_index"
+{
+    disable_current_menu();
+    p_txt_view_id = IndexOfArrayValue(common_opt_txt_list, common_opt_txt_name);
+    common_opt_txt_view[p_txt_view_id] = EventPlayer();
+}
+
+void convert_throttle() "[menu][core] Sub: convert_throttle"
+{
+    HostPlayer().input_throttle = ThrottleOf(HostPlayer());
+    HostPlayer().input_throttle = Vector((XOf(HostPlayer().input_throttle) >= -0.25 && XOf(HostPlayer().input_throttle) <= 0.25) == true ? 0 : XOf(HostPlayer().input_throttle) > 0.25 ? 1 : -1, 0, (ZOf(HostPlayer().input_throttle) >= -0.25 && ZOf(HostPlayer().input_throttle) <= 0.25) == true ? 0 : ZOf(HostPlayer().input_throttle) > 0.25 ? 1 : -1);
+}
+
+rule: "[menu][core] option throttle check"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((adjust_tracking_flg != true && adjust_circling_flg != true) == true)
+if (ThrottleOf(HostPlayer()) != Vector(0, 0, 0))
+if (MagnitudeOf(ThrottleOf(HostPlayer())) >= 0.5)
+{
+    convert_throttle();
+    WaitUntil(MagnitudeOf(ThrottleOf(HostPlayer())) < 0.5, 0.25);
+    MinWait();
+    LoopIfConditionIsTrue();
+    HostPlayer().input_throttle = Vector(0, 0, 0);
+}
+
+rule: "[menu][core] option throttle check for adjust perspective"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg != true)
+if ((adjust_tracking_flg == true || adjust_circling_flg == true) == true)
+if (ThrottleOf(EventPlayer()) != current_force_throttle)
+if (ThrottleOf(EventPlayer()) != default_force_throttle)
+{
+    current_force_throttle = ThrottleOf(EventPlayer());
+    convert_throttle_adjust();
+    WaitUntil(adjust_tracking_flg == false && adjust_circling_flg == false || ThrottleOf(HostPlayer()) != current_force_throttle || ThrottleOf(HostPlayer()) == default_force_throttle, 9999);
+    MinWait();
+    LoopIfConditionIsTrue();
+    input_throttle = Vector(0, 0, 0);
+    current_force_throttle = Vector(0, 0, 0);
+}
+
+void convert_throttle_adjust() "[menu][core] Sub: convert_throttle_adjust"
+{
+    input_throttle = current_force_throttle;
+    input_throttle = Vector(XOf(input_throttle) <= -0.897 && XOf(input_throttle) >= -0.898 ? 0 : XOf(input_throttle), 0, ZOf(input_throttle) == 0 ? 0 : ZOf(input_throttle) > 0 ? 1 : -1);
+}
+
+void wait_end_interact() "[menu][core] Sub: wait_end_interact"
+{
+    WaitUntil(IsButtonHeld(HostPlayer(), Button.Interact) == false, 99999);
+    WaitUntil(HostPlayer().opt_interact_flg == false, 99999);
+}
+
+void initialize_side_menu() "[menu][core] Sub: initialize_side_menu"
+{
+    common_opt_txt_init[p_txt_view_id] = true;
+    txt_view_id = p_txt_view_id;
+    center_menu_txt = p_center_menu_txt;
+}
+
+void set_description_data() "[menu][core] Sub: set_description_data"
+{
+    if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu"))
+    {
+    }
+    else
+    {
+        description_text_data = [];
+    }
+}
+
+rule: "[menu][core] check current_menu_idx out"
+Event.OngoingPlayer
+Team.Team1
+if (opt_view_flg == true)
+if (VerticalFacingAngleOf(EventPlayer()) > (opt_menu_start_degree - menu_degree_interval) * -1)
+{
+    menu_current_idx = -2;
+    SetMoveSpeed(EventPlayer(), 175);
+}
+
+void update_menucolor() "[menu][core] Sub: update_menu_color"
+{
+    if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Dummy Bot") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Option"))
+    {
+        if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Tracking")])
+        {
+            if (tracking_pos == [])
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Gray;
+            }
+            else
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Yellow;
+            }
+        }
+        else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Fixed")])
+        {
+            if (fixed_pos == [])
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Gray;
+            }
+            else
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Yellow;
+            }
+        }
+        else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Circling")])
+        {
+            if (circling_data[2] == null)
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Gray;
+            }
+            else
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Yellow;
+            }
+        }
+        else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Drone")])
+        {
+            if (fc_configured_flg != true)
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Gray;
+            }
+            else
+            {
+                center_menu_color[EvaluateOnce(IndexOfArrayValue(p_center_menu_txt, "Start Camera"))] = Color.Yellow;
+            }
+        }
+    }
+}
+
+void menu_start() "[menu] Sub: menu_start"
+{
+    AbortIf(opt_mutex_flg == true);
+    opt_mutex_flg = true;
+    description_txt = [];
+    SetUltimateCharge(FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false), 100);
+    input_throttle = Vector(0, 0, 0);
+    SetStatus(EventPlayer(), null, Status.PhasedOut, 9999);
+    DisableMovementCollisionWithEnvironment(FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false), false);
+    SetSlowMotion(100);
+    if (IsDead(EventPlayer()) == true)
+    {
+        Resurrect(EventPlayer());
+    }
+    MinWait();
+    discard_effect();
+    if (teleport_pos != null)
+    {
+        Teleport(EventPlayer(), teleport_pos);
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        SetFacing(EventPlayer(), spawn_face_pos, Relative.ToWorld);
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        teleport_pos = null;
+    }
+    get_position_data();
+    if (circling_data[3] == true)
+    {
+        circling_data[3] = false;
+    }
+    StopCamera(camera_activate_all == true ? FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false) : HostPlayer());
+    MinWait();
+    opt_sight_reset();
+    DisallowButton(EventPlayer(), Button.Interact);
+    DisallowButton(EventPlayer(), Button.PrimaryFire);
+    AllowButton(EventPlayer(), Button.Jump);
+    AllowButton(EventPlayer(), Button.Crouch);
+    SetJumpEnabled(EventPlayer(), true);
+    SetCrouchEnabled(EventPlayer(), true);
+    judge_open_menu();
+    wait_end_interact();
+    opt_view_flg = true;
+    MinWait();
+    opt_fast_move_mode = true;
+    opt_status_reset();
+    EnableHeroHud(camera_activate_all == true ? FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false) : HostPlayer());
+    SetMoveSpeed(EventPlayer(), 0);
+    change_hero_flg = false;
+    opt_mutex_flg = false;
+}
+
+void menu_clear() "[menu] Sub: menu_clear"
+{
+    disable_current_menu();
+    ClearStatus(HostPlayer(), Status.PhasedOut);
+    AllowButton(EventPlayer(), Button.Interact);
+    AllowButton(EventPlayer(), Button.PrimaryFire);
+    if ((start_flg == true || adjust_tracking_flg == true || adjust_circling_flg == true || fc_camera_status != null) == true)
+    {
+        DisableHeroHud(camera_activate_all == true ? FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false) : HostPlayer());
+    }
+    if (lock_open_menu_flg != true)
+    {
+        opt_layer = 0;
+    }
+    opt_fast_move_mode = false;
+    MinWait();
+    opt_view_flg = false;
+    MinWait();
+}
+
+void keep_select_menu_y_pos() "[menu] Sub: keep_select_menu_y_pos"
+{
+    keep_select_menu_y_pos = YOf(FacingDirectionOf(EventPlayer()));
+}
+
+void judge_open_menu() "[menu] Sub: judge_open_menu"
+{
+    if (opt_layer == 0)
+    {
+        opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Main Menu")] = true;
+    }
+    else
+    {
+        opt_change_layer[opt_layer] = true;
+    }
+}
+
+void get_position_data() "[menu] Sub: get_position_data"
+{
+    if (adjust_tracking_flg == true)
+    {
+        adjust_tracking_flg = false;
+        WaitUntil(adjust_end_flg == true, 3);
+        tracking_pos = [camera_len * CosineFromDegrees(camera_degree) + camera_len * CosineFromDegrees(camera_degree - 180 - adjust_degree_x), adjust_degree_y, camera_len * SineFromDegrees(camera_degree) + camera_len * SineFromDegrees(camera_degree - 180 - adjust_degree_x)];
+        SetAimSpeed(EventPlayer(), 100);
+        StopForcingThrottle(EventPlayer());
+    }
+    else if (adjust_circling_flg == true)
+    {
+        adjust_circling_flg = false;
+        WaitUntil(adjust_end_flg == true, 3);
+        circling_data[2] = [circling_len * CosineFromDegrees(circling_degree) + circling_len * CosineFromDegrees(circling_degree - 180 - circling_degree_x), circling_degree_y, circling_len * SineFromDegrees(circling_degree) + circling_len * SineFromDegrees(circling_degree - 180 - circling_degree_x)];
+        SetAimSpeed(EventPlayer(), 100);
+        StopForcingThrottle(EventPlayer());
+    }
+    if (start_flg == true)
+    {
+        start_flg = false;
+    }
+    if (fc_camera_status != null)
+    {
+        if (fc_camera_status == "Camera Recording")
+        {
+            if (record_start_flg == true)
+            {
+                opt_recstop_flg = true;
+                Wait(0.5, WaitBehavior.IgnoreCondition);
+            }
+            fc_configured_flg = true;
+            opt_layer = 0;
+        }
+        if (fc_camera_status != "Camera Replay")
+        {
+            fc_camera_end();
+            if (adjust_fixed_flg == true)
+            {
+                adjust_fixed_flg = false;
+            }
+        }
+        else
+        {
+            if (PlayersInSlot(camera_bot_slot, Team.Team1).replay_target_flg == true)
+            {
+                PlayersInSlot(camera_bot_slot, Team.Team1).replay_force_stop_flg = true;
+                MinWait();
+                PlayersInSlot(camera_bot_slot, Team.Team1).replay_target_flg = false;
+            }
+        }
+        fc_camera_status = null;
+    }
+}
+
+void discard_effect() "[menu] Sub: discard_effect"
+{
+    if (make_effect_id != null)
+    {
+        DestroyEffect(make_effect_id);
+        make_effect_id = null;
+    }
+}
+
+rule: "[menu][make] option_layer1_make_main"
+Event.OngoingPlayer
+if (opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Main Menu")] == true)
+{
+    common_opt_txt_group = ArraySlice(common_opt_txt_list, IndexOfArrayValue(common_opt_txt_list, "Main Menu"), 4);
+    common_opt_txt_name = "Main Menu";
+    get_menu_index();
+    current_menu_item_list = common_opt_txt_group;
+    current_menu_item_list[0] = <"<0> [<1>]", IconString(Icon.ArrowLeft), current_menu_item_list[0]>;
+    current_menu_item_list[1] = <"<0>", current_menu_item_list[1]>;
+    current_menu_item_list[2] = <"<0>", current_menu_item_list[2]>;
+    current_menu_item_list[3] = <"<0> <1>", current_menu_item_list[3], IconString(Icon.ArrowRight)>;
+    menu_item_color = [Color.White, Color.Gray, Color.Gray, Color.Gray];
+    menu_item_x_pos_ptn[0] = [Vector(0.3, 0, 0), Vector(0.1, 0, 0), Vector(-0.1, 0, 0), Vector(-0.3, 0, 0)];
+    menu_item_x_pos = menu_item_x_pos_ptn[0];
+    ModifyVariable(center_menu_color, Operation.AppendToArray, common_menu_color);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, [Color.Aqua, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White]);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, Color.White);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, ["Adjust Perspective", "Camera Mode", null, "Player Effect", "Slow motion", null, "Change Hero", "Change Skin"]);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt[4]);
+    if (common_opt_txt_init[p_txt_view_id] == false)
+    {
+        initialize_side_menu();
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1>]  <2>", opt_slowmotion_flg == false ? space_txt : IconString(Icon.ArrowLeft), opt_slowmotion_flg == true ? "ON" : "OFF", opt_slowmotion_flg == true ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Slow motion"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1> sec]  <2>", assemble_time == 10 ? space_txt : IconString(Icon.ArrowLeft), assemble_time, assemble_time == 100 ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Change Skin"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1>]  <2>", LocalPlayer().opt_status_value == status_name_list[0] ? space_txt : IconString(Icon.ArrowLeft), LocalPlayer().opt_status_value, LocalPlayer().opt_status_value == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Player Effect"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1>]  <2>", camera_mode == camera_mode_list[0] ? space_txt : IconString(Icon.ArrowLeft), camera_mode, camera_mode == camera_mode_list[CountOf(camera_mode_list) - 1] ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Camera Mode"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    }
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Main Menu")] = false;
+    opt_layer = p_txt_view_id;
+    update_menucolor();
+    set_description_data();
+}
+
+rule: "[menu][make] option_layer1_make_dummy_bot"
+Event.OngoingPlayer
+if (opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Dummy Bot")] == true)
+{
+    common_opt_txt_group = ArraySlice(common_opt_txt_list, IndexOfArrayValue(common_opt_txt_list, "Main Menu"), 4);
+    common_opt_txt_name = "Dummy Bot";
+    get_menu_index();
+    current_menu_item_list = common_opt_txt_group;
+    current_menu_item_list[0] = <"<0>  <1> ", IconString(Icon.ArrowLeft), current_menu_item_list[0]>;
+    current_menu_item_list[1] = <"<0>", current_menu_item_list[1]>;
+    current_menu_item_list[2] = <"[<0>]", current_menu_item_list[2]>;
+    current_menu_item_list[3] = <"<0> <1>", current_menu_item_list[3], IconString(Icon.ArrowRight)>;
+    menu_item_color = [Color.Gray, Color.Gray, Color.White, Color.Gray];
+    menu_item_x_pos = menu_item_x_pos_ptn[0];
+    ModifyVariable(center_menu_color, Operation.AppendToArray, common_menu_color);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, [Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White]);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, Color.White);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, ["Create Dummy Bot", "Edit Dummy Bot"]);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt[4]);
+    if (common_opt_txt_init[p_txt_view_id] == false)
+    {
+        initialize_side_menu();
+    }
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Dummy Bot")] = false;
+    opt_layer = p_txt_view_id;
+    update_menucolor();
+    set_description_data();
+}
+
+rule: "[menu][make] option_layer1_make_option"
+Event.OngoingPlayer
+if (opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Option")] == true)
+{
+    common_opt_txt_group = ArraySlice(common_opt_txt_list, IndexOfArrayValue(common_opt_txt_list, "Main Menu"), 4);
+    common_opt_txt_name = "Option";
+    get_menu_index();
+    current_menu_item_list = common_opt_txt_group;
+    current_menu_item_list[0] = <"<0> <1>", IconString(Icon.ArrowLeft), current_menu_item_list[0]>;
+    current_menu_item_list[1] = <"<0>", current_menu_item_list[1]>;
+    current_menu_item_list[2] = <"<0>", current_menu_item_list[2]>;
+    current_menu_item_list[3] = <"[<0>] <1>", current_menu_item_list[3], IconString(Icon.ArrowRight)>;
+    menu_item_color = [Color.Gray, Color.Gray, Color.Gray, Color.White];
+    menu_item_x_pos = menu_item_x_pos_ptn[0];
+    ModifyVariable(center_menu_color, Operation.AppendToArray, common_menu_color);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, [Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White]);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, Color.White);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, ["Slow motion percentage", "Start Camera Target", "Nameplate"]);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt[4]);
+    if (common_opt_txt_init[p_txt_view_id] == false)
+    {
+        initialize_side_menu();
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1>]  <2>", camera_activate_all == false ? space_txt : IconString(Icon.ArrowLeft), camera_activate_all == true ? "All Player" : "Host Player", camera_activate_all == true ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Start Camera Target"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1> %]  <2>", slowmotion_speed == 10 ? space_txt : IconString(Icon.ArrowLeft), slowmotion_speed, slowmotion_speed == 100 ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Slow motion percentage"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1>]  <2>", nameplate_flg == false ? space_txt : IconString(Icon.ArrowLeft), nameplate_flg == true ? "Enable" : "Disable", nameplate_flg == true ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Nameplate"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    }
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Option")] = false;
+    opt_layer = p_txt_view_id;
+    update_menucolor();
+    set_description_data();
+}
+
+rule: "[menu][make] option_layer1_make_parameter_menu"
+Event.OngoingPlayer
+if (opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Parameter")] == true)
+{
+    common_opt_txt_group = ArraySlice(common_opt_txt_list, IndexOfArrayValue(common_opt_txt_list, "Main Menu"), 4);
+    common_opt_txt_name = "Parameter";
+    get_menu_index();
+    current_menu_item_list = common_opt_txt_group;
+    current_menu_item_list[0] = <"<0>  <1> ", IconString(Icon.ArrowLeft), current_menu_item_list[0]>;
+    current_menu_item_list[1] = <"[<0>]", current_menu_item_list[1]>;
+    current_menu_item_list[2] = <"<0>", current_menu_item_list[2]>;
+    current_menu_item_list[3] = <"<0> <1>", current_menu_item_list[3], IconString(Icon.ArrowRight)>;
+    menu_item_color = [Color.Gray, Color.White, Color.Gray, Color.Gray];
+    menu_item_x_pos = menu_item_x_pos_ptn[0];
+    ModifyVariable(center_menu_color, Operation.AppendToArray, common_menu_color);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, [Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White]);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, Color.White);
+    if (camera_test_flg == true)
+    {
+        parameter_mode_type = IndexOfArrayValue(camera_mode_list, "Drone");
+        camera_test_flg = false;
+    }
+    else
+    {
+        parameter_mode_type = IndexOfArrayValue(camera_mode_list, camera_mode);
+    }
+    switch_parameter_list();
+    if (common_opt_txt_init[p_txt_view_id] == false)
+    {
+        initialize_side_menu();
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 9] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 9] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Drone" ? <"<0>  [<1>]  <2>", fc_min_dec_speed == 0.01 ? space_txt : IconString(Icon.ArrowLeft), fc_min_dec_speed, fc_min_dec_speed == 100 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 9)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 8] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 8] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Drone" ? <"<0>  [<1>]  <2>", fc_max_acc_speed == 0.01 ? space_txt : IconString(Icon.ArrowLeft), fc_max_acc_speed, fc_max_acc_speed == 100 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 8)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 7] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 7] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Drone" ? <"<0>  [<1> sec]  <2>", fc_velocity_change_time == 0.01 ? space_txt : IconString(Icon.ArrowLeft), fc_velocity_change_time, fc_velocity_change_time == 100 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 7)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 6] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 6] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Drone" ? <"<0>  [<1> %]  <2>", fc_aim_speed == 10 ? space_txt : IconString(Icon.ArrowLeft), fc_aim_speed, fc_aim_speed == 1000 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 6)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        MinWait();
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 5] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 5] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Drone" ? <"<0>  [<1>]  <2>", fc_blend_speed == 1 ? space_txt : IconString(Icon.ArrowLeft), fc_blend_speed, fc_blend_speed == 1000 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 5)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 4] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 4] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Drone" ? <"<0>  [<1>]  <2>", fc_camera_speed == 0.01 ? space_txt : IconString(Icon.ArrowLeft), fc_camera_speed, fc_camera_speed == 100 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 4)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 3] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 3] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Tracking" ? <"<0>  [<1>]  <2>", horizontal_speed == 0.1 ? space_txt : IconString(Icon.ArrowLeft), horizontal_speed, horizontal_speed == 10 ? space_txt : IconString(Icon.ArrowRight)> : camera_mode_list[LocalPlayer().parameter_mode_type] == "Drone" ? <"<0>  [<1> sec]  <2>", drone_camera_rectime == 1 ? space_txt : IconString(Icon.ArrowLeft), drone_camera_rectime, drone_camera_rectime == 30 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 3)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        MinWait();
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 2] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 2] != common_menu_txt[4] && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Tracking" ? <"<0>  [<1>]  <2>", adjust_param == 0.001 ? space_txt : IconString(Icon.ArrowLeft), adjust_param * 10, adjust_param == 1 ? space_txt : IconString(Icon.ArrowRight)> : camera_mode_list[LocalPlayer().parameter_mode_type] == "Circling" ? <"<0>  [<1>]  <2>", circling_data[1] == 0.01 ? space_txt : IconString(Icon.ArrowLeft), circling_data[1], circling_data[1] == 1 ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 2)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 1] != null && LocalPlayer().p_center_menu_txt[CountOf(common_menu_txt) + 1] != common_menu_txt[4] && camera_mode_list[LocalPlayer().parameter_mode_type] != "Drone" && LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, camera_mode_list[LocalPlayer().parameter_mode_type] == "Tracking" ? <"<0>  [<1>]  <2>", zoom_param == 0.001 ? space_txt : IconString(Icon.ArrowLeft), zoom_param * 10, zoom_param == 1 ? space_txt : IconString(Icon.ArrowRight)> : camera_mode_list[LocalPlayer().parameter_mode_type] == "Fixed" ? <"<0>  [<1>]  <2>", fixed_speed_data[4] == 0.01 ? space_txt : IconString(Icon.ArrowLeft), fixed_speed_data[4], fixed_speed_data[4] == 1 ? space_txt : IconString(Icon.ArrowRight)> : camera_mode_list[LocalPlayer().parameter_mode_type] == "Circling" ? <"<0>  [<1>]  <2>", circling_data[0] == "Left" ? space_txt : IconString(Icon.ArrowLeft), circling_data[0], circling_data[0] == "Right" ? space_txt : IconString(Icon.ArrowRight)> : null, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt) + 1)] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"<0> [<1>] <2>", camera_mode_list[LocalPlayer().parameter_mode_type] == camera_mode_list[0] ? space_txt : IconString(Icon.ArrowLeft), camera_mode_list[LocalPlayer().parameter_mode_type], camera_mode_list[LocalPlayer().parameter_mode_type] == LastOf(camera_mode_list) ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(CountOf(common_menu_txt))] + Vector(0, 0, 0), HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.Green, Spectators.DefaultVisibility);
+    }
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Parameter")] = false;
+    opt_layer = p_txt_view_id;
+    update_menucolor();
+    set_description_data();
+}
+
+rule: "[menu][make] option_layer1_make_createdummy_bot_ind"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_interact_flg == true)
+if (opt_view_flg == true)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Dummy Bot"))
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Create Dummy Bot"))
+{
+    wait_end_interact();
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot")] = true;
+    opt_sight_reset();
+}
+
+rule: "[menu][make] option_layer1_make_edit_dummybot_ind"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_interact_flg == true)
+if (opt_view_flg == true)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Dummy Bot"))
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Edit Dummy Bot"))
+{
+    wait_end_interact();
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot")] = true;
+    opt_sight_reset();
+}
+
+rule: "[menu][make] option_layer1_make_create_dummy_bot"
+Event.OngoingPlayer
+if (opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot")] == true)
+{
+    common_opt_txt_group = ArraySlice(common_opt_txt_list, IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot"), 2);
+    common_opt_txt_name = "Create Dummy Bot";
+    get_menu_index();
+    current_menu_item_list = common_opt_txt_group;
+    current_menu_item_list[0] = <"<0> [<1>]", IconString(Icon.ArrowLeft), current_menu_item_list[0]>;
+    current_menu_item_list[1] = <"<0> <1>", current_menu_item_list[1], IconString(Icon.ArrowRight)>;
+    menu_item_color = [Color.White, Color.Gray];
+    menu_item_x_pos = [Vector(0.15, 0, 0), Vector(-0.15, 0, 0)];
+    ModifyVariable(center_menu_color, Operation.AppendToArray, common_menu_color);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, [Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White]);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, Color.White);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_sub_txt);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, ["Recording Bot", "Recording Time", "Recording Accuracy"]);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt[4]);
+    p_center_menu_txt[1] = "Start Recording";
+    if (common_opt_txt_init[p_txt_view_id] == false)
+    {
+        initialize_side_menu();
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1>]  <2>", opt_record_type == "Enemy" ? space_txt : IconString(Icon.ArrowLeft), opt_record_type, opt_record_type == "Friendly" ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Recording Bot"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1> sec]  <2>", max_record_time == 1 ? space_txt : IconString(Icon.ArrowLeft), max_record_time, max_record_time == 60 ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Recording Time"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] == HostPlayer() ? HostPlayer() : null, <"<0>  [<1>]  <2>", accuracy_flg == 0 ? space_txt : IconString(Icon.ArrowLeft), accuracy_flg == 1 ? "High" : "Normal", accuracy_flg == 1 ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[EvaluateOnce(IndexOfArrayValue(center_menu_txt, "Recording Accuracy"))] + Vector(opt_txt_right_pos, 0, 0), LocalPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionAndString, Color.White, Spectators.DefaultVisibility);
+    }
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot")] = false;
+    opt_layer = p_txt_view_id;
+    update_menucolor();
+    set_description_data();
+}
+
+rule: "[menu][make] option_layer1_make_edit_dummybot"
+Event.OngoingPlayer
+if (opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot")] == true)
+{
+    common_opt_txt_group = ArraySlice(common_opt_txt_list, IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot"), 2);
+    common_opt_txt_name = "Edit Dummy Bot";
+    get_menu_index();
+    current_menu_item_list = common_opt_txt_group;
+    current_menu_item_list[0] = <"<0> <1>", IconString(Icon.ArrowLeft), current_menu_item_list[0]>;
+    current_menu_item_list[1] = <"[<0>] <1>", current_menu_item_list[1], IconString(Icon.ArrowRight)>;
+    menu_item_color = [Color.Gray, Color.White];
+    menu_item_x_pos = [Vector(0.15, 0, 0), Vector(-0.15, 0, 0)];
+    ModifyVariable(center_menu_color, Operation.AppendToArray, common_menu_color);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, [Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White, Color.White]);
+    ModifyVariable(center_menu_color, Operation.AppendToArray, Color.White);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_sub_txt);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, [null, null, null, null, null, null]);
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt[4]);
+    p_center_menu_txt[1] = "Start Recording";
+    if (common_opt_txt_init[p_txt_view_id] == false)
+    {
+        initialize_side_menu();
+        CreateInWorldText(opt_team_type == Team.Team2 ? LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] : null, <"Dummy Bot 5 <0>", opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(4, Team.Team2)) == true ? HeroIconString(HeroOf(PlayersInSlot(4, Team.Team2))) : "" : "">, WorldVectorOf(LocalPlayer().opt_p_list[6 + 4], HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[5], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(4, Team.Team2)) == true && PlayersInSlot(4, Team.Team2).edit_status == "Enable" ? Color.White : Color.Gray : Color.Gray, Spectators.DefaultVisibility);
+        CreateInWorldText(opt_team_type == Team.Team2 ? LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)] : null, <"<0> [<1>] <2>", EntityExists(PlayersInSlot(4, Team.Team2)) == false || PlayersInSlot(4, Team.Team2).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft), opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(4, Team.Team2)) == true ? PlayersInSlot(4, Team.Team2).opt_edit_status : "Empty" : "Empty", EntityExists(PlayersInSlot(4, Team.Team2)) == false || PlayersInSlot(4, Team.Team2).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[6 + 4] + Vector(opt_txt_right_pos, 0, 0), HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"Dummy Bot 4 <0>", opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(3, Team.Team2)) == true ? HeroIconString(HeroOf(PlayersInSlot(3, Team.Team2))) : "" : EntityExists(PlayersInSlot(4, Team.Team1)) == true ? HeroIconString(HeroOf(PlayersInSlot(4, Team.Team1))) : "">, WorldVectorOf(LocalPlayer().opt_p_list[5 + 4], HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[5], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(3, Team.Team2)) == true && PlayersInSlot(3, Team.Team2).edit_status == "Enable" ? Color.White : Color.Gray : EntityExists(PlayersInSlot(4, Team.Team1)) == true && PlayersInSlot(4, Team.Team1).edit_status == "Enable" ? Color.White : Color.Gray, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"<0> [<1>] <2>", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(4, Team.Team1)) == false || PlayersInSlot(4, Team.Team1).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft) : EntityExists(PlayersInSlot(3, Team.Team2)) == false || PlayersInSlot(3, Team.Team2).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft), opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(3, Team.Team2)) == true ? PlayersInSlot(3, Team.Team2).opt_edit_status : "Empty" : EntityExists(PlayersInSlot(4, Team.Team1)) == true ? PlayersInSlot(4, Team.Team1).opt_edit_status : "Empty", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(4, Team.Team1)) == false || PlayersInSlot(4, Team.Team1).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight) : EntityExists(PlayersInSlot(3, Team.Team2)) == false || PlayersInSlot(3, Team.Team2).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[5 + 4] + Vector(opt_txt_right_pos, 0, 0), HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"Dummy Bot 3 <0>", opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(2, Team.Team2)) == true ? HeroIconString(HeroOf(PlayersInSlot(2, Team.Team2))) : "" : EntityExists(PlayersInSlot(3, Team.Team1)) == true ? HeroIconString(HeroOf(PlayersInSlot(3, Team.Team1))) : "">, WorldVectorOf(LocalPlayer().opt_p_list[4 + 4], HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[5], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(2, Team.Team2)) == true && PlayersInSlot(2, Team.Team2).edit_status == "Enable" ? Color.White : Color.Gray : EntityExists(PlayersInSlot(3, Team.Team1)) == true && PlayersInSlot(3, Team.Team1).edit_status == "Enable" ? Color.White : Color.Gray, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"<0> [<1>] <2>", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(3, Team.Team1)) == false || PlayersInSlot(3, Team.Team1).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft) : EntityExists(PlayersInSlot(2, Team.Team2)) == false || PlayersInSlot(2, Team.Team2).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft), opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(2, Team.Team2)) == true ? PlayersInSlot(2, Team.Team2).opt_edit_status : "Empty" : EntityExists(PlayersInSlot(3, Team.Team1)) == true ? PlayersInSlot(3, Team.Team1).opt_edit_status : "Empty", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(3, Team.Team1)) == false || PlayersInSlot(3, Team.Team1).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight) : EntityExists(PlayersInSlot(2, Team.Team2)) == false || PlayersInSlot(2, Team.Team2).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[4 + 4] + Vector(opt_txt_right_pos, 0, 0), HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.White, Spectators.DefaultVisibility);
+        MinWait();
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"Dummy Bot 2 <0>", opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(1, Team.Team2)) == true ? HeroIconString(HeroOf(PlayersInSlot(1, Team.Team2))) : "" : EntityExists(PlayersInSlot(2, Team.Team1)) == true ? HeroIconString(HeroOf(PlayersInSlot(2, Team.Team1))) : "">, WorldVectorOf(LocalPlayer().opt_p_list[3 + 4], HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[5], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(1, Team.Team2)) == true && PlayersInSlot(1, Team.Team2).edit_status == "Enable" ? Color.White : Color.Gray : EntityExists(PlayersInSlot(2, Team.Team1)) == true && PlayersInSlot(2, Team.Team1).edit_status == "Enable" ? Color.White : Color.Gray, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"<0> [<1>] <2>", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(2, Team.Team1)) == false || PlayersInSlot(2, Team.Team1).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft) : EntityExists(PlayersInSlot(1, Team.Team2)) == false || PlayersInSlot(1, Team.Team2).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft), opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(1, Team.Team2)) == true ? PlayersInSlot(1, Team.Team2).opt_edit_status : "Empty" : EntityExists(PlayersInSlot(2, Team.Team1)) == true ? PlayersInSlot(2, Team.Team1).opt_edit_status : "Empty", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(2, Team.Team1)) == false || PlayersInSlot(2, Team.Team1).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight) : EntityExists(PlayersInSlot(1, Team.Team2)) == false || PlayersInSlot(1, Team.Team2).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[3 + 4] + Vector(opt_txt_right_pos, 0, 0), HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"Dummy Bot 1 <0>", opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(0, Team.Team2)) == true ? HeroIconString(HeroOf(PlayersInSlot(0, Team.Team2))) : "" : EntityExists(PlayersInSlot(1, Team.Team1)) == true ? HeroIconString(HeroOf(PlayersInSlot(1, Team.Team1))) : "">, WorldVectorOf(LocalPlayer().opt_p_list[2 + 4], HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[5], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(0, Team.Team2)) == true && PlayersInSlot(0, Team.Team2).edit_status == "Enable" ? Color.White : Color.Gray : EntityExists(PlayersInSlot(1, Team.Team1)) == true && PlayersInSlot(1, Team.Team1).edit_status == "Enable" ? Color.White : Color.Gray, Spectators.DefaultVisibility);
+        MinWait();
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"<0> [<1>] <2>", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(1, Team.Team1)) == false || PlayersInSlot(1, Team.Team1).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft) : EntityExists(PlayersInSlot(0, Team.Team2)) == false || PlayersInSlot(0, Team.Team2).opt_edit_status == "Enable" ? space_txt : IconString(Icon.ArrowLeft), opt_team_type == Team.Team2 ? EntityExists(PlayersInSlot(0, Team.Team2)) == true ? PlayersInSlot(0, Team.Team2).opt_edit_status : "Empty" : EntityExists(PlayersInSlot(1, Team.Team1)) == true ? PlayersInSlot(1, Team.Team1).opt_edit_status : "Empty", opt_team_type == Team.Team1 ? EntityExists(PlayersInSlot(1, Team.Team1)) == false || PlayersInSlot(1, Team.Team1).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight) : EntityExists(PlayersInSlot(0, Team.Team2)) == false || PlayersInSlot(0, Team.Team2).opt_edit_status == LastOf(status_name_list) ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[2 + 4] + Vector(opt_txt_right_pos, 0, 0), HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.White, Spectators.DefaultVisibility);
+        CreateInWorldText(LocalPlayer().common_opt_txt_view[EvaluateOnce(txt_view_id)], <"<0> [<1>] <2>", opt_team_type == Team.Team1 ? space_txt : IconString(Icon.ArrowLeft), opt_team_type == Team.Team1 ? "Friendly" : "Enemy", opt_team_type == Team.Team2 ? space_txt : IconString(Icon.ArrowRight)>, WorldVectorOf(LocalPlayer().opt_p_list[1 + 4] + Vector(0, 0, 0), HostPlayer(), LocalVector.RotationAndTranslation), opt_txt_size[1], Clipping.DoNotClip, InworldTextRev.VisibleToPositionStringAndColor, Color.White, Spectators.DefaultVisibility);
+    }
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot")] = false;
+    opt_layer = p_txt_view_id;
+    update_menucolor();
+    set_description_data();
+}
+
+rule: "[menu][main] adjust slow motion"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Slow motion"))
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu"))
+{
+    if (input_throttle == Left())
+    {
+        if (opt_slowmotion_flg != false)
+        {
+            opt_slowmotion_flg = false;
+        }
+    }
+    else if (input_throttle == Right())
+    {
+        if (opt_slowmotion_flg != true)
+        {
+            opt_slowmotion_flg = true;
+        }
+    }
+}
+
+rule: "[menu][main] adjust change skin timer"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right() || IsButtonHeld(EventPlayer(), Button.Interact) == true) == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Change Skin"))
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu"))
+{
+    if (input_throttle == Left())
+    {
+        if (assemble_time >= 11)
+        {
+            assemble_time -= 1;
+        }
+    }
+    else if (input_throttle == Right())
+    {
+        if (assemble_time < 100)
+        {
+            assemble_time += 1;
+        }
+    }
+    else if (IsButtonHeld(EventPlayer(), Button.Interact))
+    {
+        wait_end_interact();
+        teleport_pos = PositionOf(EventPlayer());
+        menu_clear();
+        slowmotion_cancel();
+        DestroyAllDummyBots();
+        fc_configured_flg = false;
+        MinWait();
+        if (CurrentGameMode() != GameMode.TeamDeathmatch)
+        {
+            // SetMatchTime(0);
+            MinWait();
+        }
+        GoToAssembleHeroes();
+        Abort();
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][main] change hero (host)"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_interact_flg == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Change Hero"))
+if (opt_view_flg == true)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu"))
+{
+    wait_end_interact();
+    change_hero_flg = true;
+    spawn_face_pos = FacingDirectionOf(EventPlayer());
+    teleport_pos = PositionOf(EventPlayer());
+    slowmotion_cancel();
+    SetAllowedHeroes(EventPlayer(), RemoveFromArray(AllHeroes(), HeroOf(EventPlayer())));
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    Kill(EventPlayer(), null);
+    SetAllowedHeroes(EventPlayer(), AllHeroes());
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    SetAllowedHeroes(EventPlayer(), AllHeroes());
+}
+
+rule: "[menu][main] change hero (not host)"
+Event.OngoingPlayer
+if (EventPlayer() != HostPlayer())
+if (IsDummyBot(EventPlayer()) == false)
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true)
+{
+    wait_end_interact();
+    change_hero_flg = true;
+    spawn_face_pos = FacingDirectionOf(EventPlayer());
+    teleport_pos = PositionOf(EventPlayer());
+    SetAllowedHeroes(EventPlayer(), RemoveFromArray(AllHeroes(), HeroOf(EventPlayer())));
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    Kill(EventPlayer(), null);
+    SetAllowedHeroes(EventPlayer(), AllHeroes());
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    SetAllowedHeroes(EventPlayer(), AllHeroes());
+}
+
+rule: "[menu][main] adjust camera mode"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Camera Mode"))
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu"))
+{
+    if (input_throttle == Left())
+    {
+        if (camera_mode != camera_mode_list[0])
+        {
+            camera_mode = camera_mode_list[IndexOfArrayValue(camera_mode_list, camera_mode) - 1];
+        }
+    }
+    else if (input_throttle == Right())
+    {
+        if (camera_mode != camera_mode_list[CountOf(camera_mode_list) - 1])
+        {
+            camera_mode = camera_mode_list[IndexOfArrayValue(camera_mode_list, camera_mode) + 1];
+        }
+    }
+    update_menucolor();
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][main] opt_start_adjust"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if (opt_interact_flg == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Adjust Perspective"))
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu"))
+{
+    wait_end_interact();
+    keep_select_menu_y_pos();
+    if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Tracking")])
+    {
+        adjust_tracking_flg = true;
+        SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), 0, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+        WaitUntil(FacingDirectionOf(EventPlayer()) == Vector(XOf(FacingDirectionOf(EventPlayer())), 0, ZOf(FacingDirectionOf(EventPlayer()))), 1);
+        base_face_pos = FacingDirectionOf(EventPlayer());
+        async! adjust_tracking_xy();
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        if (tracking_pos == [])
+        {
+            SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), 0.11, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+            Wait(0.1, WaitBehavior.IgnoreCondition);
+        }
+        common_adjust_around_pos();
+    }
+    else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Fixed")])
+    {
+        adjust_fixed_flg = true;
+        common_camera_test();
+        set_adjust_description();
+    }
+    else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Circling")])
+    {
+        adjust_circling_flg = true;
+        SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), 0, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+        WaitUntil(FacingDirectionOf(EventPlayer()) == Vector(XOf(FacingDirectionOf(EventPlayer())), 0, ZOf(FacingDirectionOf(EventPlayer()))), 1);
+        base_face_pos = FacingDirectionOf(EventPlayer());
+        async! adjust_circling_xy();
+        Wait(0.1, WaitBehavior.IgnoreCondition);
+        if (circling_data[2] == null)
+        {
+            SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), 0.11, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+            Wait(0.1, WaitBehavior.IgnoreCondition);
+        }
+        common_adjust_around_pos();
+    }
+    else if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Drone")])
+    {
+        start_recording_camera();
+    }
+}
+
+rule: "[menu][main] adjust player effect"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Player Effect"))
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu"))
+{
+    if (input_throttle == Left())
+    {
+        adjust_status_left();
+    }
+    else if (input_throttle == Right())
+    {
+        adjust_status_right();
+    }
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][main] start camera"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if (IsButtonHeld(EventPlayer(), Button.Interact) == true == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Start Camera"))
+if ((opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Dummy Bot") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Option")) == true)
+{
+    wait_end_interact();
+    if (camera_mode != camera_mode_list[IndexOfArrayValue(camera_mode_list, "Drone")])
+    {
+        if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Tracking")] && tracking_pos == [] || camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Fixed")] && fixed_pos == [] || camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Circling")] && circling_data[2] == null)
+        {
+            SmallMessage(HostPlayer(), "Need to adjust perspective");
+            Abort();
+        }
+        start_flg = true;
+        lock_open_menu_flg = true;
+        menu_clear();
+        SetMoveSpeed(EventPlayer(), 100);
+        camera_on();
+        status_set();
+        if (guide_cnt == 0)
+        {
+            if (opt_slowmotion_flg == false)
+            {
+                SmallMessage(HostPlayer(), <"Hold [<0>] for <1> seconds to display the menu", InputBindingString(Button.Interact), check_interact_time>);
+            }
+            guide_cnt += 1;
+        }
+        EnableMovementCollisionWithEnvironment(FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false));
+        slowmotion_set();
+    }
+    else
+    {
+        if (fc_configured_flg == false)
+        {
+            SmallMessage(HostPlayer(), "Need to adjust perspective");
+            Abort();
+        }
+        fc_camera_status = "Camera Replay";
+        PlayersInSlot(camera_bot_slot, Team.Team1).fc_activate_camera_flg = true;
+        WaitUntil(PlayersInSlot(camera_bot_slot, Team.Team1).fc_activate_camera_flg == false, 3);
+        lock_open_menu_flg = true;
+        menu_clear();
+        SetFacing(EventPlayer(), Vector(XOf(FacingDirectionOf(EventPlayer())), 0, ZOf(FacingDirectionOf(EventPlayer()))), Relative.ToWorld);
+        SetMoveSpeed(EventPlayer(), 100);
+        status_set();
+        EnableMovementCollisionWithEnvironment(FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false));
+        check_sync();
+        slowmotion_set();
+    }
+    lock_open_menu_flg = false;
+}
+
+rule: "[menu][main] option_layer1_end"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_interact_flg == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Exit Menu"))
+if (opt_view_flg == true)
+if ((opt_layer == IndexOfArrayValue(common_opt_txt_list, "Main Menu") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Dummy Bot") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Option")) == true)
+{
+    wait_end_interact();
+    menu_clear();
+    opt_mutex_flg = false;
+}
+
+void opt_status_reset() "[menu] Sub: opt_status_reset"
+{
+    if (HasStatus(EventPlayer(), Status.Burning) == true)
+    {
+        ClearStatus(EventPlayer(), Status.Burning);
+        WaitUntil(HasStatus(EventPlayer(), Status.Burning) == false, 5);
+    }
+    if (HasStatus(EventPlayer(), Status.KnockedDown) == true)
+    {
+        ClearStatus(EventPlayer(), Status.KnockedDown);
+        WaitUntil(HasStatus(EventPlayer(), Status.KnockedDown) == false, 5);
+    }
+    if (HasStatus(EventPlayer(), Status.Asleep) == true)
+    {
+        ClearStatus(EventPlayer(), Status.Asleep);
+        WaitUntil(HasStatus(EventPlayer(), Status.Asleep) == false, 5);
+    }
+    if (HasStatus(EventPlayer(), Status.Frozen) == true)
+    {
+        ClearStatus(EventPlayer(), Status.Frozen);
+        WaitUntil(HasStatus(EventPlayer(), Status.Frozen) == false, 5);
+    }
+    if (HasStatus(EventPlayer(), Status.Stunned) == true)
+    {
+        ClearStatus(EventPlayer(), Status.Stunned);
+        WaitUntil(HasStatus(EventPlayer(), Status.Stunned) == false, 5);
+    }
+    if (HasStatus(EventPlayer(), Status.Hacked) == true)
+    {
+        ClearStatus(EventPlayer(), Status.Hacked);
+        WaitUntil(HasStatus(EventPlayer(), Status.Hacked) == false, 5);
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+}
+
+void status_set() "[menu] Sub: status_set"
+{
+    if ((IsDead(EventPlayer()) == true && opt_status_value != status_name_list[IndexOfArrayValue(status_name_list, "Kill")]) == true)
+    {
+        Teleport(EventPlayer(), teleport_pos);
+        Resurrect(EventPlayer());
+        replay_target_flg = true;
+        SetStatus(EventPlayer(), null, Status.Unkillable, 9999);
+    }
+    if (opt_status_value == status_name_list[0])
+    {
+        opt_status_reset();
+        discard_effect();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Frozen")])
+    {
+        SetStatus(EventPlayer(), null, Status.Frozen, status_time);
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Burning")])
+    {
+        SetStatus(EventPlayer(), null, Status.Burning, status_time);
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Asleep")])
+    {
+        SetStatus(EventPlayer(), null, Status.Asleep, status_time);
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Stunned")])
+    {
+        SetStatus(EventPlayer(), null, Status.Stunned, 5);
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Knocked Down")])
+    {
+        SetStatus(EventPlayer(), null, Status.KnockedDown, status_time);
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Nano Boost")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.AnaNanoBoostedEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Hacked")])
+    {
+        SetUltimateCharge(EventPlayer(), 0);
+        MinWait();
+        SetStatus(EventPlayer(), null, Status.Hacked, status_time);
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Echo Cloning")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.EchoCloningEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Kill")])
+    {
+        if (HasStatus(EventPlayer(), Status.Unkillable) == true)
+        {
+            ClearStatus(EventPlayer(), Status.Unkillable);
+            MinWait();
+        }
+        Wait(1, WaitBehavior.IgnoreCondition);
+        Kill(EventPlayer(), null);
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Immortality Field")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.BaptisteImmortalityFieldProtectedEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Sound Barrier")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.LucioSoundBarrierProtectedEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Damage Boosted")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.MercyDamageBoostedEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Wraith Form")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.ReaperWraithFormEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Overloading")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.TorbjornOverloadingEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Primal Rage")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.WinstonPrimalRageEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+    else if (opt_status_value == status_name_list[IndexOfArrayValue(status_name_list, "Piledriver")])
+    {
+        CreateEffect(AllPlayers(Team.All), Effect.WreckingBallPiledriverFireEffect, TeamOf(EventPlayer()) == Team.Team1 ? Color.Team1 : Color.Team2, EventPlayer(), 1, EffectRev.VisibleToPositionRadiusAndColor);
+        make_effect_id = LastCreatedEntity();
+    }
+}
+
+void adjust_status_left() "[menu] Sub: adjust_status_left"
+{
+    if (stat_name_cnt > 0)
+    {
+        stat_name_cnt -= 1;
+    }
+    opt_status_value = status_name_list[stat_name_cnt];
+}
+
+void adjust_status_right() "[menu] Sub: adjust_status_right"
+{
+    if (stat_name_cnt < IndexOfArrayValue(status_name_list, LastOf(status_name_list)))
+    {
+        stat_name_cnt += 1;
+    }
+    opt_status_value = status_name_list[stat_name_cnt];
+}
+
+rule: "[menu] fast move mode (movement)"
+Event.OngoingPlayer
+if (opt_fast_move_mode == true)
+if (IsDummyBot(EventPlayer()) == false)
+if (EventPlayer() == HostPlayer())
+{
+    if (green_screen_map_flg == false && (opt_layer == 0 || opt_view_flg == true) == true)
+    {
+        SetMoveSpeed(EventPlayer(), 175);
+    }
+    else
+    {
+        SetMoveSpeed(EventPlayer(), 100);
+    }
+}
+
+rule: "[menu] fast move mode (jump)"
+Event.OngoingPlayer
+if (opt_fast_move_mode == true)
+if (green_screen_map_flg == false)
+if (IsButtonHeld(EventPlayer(), Button.Jump) == true)
+if (IsDummyBot(EventPlayer()) == false)
+{
+    if ((opt_layer == 0 || opt_view_flg == true) == true)
+    {
+        while (IsButtonHeld(EventPlayer(), Button.Jump) == true)
+        {
+            ApplyImpulse(EventPlayer(), Up(), 7.5, Relative.ToWorld, ContraryMotion.Cancel);
+            Wait(0.1, WaitBehavior.IgnoreCondition);
+        }
+    }
+}
+
+void set_adjust_description() "[menu] Sub: set_adjust_description"
+{
+    if (camera_mode == "Tracking")
+    {
+        description_txt = [true, "Decide on the camera's perspective of tracking the hero", null, null, null];
+    }
+    else if (camera_mode == "Fixed")
+    {
+        description_txt = [true, "Decide on the camera's perspective from a fixed position", null, null, null];
+    }
+    else if (camera_mode == "Circling")
+    {
+        description_txt = [true, "Decide on the camera's perspective as it rotates around the hero", null, null, null];
+    }
+    else if (camera_mode == "Drone")
+    {
+        description_txt = [true, "Press", "to start drone route recording", Button.Interact, true];
+    }
+}
+
+rule: "[menu][option] opt_adjustable_setting_control"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Option"))
+if (menu_current_idx != -1)
+{
+    if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Slow motion percentage"))
+    {
+        if (input_throttle == Left())
+        {
+            if (slowmotion_speed >= 11)
+            {
+                slowmotion_speed -= 1;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (slowmotion_speed < 100)
+            {
+                slowmotion_speed += 1;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Start Camera Target"))
+    {
+        if (input_throttle == Left() && camera_activate_all == true)
+        {
+            camera_activate_all = false;
+        }
+        else if (input_throttle == Right() && camera_activate_all == false)
+        {
+            camera_activate_all = true;
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Nameplate"))
+    {
+        if (input_throttle == Left() && nameplate_flg == true)
+        {
+            nameplate_flg = false;
+            DisableNameplates(AllPlayers(Team.All), AllPlayers(Team.All));
+        }
+        else if (input_throttle == Right() && nameplate_flg == false)
+        {
+            nameplate_flg = true;
+            EnableNameplates(AllPlayers(Team.All), AllPlayers(Team.All));
+        }
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][parameter] adjust parameter type"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (menu_current_idx == CountOf(common_menu_txt))
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter"))
+{
+    if (input_throttle == Left())
+    {
+        if (parameter_mode_type > 0)
+        {
+            parameter_mode_type -= 1;
+            switch_parameter_list();
+        }
+    }
+    else if (input_throttle == Right())
+    {
+        if (parameter_mode_type < CountOf(camera_mode_list) - 1)
+        {
+            parameter_mode_type += 1;
+            switch_parameter_list();
+        }
+    }
+}
+
+void switch_parameter_list() "[menu][parameter] Sub: switch_parameter_list"
+{
+    if (camera_mode_list[parameter_mode_type] != "Drone")
+    {
+        center_menu_color[IndexOfArrayValue(p_center_menu_txt, "Camera Test")] = Color.White;
+    }
+    p_center_menu_txt = [];
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt);
+    if (camera_mode_list[parameter_mode_type] == "Tracking")
+    {
+        ModifyVariable(p_center_menu_txt, Operation.AppendToArray, [null, "Zoom In/Out Speed", "Move Up/Down Speed", "Move Left/Right Speed"]);
+    }
+    else if (camera_mode_list[parameter_mode_type] == "Fixed")
+    {
+        ModifyVariable(p_center_menu_txt, Operation.AppendToArray, [null, "Camera Movement Speed"]);
+    }
+    else if (camera_mode_list[parameter_mode_type] == "Circling")
+    {
+        ModifyVariable(p_center_menu_txt, Operation.AppendToArray, [null, "Rotation Direction", "Rotation Speed"]);
+    }
+    else if (camera_mode_list[parameter_mode_type] == "Drone")
+    {
+        ModifyVariable(p_center_menu_txt, Operation.AppendToArray, [null, "Camera Test", null, "Recording Time", "Camera Movement Speed", "Camera Blend Speed", "Aim Speed", "Velocity Change Time", "Maximum Acceleration Speed", "Minimum Deceleration Speed"]);
+        center_menu_color[IndexOfArrayValue(p_center_menu_txt, "Camera Test")] = Color.Rose;
+    }
+    ModifyVariable(p_center_menu_txt, Operation.AppendToArray, common_menu_txt[4]);
+}
+
+rule: "[menu][parameter] opt_tracking_adjustable_setting_control"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (camera_mode_list[parameter_mode_type] == "Tracking")
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter"))
+if (menu_current_idx != -1)
+{
+    if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Move Up/Down Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (adjust_param >= 0.002)
+            {
+                adjust_param -= 0.001;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (adjust_param < 1)
+            {
+                adjust_param += 0.001;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Zoom In/Out Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (zoom_param >= 0.002)
+            {
+                zoom_param -= 0.001;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (zoom_param < 1)
+            {
+                zoom_param += 0.001;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Move Left/Right Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (horizontal_speed >= 0.1)
+            {
+                horizontal_speed -= 0.01;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (horizontal_speed < 10)
+            {
+                horizontal_speed += 0.01;
+            }
+        }
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][parameter] opt_fixed_adjustable_setting_control"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (camera_mode_list[parameter_mode_type] == "Fixed")
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter"))
+if (menu_current_idx != -1)
+{
+    if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Camera Movement Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (fixed_speed_data[4] >= 0.02)
+            {
+                fixed_speed_data[4] -= 0.01;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (fixed_speed_data[4] < 1)
+            {
+                fixed_speed_data[4] += 0.01;
+            }
+        }
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][parameter] opt_circling_adjustable_setting_control"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (camera_mode_list[parameter_mode_type] == "Circling")
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter"))
+if (menu_current_idx != -1)
+{
+    if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Rotation Direction"))
+    {
+        if (input_throttle == Left() && circling_data[0] == "Right")
+        {
+            circling_data[0] = "Left";
+        }
+        else if (input_throttle == Right() && circling_data[0] == "Left")
+        {
+            circling_data[0] = "Right";
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Rotation Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (circling_data[1] >= 0.02)
+            {
+                circling_data[1] -= 0.01;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (circling_data[1] < 1)
+            {
+                circling_data[1] += 0.01;
+            }
+        }
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][parameter] opt_drone_adjustable_setting_control"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (camera_mode_list[parameter_mode_type] == "Drone")
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter"))
+if (menu_current_idx != -1)
+{
+    if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Recording Time"))
+    {
+        if (input_throttle == Left())
+        {
+            if (drone_camera_rectime > 1)
+            {
+                drone_camera_rectime -= 1;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (drone_camera_rectime < 30)
+            {
+                drone_camera_rectime += 1;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Camera Movement Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (fc_camera_speed > 0.01)
+            {
+                fc_camera_speed -= 0.01;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (fc_camera_speed < 100)
+            {
+                fc_camera_speed += 0.01;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Aim Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (fc_aim_speed > 10)
+            {
+                fc_aim_speed -= 1;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (fc_aim_speed < 1000)
+            {
+                fc_aim_speed += 1;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Velocity Change Time"))
+    {
+        if (input_throttle == Left())
+        {
+            if (fc_velocity_change_time > 0.01)
+            {
+                fc_velocity_change_time -= 0.01;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (fc_velocity_change_time < 100)
+            {
+                fc_velocity_change_time += 0.01;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Maximum Acceleration Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (fc_max_acc_speed > 0.01)
+            {
+                fc_max_acc_speed -= 0.01;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (fc_max_acc_speed < 100)
+            {
+                fc_max_acc_speed += 0.01;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Minimum Deceleration Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (fc_min_dec_speed >= 0.01)
+            {
+                fc_min_dec_speed -= 0.01;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (fc_min_dec_speed < 100)
+            {
+                fc_min_dec_speed += 0.01;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Camera Blend Speed"))
+    {
+        if (input_throttle == Left())
+        {
+            if (fc_blend_speed >= 1)
+            {
+                fc_blend_speed -= 1;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (fc_blend_speed < 1000)
+            {
+                fc_blend_speed += 1;
+            }
+        }
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+rule: "[menu][dummybot] start_recording"
+Event.OngoingPlayer
+if (record_start_flg == false)
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((opt_layer == IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot")) == true)
+if (opt_interact_flg == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Start Recording"))
+{
+    wait_end_interact();
+    keep_select_menu_y_pos();
+    check_bot_num();
+    fc_camera_status = null;
+    lock_open_menu_flg = true;
+    menu_clear();
+    lock_open_menu_flg = false;
+    description_txt = [true, "Press", "to start recording your actions", Button.Interact, true];
+    WaitUntil(IsButtonHeld(EventPlayer(), Button.Interact) == true, 9999);
+    description_txt = [];
+    ForceThrottle(EventPlayer(), 0, 0, 0, 0, 0, 0);
+    data_reset_cnt();
+    data_reset_status();
+    record_hero = HeroOf(HostPlayer());
+    record_master_time = 0;
+    HostPlayer().current_face_vec_num = 1;
+    HostPlayer().current_botpos_num = 1;
+    HostPlayer().record_max_time = max_record_time;
+    MinWait();
+    weapon_bullet_num = [Ammo(EventPlayer(), 0), Ammo(EventPlayer(), 1)];
+    HostPlayer().rec_start_form = IsInAlternateForm(HostPlayer());
+    rec_start_life = Health(EventPlayer());
+    HostPlayer().rec_start_weapon = Weapon(HostPlayer());
+    if (accuracy_flg == 1)
+    {
+        HostPlayer().botpos_start_flg = true;
+    }
+    MinWait();
+    EnableMovementCollisionWithEnvironment(FilteredArray(AllPlayers(Team.All), IsDummyBot(ArrayElement()) == false));
+    StopForcingThrottle(EventPlayer());
+    opt_fast_move_mode = true;
+    check_sync();
+    HostPlayer().rec_start_position_vec = PositionOf(HostPlayer());
+    HostPlayer().rec_start_face_vec = FacingDirectionOf(HostPlayer());
+    BigMessage(HostPlayer(), "Start Recording");
+    ChaseVariableAtRate(record_master_time, max_record_time, 1, RateChaseReevaluation.None);
+    MinWait();
+    record_start_flg = true;
+}
+
+rule: "[menu][dummybot] option_layer1_dummybot_end"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if (opt_interact_flg == true)
+if ((opt_layer == IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot") || opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot")) == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Back"))
+{
+    wait_end_interact();
+    opt_change_layer[IndexOfArrayValue(common_opt_txt_list, "Dummy Bot")] = true;
+}
+
+rule: "[menu][dummybot] opt_adjustable_setting_control"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Create Dummy Bot"))
+if (menu_current_idx != -1)
+{
+    if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Recording Time"))
+    {
+        if (input_throttle == Left())
+        {
+            if (max_record_time > 1)
+            {
+                max_record_time -= 1;
+            }
+        }
+        else if (input_throttle == Right())
+        {
+            if (max_record_time < 60)
+            {
+                max_record_time += 1;
+            }
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Recording Accuracy"))
+    {
+        if (input_throttle == Right() && accuracy_flg == 0)
+        {
+            accuracy_flg = 1;
+        }
+        else if (input_throttle == Left() && accuracy_flg == 1)
+        {
+            accuracy_flg = 0;
+        }
+    }
+    else if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Recording Bot"))
+    {
+        if (input_throttle == Right() && opt_record_type == "Enemy")
+        {
+            opt_record_type = "Friendly";
+            bot_team_name = Team.Team1;
+        }
+        else if (input_throttle == Left() && opt_record_type == "Friendly")
+        {
+            opt_record_type = "Enemy";
+            bot_team_name = Team.Team2;
+        }
+    }
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    LoopIfConditionIsTrue();
+}
+
+void edit_bot_status() "[menu][dummybot] Sub: edit_bot_status"
+{
+    if (input_throttle == Left())
+    {
+        adjust_status_left_bot();
+    }
+    else if (input_throttle == Right())
+    {
+        adjust_status_right_bot();
+    }
+    else if (IsButtonHeld(EventPlayer(), Button.Interact))
+    {
+        wait_end_interact();
+        if (PlayersInSlot(edit_slot, opt_team_type).opt_edit_status == "Enable")
+        {
+            PlayersInSlot(edit_slot, opt_team_type).replay_target_flg = true;
+            check_sync();
+            PlayersInSlot(edit_slot, opt_team_type).edit_status = "Enable";
+            PlayersInSlot(edit_slot, opt_team_type).opt_edit_status = "Disable";
+        }
+        else if (PlayersInSlot(edit_slot, opt_team_type).opt_edit_status == "Disable")
+        {
+            PlayersInSlot(edit_slot, opt_team_type).replay_force_stop_flg = true;
+            MinWait();
+            PlayersInSlot(edit_slot, opt_team_type).replay_target_flg = false;
+            PlayersInSlot(edit_slot, opt_team_type).edit_status = "Disable";
+            PlayersInSlot(edit_slot, opt_team_type).opt_edit_status = "Enable";
+        }
+        else if (PlayersInSlot(edit_slot, opt_team_type).opt_edit_status == "Delete")
+        {
+            DestroyDummyBot(opt_team_type, edit_slot);
+        }
+        else if (PlayersInSlot(edit_slot, opt_team_type).opt_edit_status == "Switch Team")
+        {
+            switch_bot_team();
+        }
+        else
+        {
+            PlayersInSlot(edit_slot, opt_team_type).status_enable_flg = true;
+        }
+    }
+}
+
+void switch_bot_team() "[menu][dummybot] Sub: switch_bot_team"
+{
+    if (NumberOfPlayers(opt_team_type == Team.Team1 ? Team.Team2 : Team.Team1) < 6)
+    {
+        copy_from_player = [opt_team_type, edit_slot];
+        copy_replay_data();
+        record_hero = HeroOf(PlayersInSlot(edit_slot, opt_team_type));
+        DestroyDummyBot(opt_team_type, edit_slot);
+        Wait(0.25, WaitBehavior.IgnoreCondition);
+        CreateDummyBot(record_hero, opt_team_type == Team.Team1 ? Team.Team2 : Team.Team1, -1, HostPlayer().rec_start_position_vec, HostPlayer().rec_start_face_vec);
+        check_sync();
+    }
+}
+
+void copy_replay_data() "[menu][dummybot] Sub: copy_replay_data"
+{
+    rec_start_position_vec = PlayersInSlot(copy_from_player[1], copy_from_player[0]).rec_start_position_vec;
+    rec_start_face_vec = PlayersInSlot(copy_from_player[1], copy_from_player[0]).rec_start_face_vec;
+    throttle_status = PlayersInSlot(copy_from_player[1], copy_from_player[0]).throttle_status;
+    throttle_status2 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).throttle_status2;
+    throttle_status3 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).throttle_status3;
+    throttle_status4 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).throttle_status4;
+    MinWait();
+    face_vec_status = PlayersInSlot(copy_from_player[1], copy_from_player[0]).face_vec_status;
+    face_vec_status2 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).face_vec_status2;
+    face_vec_status3 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).face_vec_status3;
+    face_vec_status4 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).face_vec_status4;
+    MinWait();
+    botpos_status = PlayersInSlot(copy_from_player[1], copy_from_player[0]).botpos_status;
+    botpos_status2 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).botpos_status2;
+    botpos_status3 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).botpos_status3;
+    botpos_status4 = PlayersInSlot(copy_from_player[1], copy_from_player[0]).botpos_status4;
+    MinWait();
+    botpos_enable_status = PlayersInSlot(copy_from_player[1], copy_from_player[0]).botpos_enable_status;
+    record_max_time = PlayersInSlot(copy_from_player[1], copy_from_player[0]).record_max_time;
+    rec_start_form = PlayersInSlot(copy_from_player[1], copy_from_player[0]).rec_start_form;
+    rec_start_weapon = PlayersInSlot(copy_from_player[1], copy_from_player[0]).rec_start_weapon;
+    button_high_status = PlayersInSlot(copy_from_player[1], copy_from_player[0]).button_high_status;
+    weapon_bullet_num = PlayersInSlot(copy_from_player[1], copy_from_player[0]).weapon_bullet_num;
+    rec_start_life = PlayersInSlot(copy_from_player[1], copy_from_player[0]).rec_start_life;
+    weapon_status = PlayersInSlot(copy_from_player[1], copy_from_player[0]).weapon_status;
+}
+
+rule: "[menu][dummybot] adjust bot 5"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right() || IsButtonHeld(EventPlayer(), Button.Interact) == true) == true)
+if (menu_current_idx == 6 + 4)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot"))
+if (opt_mutex_flg == false)
+{
+    opt_mutex_flg = true;
+    if (opt_team_type == Team.Team2)
+    {
+        edit_slot = 4;
+    }
+    else
+    {
+        edit_slot = 5;
+    }
+    if (EntityExists(PlayersInSlot(edit_slot, opt_team_type)) == true)
+    {
+        edit_bot_status();
+    }
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIf(input_throttle != Vector(0, 0, 0));
+    opt_mutex_flg = false;
+}
+
+rule: "[menu][dummybot] adjust bot 4"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right() || IsButtonHeld(EventPlayer(), Button.Interact) == true) == true)
+if (menu_current_idx == 5 + 4)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot"))
+if (opt_mutex_flg == false)
+{
+    opt_mutex_flg = true;
+    if (opt_team_type == Team.Team2)
+    {
+        edit_slot = 3;
+    }
+    else
+    {
+        edit_slot = 4;
+    }
+    if (EntityExists(PlayersInSlot(edit_slot, opt_team_type)) == true)
+    {
+        edit_bot_status();
+    }
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIf(input_throttle != Vector(0, 0, 0));
+    opt_mutex_flg = false;
+}
+
+rule: "[menu][dummybot] adjust bot 3"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right() || IsButtonHeld(EventPlayer(), Button.Interact) == true) == true)
+if (menu_current_idx == 4 + 4)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot"))
+if (opt_mutex_flg == false)
+{
+    opt_mutex_flg = true;
+    if (opt_team_type == Team.Team2)
+    {
+        edit_slot = 2;
+    }
+    else
+    {
+        edit_slot = 3;
+    }
+    if (EntityExists(PlayersInSlot(edit_slot, opt_team_type)) == true)
+    {
+        edit_bot_status();
+    }
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIf(input_throttle != Vector(0, 0, 0));
+    opt_mutex_flg = false;
+}
+
+rule: "[menu][dummybot] adjust bot 2"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right() || IsButtonHeld(EventPlayer(), Button.Interact) == true) == true)
+if (menu_current_idx == 3 + 4)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot"))
+if (opt_mutex_flg == false)
+{
+    opt_mutex_flg = true;
+    if (opt_team_type == Team.Team2)
+    {
+        edit_slot = 1;
+    }
+    else
+    {
+        edit_slot = 2;
+    }
+    if (EntityExists(PlayersInSlot(edit_slot, opt_team_type)) == true)
+    {
+        edit_bot_status();
+    }
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIf(input_throttle != Vector(0, 0, 0));
+    opt_mutex_flg = false;
+}
+
+rule: "[menu][dummybot] adjust bot 1"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right() || IsButtonHeld(EventPlayer(), Button.Interact) == true) == true)
+if (menu_current_idx == 2 + 4)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot"))
+if (opt_mutex_flg == false)
+{
+    opt_mutex_flg = true;
+    if (opt_team_type == Team.Team2)
+    {
+        edit_slot = 0;
+    }
+    else
+    {
+        edit_slot = 1;
+    }
+    if (EntityExists(PlayersInSlot(edit_slot, opt_team_type)) == true)
+    {
+        edit_bot_status();
+    }
+    Wait(0.25, WaitBehavior.IgnoreCondition);
+    LoopIf(input_throttle != Vector(0, 0, 0));
+    opt_mutex_flg = false;
+}
+
+rule: "[menu][dummybot] adjust team type"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if ((input_throttle == Left() || input_throttle == Right()) == true)
+if (menu_current_idx == 1 + CountOf(common_menu_sub_txt) - 1)
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Edit Dummy Bot"))
+{
+    if (input_throttle == Left())
+    {
+        if (opt_team_type == Team.Team2)
+        {
+            opt_team_type = Team.Team1;
+        }
+    }
+    else if (input_throttle == Right())
+    {
+        if (opt_team_type == Team.Team1)
+        {
+            opt_team_type = Team.Team2;
+        }
+    }
+}
+
+void adjust_status_left_bot() "[menu][dummybot] Sub: adjust_status_left_bot"
+{
+    if (PlayersInSlot(edit_slot, opt_team_type).status_cnt > 0)
+    {
+        PlayersInSlot(edit_slot, opt_team_type).status_cnt -= 1;
+    }
+    PlayersInSlot(edit_slot, opt_team_type).opt_edit_status = PlayersInSlot(edit_slot, opt_team_type).status_list[PlayersInSlot(edit_slot, opt_team_type).status_cnt];
+}
+
+void adjust_status_right_bot() "[menu][dummybot] Sub: adjust_status_right_bot"
+{
+    if (PlayersInSlot(edit_slot, opt_team_type).status_cnt < IndexOfArrayValue(PlayersInSlot(edit_slot, opt_team_type).status_list, LastOf(PlayersInSlot(edit_slot, opt_team_type).status_list)))
+    {
+        PlayersInSlot(edit_slot, opt_team_type).status_cnt += 1;
+    }
+    PlayersInSlot(edit_slot, opt_team_type).opt_edit_status = PlayersInSlot(edit_slot, opt_team_type).status_list[PlayersInSlot(edit_slot, opt_team_type).status_cnt];
+}
+
+void get_fc_global_param() "[menu][drone] Sub: get_fc_global_param"
+{
+    if (camera_mode == camera_mode_list[IndexOfArrayValue(camera_mode_list, "Fixed")] && camera_mode_list[parameter_mode_type] != "Drone")
+    {
+        p_fc_min_dec_speed = fixed_speed_data[0];
+        p_fc_max_acc_speed = fixed_speed_data[4] * 5;
+        p_fc_velocity_change_time = fixed_speed_data[2];
+        p_fc_aim_speed = fixed_speed_data[3];
+        p_fc_camera_speed = fixed_speed_data[4];
+        fc_adjust_param = fixed_speed_data[4];
+        fc_dest_adjust_param = fixed_speed_data[4];
+    }
+    else
+    {
+        p_fc_min_dec_speed = fc_min_dec_speed;
+        p_fc_max_acc_speed = fc_max_acc_speed;
+        p_fc_velocity_change_time = fc_velocity_change_time;
+        p_fc_aim_speed = fc_aim_speed;
+        p_fc_camera_speed = fc_camera_speed;
+        fc_adjust_param = fc_camera_speed;
+        fc_dest_adjust_param = fc_camera_speed;
+    }
+}
+
+rule: "[menu][drone] start camera test"
+Event.OngoingPlayer
+if (EventPlayer() == HostPlayer())
+if (opt_view_flg == true)
+if (opt_interact_flg == true)
+if (menu_current_idx == IndexOfArrayValue(p_center_menu_txt, "Camera Test"))
+if (camera_mode_list[parameter_mode_type] == "Drone")
+if (opt_layer == IndexOfArrayValue(common_opt_txt_list, "Parameter"))
+{
+    wait_end_interact();
+    keep_select_menu_y_pos();
+    common_camera_test();
+}
+
+void start_recording_camera() "[menu][drone] start recording camera"
+{
+    fc_camera_status = "Camera Recording";
+    menu_clear();
+    create_camera_bot();
+    fc_initialize();
+    SetInvisible(HostPlayer(), InvisibleTo.All);
+    Wait(0.1, WaitBehavior.IgnoreCondition);
+    PlayersInSlot(camera_bot_slot, Team.Team1).initialize_camera_flg = true;
+    WaitUntil(PlayersInSlot(camera_bot_slot, Team.Team1).initialize_camera_flg == false, 5);
+    camera_dummy_bot_set();
+    set_adjust_description();
+    WaitUntil(IsButtonHeld(EventPlayer(), Button.Interact) == true, 9999);
+    wait_end_interact();
+    description_txt = [];
+    free_camera_start_recording();
+}
+
+void create_camera_bot() "[menu][drone] Sub: create_camera_bot"
+{
+    if (EntityExists(PlayersInSlot(camera_bot_slot, Team.Team1)) == false)
+    {
+        CreateDummyBot(Hero.Zenyatta, Team.Team1, camera_bot_slot, WorldVectorOf(Vector(0, 0, 2), EventPlayer(), LocalVector.RotationAndTranslation), EyePosition(EventPlayer()));
+        WaitUntil(EntityExists(PlayersInSlot(camera_bot_slot, Team.Team1)) == true, 99999);
+    }
+}
+
+void common_camera_test() "[menu][drone] Sub: common_camera_test"
+{
+    fc_camera_status = "Camera Test";
+    menu_clear();
+    if (adjust_fixed_flg != true)
+    {
+        opt_layer = IndexOfArrayValue(common_opt_txt_list, "Parameter");
+        camera_test_flg = true;
+    }
+    create_camera_bot();
+    fc_initialize();
+    SetInvisible(HostPlayer(), InvisibleTo.All);
+    PlayersInSlot(camera_bot_slot, Team.Team1).initialize_camera_flg = true;
+    WaitUntil(PlayersInSlot(camera_bot_slot, Team.Team1).initialize_camera_flg == false, 5);
+    camera_dummy_bot_set();
+}
+
+void check_bot_num() "[menu] Sub: check_bot_num"
+{
+    if (bot_team_name == Team.Team1)
+    {
+        if (CountOf(FilteredArray(AllPlayers(Team.Team1), ArrayElement().bot_type == 1)) >= 4)
+        {
+            SmallMessage(AllPlayers(Team.All), <"Need to Delete Dummy Bot (<0>)", Team.Team1>);
+            Abort();
+        }
+    }
+    else
+    {
+        if (CountOf(FilteredArray(AllPlayers(Team.Team1), ArrayElement().bot_type == 1)) >= 5)
+        {
+            SmallMessage(AllPlayers(Team.All), <"Need to Delete Dummy Bot (<0>)", Team.Team2>);
+            Abort();
+        }
+    }
+}
