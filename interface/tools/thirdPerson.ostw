@@ -44,7 +44,7 @@ rule: "[lib/tools/thirdPerson.ostw] Third Person Adjustment Instructions"
     VisibleTo: AllPlayers().Filter(p => p.thirdPersonState == ThirdPersonState.ADJUSTING),
     Text: <"<0>\n<1>",
       $"[{InputBindingString(Button.Jump)}] Move Up",
-      $"[{InputBindingString(Button.Crouch)}] Move Down">);
+      $"[{StringLength(<'<0>', InputBindingString(Button.Crouch)>) ? InputBindingString(Button.Crouch) : 'Crouch'}] Move Down">);
 }
 
 rule: "[interface/tools/thirdPerson.ostw] When person is in third person and their menu state becomes closed, start third person camera"
