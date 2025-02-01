@@ -54,8 +54,10 @@ Event.OngoingPlayer
 if (IsModificationActive(Modification.FASTER_ABILITIES))
 {
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 1, 1, newLabel: "Faster Abilities [ON]", newColor: Color.Blue);
+  SmallMessage(AllPlayers(), <"  <0> Faster Abilities On", Icon.Checkmark>);
   WaitUntil(!IsModificationActive(Modification.FASTER_ABILITIES), 99999);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 1, 1, newLabel: "Faster Abilities [OFF]", newColor: Color.Gray);
+  SmallMessage(AllPlayers(), <"  <0> Faster Abilities Off", Icon.X>);
 }
 
 import "fasterAbilities.ostw";
@@ -67,8 +69,10 @@ if (IsModificationActive(Modification.UNKILLABLE))
 {
   SetStatus(EventPlayer(), null, Status.Unkillable, 1000000);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 1, "Unkillable [ON]", Color.Green);
+  SmallMessage(AllPlayers(), <"  <0> Unkillable On", Icon.Checkmark>);
   WaitUntil(!IsModificationActive(Modification.UNKILLABLE), 1000000);
   ClearStatus(EventPlayer(), Status.Unkillable);
+  SmallMessage(AllPlayers(), <"  <0> Unkillable Off", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 1, "Unkillable [OFF]", Color.Gray);
 }
 
@@ -78,9 +82,11 @@ Event.OngoingPlayer
 if (IsModificationActive(Modification.REDUCE_DAMAGE_TAKEN))
 {
   SetDamageReceived(EventPlayer(), 10);
+    SmallMessage(AllPlayers(), <"  <0> Reduced Damage On", Icon.Checkmark>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 1, 2, "Reduced Damage Taken [ON]", Color.Orange);
   WaitUntil(!IsModificationActive(Modification.REDUCE_DAMAGE_TAKEN), 99999);
   SetDamageReceived(EventPlayer(), 100);
+    SmallMessage(AllPlayers(), <"  <0> Reduced Damage Off", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 1, 2, "Reduced Damage Taken [OFF]", Color.Gray);
 }
 
@@ -90,9 +96,11 @@ Event.OngoingPlayer
 if (IsModificationActive(Modification.INCREASE_DAMAGE_DEALT))
 {
   SetDamageDealt(EventPlayer(), 300);
+    SmallMessage(AllPlayers(), <"  <0> Increased Damage On", Icon.Checkmark>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 3, 1, "Increased Damage Dealt [ON]", Color.Rose);
   WaitUntil(!IsModificationActive(Modification.INCREASE_DAMAGE_DEALT), 99999);
   SetDamageDealt(EventPlayer(), 100);
+    SmallMessage(AllPlayers(), <"  <0> Increased Damage Off", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 3, 1, "Increased Damage Dealt [OFF]", Color.Gray);
 }
 
@@ -102,16 +110,19 @@ rule: "[interface/modifications/modsMenu.ostw] Handle auto-regen health"
 Event.OngoingPlayer
 if (IsModificationActive(Modification.AUTO_REGEN_HEALTH))
 {
+  SmallMessage(AllPlayers(), <"  <0> Auto-Regen On", Icon.Checkmark>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 1, 3, newLabel: "Auto-Regen Health [ON]", newColor: Color.Red);
   WaitUntil(!IsModificationActive(Modification.AUTO_REGEN_HEALTH), 99999);
+  SmallMessage(AllPlayers(), <"  <0> Auto-Regen Off", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 1, 3, newLabel: "Auto-Regen Health [OFF]", newColor: Color.Gray);
 }
 
+globalvar Number AUTO_REGEN_DELAY = WorkshopSettingInteger(ModSettingsCategory, "Auto-Regen Delay", 5, 1, 20);
 rule: "[interface/modifications/modsMenu.ostw] When player takes damage, and they avoid damage for 5 seconds, fill health"
 Event.OnDamageTaken
 if (IsModificationActive(Modification.AUTO_REGEN_HEALTH))
 {
-  Wait(WorkshopSettingInteger(ModSettingsCategory, "Auto-Regen Delay", 5, 1, 20), WaitBehavior.RestartWhenTrue);
+  Wait(AUTO_REGEN_DELAY, WaitBehavior.RestartWhenTrue);
   SetPlayerHealth(EventPlayer(), MaxHealth());
 }
 
@@ -121,8 +132,10 @@ rule: "[interface/modifications/modsMenu.ostw] Handle faster respawn button appe
 Event.OngoingPlayer
 if (IsModificationActive(Modification.FASTER_RESPAWN))
 {
+  SmallMessage(AllPlayers(), <"  <0> Faster Respawn On", Icon.Checkmark>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 3, 2, newLabel: "Faster Respawn [ON]", newColor: Color.Aqua);
   WaitUntil(!IsModificationActive(Modification.FASTER_RESPAWN), 99999);
+  SmallMessage(AllPlayers(), <"  <0> Faster Respawn Off", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 3, 2, newLabel: "Faster Respawn [OFF]", newColor: Color.Gray);
 }
 
@@ -141,8 +154,10 @@ rule: "[interface/modifications/modsMenu.ostw] Handle disable mode completion bu
 Event.OngoingPlayer
 if (IsModificationActive(Modification.DISABLE_GAMEMODE_COMPLETION))
 {
+  SmallMessage(AllPlayers(), <"  <0> Mode Completion Disabled", Icon.Checkmark>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 3, 3, "Disable Mode Completion [ON]", Color.SkyBlue, <Player>AllPlayers());
   WaitUntil(!IsModificationActive(Modification.DISABLE_GAMEMODE_COMPLETION), 99999);
+  SmallMessage(AllPlayers(), <"  <0> Mode Completion Enabled", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 3, 3, "Disable Mode Completion [OFF]", Color.Gray, <Player>AllPlayers());
 }
 
@@ -160,8 +175,10 @@ rule: "[interface/modifications/modsMenu.ostw] Handle slow motion button appeara
 Event.OngoingPlayer
 if (IsModificationActive(Modification.SLOW_MOTION))
 {
+  SmallMessage(AllPlayers(), <"  <0> Slow Motion On", Icon.Checkmark>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 2, "Slow Motion [ON]", Color.Violet);
   WaitUntil(!IsModificationActive(Modification.SLOW_MOTION), 99999);
+  SmallMessage(AllPlayers(), <"  <0> Slow Motion Off", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 2, "Slow Motion [OFF]", Color.Gray);
 }
 
@@ -179,8 +196,10 @@ rule: "[interface/modifications/modsMenu.ostw] Handle disable self-heal passive 
 Event.OngoingPlayer
 if (IsModificationActive(Modification.DISABLE_SUPPORT_PASSIVE))
 {
+  SmallMessage(AllPlayers(), <"  <0> Self-Heal Passive Off", Icon.X>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 3, "Self-Heal Passive [OFF]", Color.Gray);
   WaitUntil(!IsModificationActive(Modification.DISABLE_SUPPORT_PASSIVE), 99999);
+  SmallMessage(AllPlayers(), <"  <0> Self-Heal Passive On", Icon.Checkmark>);
   UpdateButtonAppearance(MenuState.MODIFICATIONS, 2, 3, "Self-Heal Passive [ON]", Color.Yellow);
 }
 
