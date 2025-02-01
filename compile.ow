@@ -467,6 +467,20 @@ rule("Initial Global")
 			Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String(
 			"Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String(
 			"Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String(
+			"Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
+			"Ability 1 + Reload"), 0, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
+			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"),
+			Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0),
+			Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String("Ability 2 + Reload"), 0, Array(Custom String("None"),
+			Custom String("Change Hero"), Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String(
+			"Damage Self"), Custom String("Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String(
+			"Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String(
+			"Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String(
+			"07. Quick Actions"), Custom String("Ultimate + Reload"), 0, Array(Custom String("None"), Custom String("Change Hero"),
+			Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String(
+			"Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String(
+			"Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String(
 			"Toggle Self-Heal Passive")), 0));
 		Global._watch_triggers = Empty Array;
 		Global.TRIGGERS_ENABLED = Workshop Setting Toggle(Custom String("07. Quick Actions"), Custom String("Quick Actions Enabled"),
@@ -811,6 +825,7 @@ rule("[interface/menu.ostw] Initialize player and perform cleanup")
 	{
 		"Note that we store it for reevaluation, because changing heroes causes a respawn which overwrites non-reeval force pos and facing"
 		Event Player.menuActivationPoint = Array(Position Of(Event Player), Eye Position(Event Player), Facing Direction Of(Event Player));
+		Stop Forcing Throttle(Event Player);
 		Stop Transforming Throttle(Event Player);
 		Set Aim Speed(Event Player, 0);
 		Start Facing(Event Player, Event Player.menuActivationPoint[2], 1000, To World, None);
@@ -2667,6 +2682,30 @@ rule("[interface/tools/ruler.ostw] Manage ruler visual effects lifecycle")
 	}
 }
 
+rule("[lib/tools/thirdPerson.ostw] Third Person Adjustment Instructions")
+{
+	event
+	{
+		Ongoing - Global;
+	}
+
+	actions
+	{
+		Create HUD Text(Filtered Array(All Players(All Teams), Current Array Element.thirdPersonState == 1), Null, Custom String(
+			"                                                                                          "), Custom String("{0}\n{1}",
+			Custom String("{0}{1}{2}", Custom String("{0}{1}{2}", Custom String("["), Icon String(Arrow: Up), Custom String("/")),
+			Icon String(Arrow: Down), Custom String("] Zoom In/Out")), Custom String("{0}{1}{2}", Custom String("{0}{1}{2}", Custom String(
+			"["), Icon String(Arrow: Left), Custom String("/")), Icon String(Arrow: Right), Custom String("] Orbit Camera"))), Left, 0,
+			Color(White), Color(White), Color(White), Visible To and String, Default Visibility);
+		Create HUD Text(Filtered Array(All Players(All Teams), Current Array Element.thirdPersonState == 1), Null, Custom String(
+			"                                                                                          "), Custom String("{0}\n{1}",
+			Custom String("{0}{1}{2}", Custom String("["), Input Binding String(Button(Jump)), Custom String("] Move Up")), Custom String(
+			"{0}{1}{2}", Custom String("["), String Length(Custom String("{0}", Input Binding String(Button(Crouch))))
+			? Input Binding String(Button(Crouch)) : Custom String("Crouch"), Custom String("] Move Down"))), Left, 0, Color(White), Color(
+			White), Color(White), Visible To and String, Default Visibility);
+	}
+}
+
 rule("[interface/tools/thirdPerson.ostw] When person is in third person and their menu state becomes closed, start third person camera")
 {
 	event
@@ -2697,6 +2736,10 @@ rule("[interface/tools/thirdPerson.ostw] When person is in third person and thei
 			Event Player, False) + World Vector Of(Direction From Angles(
 			Event Player.thirdPersonPosAngle - Event Player.thirdPersonFacAzim, Event Player.thirdPersonFacPolar), Event Player, Rotation),
 			25);
+		"Forcing the throttle prevents the player model from animating while player provides inputs."
+		If(Event Player.thirdPersonState == 1);
+			Start Forcing Throttle(Event Player, 0.900, 1, 0.900, 1, 0.900, 1);
+		End;
 		If(Event Player.thirdPersonState == 2);
 			Start Transforming Throttle(Event Player, 1, 1, World Vector Of(Direction From Angles(
 				Event Player.thirdPersonPosAngle - Event Player.thirdPersonFacAzim, Event Player.thirdPersonFacPolar), Event Player,
@@ -2728,6 +2771,7 @@ rule("[interface/tools/thirdPerson.ostw] Handle entering and exiting adjustment"
 		Event Player.thirdPersonFacPolar = 0;
 		Event Player.thirdPersonFacAzim = 180;
 		Wait(0.016, Ignore Condition);
+		"Forcing the throttle prevents the player model from animating while player provides inputs."
 		Start Forcing Throttle(Event Player, 0.900, 1, 0.900, 1, 0.900, 1);
 		Start Facing(Event Player, Direction From Angles(Horizontal Angle From Direction(Facing Direction Of(Event Player)), 0), 1000,
 			To World, Direction and Turn Rate);
@@ -2735,7 +2779,6 @@ rule("[interface/tools/thirdPerson.ostw] Handle entering and exiting adjustment"
 		Set Move Speed(Event Player, 0);
 		Wait(0.500, Ignore Condition);
 		Stop Facing(Event Player);
-		Start Forcing Throttle(Event Player, 0, 0.700, 0, 0.700, 0, 0.700);
 		Event Player._extendedPlayerCollection[4] = True;
 		Event Player.baseFacingDirection = Facing Direction Of(Event Player);
 		Wait(0.064, Ignore Condition);
@@ -2795,7 +2838,7 @@ rule("[interface/tools/thirdPerson.ostw] While adjusting, use Z Component of Thr
 		Event Player._extendedPlayerCollection[4] == True;
 		Is Alive(Event Player) == True;
 		Event Player.currentMenuState == 0;
-		Absolute Value(Z Component Of(Throttle Of(Event Player))) >= 0.500;
+		Absolute Value(Z Component Of(Throttle Of(Event Player))) > 0;
 	}
 
 	actions
@@ -2803,7 +2846,7 @@ rule("[interface/tools/thirdPerson.ostw] While adjusting, use Z Component of Thr
 		Chase Player Variable At Rate(Event Player, thirdPersonDistance, Z Component Of(Throttle Of(Event Player)) > 0 ? 0.100 : 7, 1,
 			Destination and Rate);
 		Wait Until(Event Player.thirdPersonState != 1 || !Event Player._extendedPlayerCollection[4] || Is Dead(Event Player)
-			|| Event Player.currentMenuState != 0 || Absolute Value(Z Component Of(Throttle Of(Event Player))) < 0.500, 1000000);
+			|| Event Player.currentMenuState != 0 || Absolute Value(Z Component Of(Throttle Of(Event Player))) == 0, 1000000);
 		Stop Chasing Player Variable(Event Player, thirdPersonDistance);
 	}
 }
@@ -2823,7 +2866,7 @@ rule("[interface/tools/thirdPerson.ostw] While adjusting, use X Component of Thr
 		Event Player._extendedPlayerCollection[4] == True;
 		Is Alive(Event Player) == True;
 		Event Player.currentMenuState == 0;
-		Absolute Value(X Component Of(Throttle Of(Event Player))) >= 0.500;
+		Absolute Value(X Component Of(Throttle Of(Event Player))) > 0.900;
 	}
 
 	actions
@@ -2831,7 +2874,7 @@ rule("[interface/tools/thirdPerson.ostw] While adjusting, use X Component of Thr
 		Chase Player Variable At Rate(Event Player, thirdPersonPosAngle, X Component Of(Throttle Of(Event Player))
 			> 0 ? -1000000 : 1000000, 30, Destination and Rate);
 		While(Event Player.thirdPersonState == 1 && Event Player._extendedPlayerCollection[4] && Is Alive(Event Player)
-			&& Event Player.currentMenuState == 0 && Absolute Value(X Component Of(Throttle Of(Event Player))) >= 0.500);
+			&& Event Player.currentMenuState == 0 && Absolute Value(X Component Of(Throttle Of(Event Player))) >= 0.900);
 			If(Absolute Value(Event Player.thirdPersonPosAngle) > 180);
 				Event Player.thirdPersonPosAngle += Event Player.thirdPersonPosAngle > 0 ? -360 : 360;
 			End;
@@ -2881,7 +2924,7 @@ rule("[lib/player/noClip.del] Global noclip setup")
 	actions
 	{
 		Create HUD Text(Local Player.isNoClipActive && Local Player.currentMenuState == 0 ? Local Player : Null, Null, Custom String(
-			"NoClip Active"), Custom String("Hold [{0}] - Move Faster", Input Binding String(Button(Reload))), Right, 1, Color(White),
+			"NoClip Active"), Custom String("Hold [{0}] - Move Faster", Input Binding String(Button(Reload))), Right, 0.500, Color(White),
 			Color(Orange), Is Button Held(Local Player, Button(Reload)) ? Color(Orange) : Color(Blue), Visible To String and Color,
 			Visible Never);
 	}
@@ -3847,7 +3890,7 @@ rule("[interface/modifications/modsMenu.ostw] Update faster abilities button app
 		Global._arrayConstructor = Event Player.ButtonColorGrid[4];
 		Global._arrayConstructor[6] = Color(Blue);
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
-		Small Message(All Players(All Teams), Custom String("  {0} Faster Abilities On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Faster Abilities On", Icon String(Checkmark)));
 		Wait Until(!Global.activeModifications[1], 99999);
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[6] = Custom String("Faster Abilities [OFF]");
@@ -3855,7 +3898,7 @@ rule("[interface/modifications/modsMenu.ostw] Update faster abilities button app
 		Global._arrayConstructor = Event Player.ButtonColorGrid[4];
 		Global._arrayConstructor[6] = Color(Gray);
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
-		Small Message(All Players(All Teams), Custom String("  {0} Faster Abilities Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Faster Abilities Off", Icon String(X)));
 	}
 }
 
@@ -3882,10 +3925,10 @@ rule("[interface/modifications/modsMenu.ostw] Handle unkillable modification")
 		Global._arrayConstructor = Event Player.ButtonColorGrid[4];
 		Global._arrayConstructor[7] = Color(Green);
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
-		Small Message(All Players(All Teams), Custom String("  {0} Unkillable On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Unkillable On", Icon String(Checkmark)));
 		Wait Until(!Global.activeModifications[9], 1000000);
 		Clear Status(Event Player, Unkillable);
-		Small Message(All Players(All Teams), Custom String("  {0} Unkillable Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Unkillable Off", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[7] = Custom String("Unkillable [OFF]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -3912,7 +3955,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle reduced damage taken")
 	actions
 	{
 		Set Damage Received(Event Player, 10);
-		Small Message(All Players(All Teams), Custom String("  {0} Reduced Damage On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Reduced Damage On", Icon String(Checkmark)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[11] = Custom String("Reduced Damage Taken [ON]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -3921,7 +3964,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle reduced damage taken")
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
 		Wait Until(!Global.activeModifications[2], 99999);
 		Set Damage Received(Event Player, 100);
-		Small Message(All Players(All Teams), Custom String("  {0} Reduced Damage Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Reduced Damage Off", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[11] = Custom String("Reduced Damage Taken [OFF]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -3948,7 +3991,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle increased damage dealt")
 	actions
 	{
 		Set Damage Dealt(Event Player, 300);
-		Small Message(All Players(All Teams), Custom String("  {0} Increased Damage On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Increased Damage On", Icon String(Checkmark)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[8] = Custom String("Increased Damage Dealt [ON]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -3957,7 +4000,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle increased damage dealt")
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
 		Wait Until(!Global.activeModifications[3], 99999);
 		Set Damage Dealt(Event Player, 100);
-		Small Message(All Players(All Teams), Custom String("  {0} Increased Damage Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Increased Damage Off", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[8] = Custom String("Increased Damage Dealt [OFF]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -3983,7 +4026,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle auto-regen health")
 
 	actions
 	{
-		Small Message(All Players(All Teams), Custom String("  {0} Auto-Regen On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Auto-Regen On", Icon String(Checkmark)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[16] = Custom String("Auto-Regen Health [ON]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -3991,7 +4034,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle auto-regen health")
 		Global._arrayConstructor[16] = Color(Red);
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
 		Wait Until(!Global.activeModifications[4], 99999);
-		Small Message(All Players(All Teams), Custom String("  {0} Auto-Regen Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Auto-Regen Off", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[16] = Custom String("Auto-Regen Health [OFF]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4038,7 +4081,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle faster respawn button appea
 
 	actions
 	{
-		Small Message(All Players(All Teams), Custom String("  {0} Faster Respawn On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Faster Respawn On", Icon String(Checkmark)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[13] = Custom String("Faster Respawn [ON]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4046,7 +4089,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle faster respawn button appea
 		Global._arrayConstructor[13] = Color(Aqua);
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
 		Wait Until(!Global.activeModifications[5], 99999);
-		Small Message(All Players(All Teams), Custom String("  {0} Faster Respawn Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Faster Respawn Off", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[13] = Custom String("Faster Respawn [OFF]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4094,7 +4137,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle disable mode completion but
 
 	actions
 	{
-		Small Message(All Players(All Teams), Custom String("  {0} Mode Completion Disabled", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Mode Completion Disabled", Icon String(Checkmark)));
 		Global._arrayConstructor = All Players(All Teams).ButtonLabelGrid[4];
 		Global._arrayConstructor[18] = Custom String("Disable Mode Completion [ON]");
 		All Players(All Teams).ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4102,7 +4145,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle disable mode completion but
 		Global._arrayConstructor[18] = Color(Sky Blue);
 		All Players(All Teams).ButtonColorGrid[4] = Global._arrayConstructor;
 		Wait Until(!Global.activeModifications[6], 99999);
-		Small Message(All Players(All Teams), Custom String("  {0} Mode Completion Enabled", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Mode Completion Enabled", Icon String(X)));
 		Global._arrayConstructor = All Players(All Teams).ButtonLabelGrid[4];
 		Global._arrayConstructor[18] = Custom String("Disable Mode Completion [OFF]");
 		All Players(All Teams).ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4148,7 +4191,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle slow motion button appearan
 
 	actions
 	{
-		Small Message(All Players(All Teams), Custom String("  {0} Slow Motion On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Slow Motion On", Icon String(Checkmark)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[12] = Custom String("Slow Motion [ON]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4156,7 +4199,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle slow motion button appearan
 		Global._arrayConstructor[12] = Color(Violet);
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
 		Wait Until(!Global.activeModifications[7], 99999);
-		Small Message(All Players(All Teams), Custom String("  {0} Slow Motion Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Slow Motion Off", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[12] = Custom String("Slow Motion [OFF]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4202,7 +4245,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle disable self-heal passive b
 
 	actions
 	{
-		Small Message(All Players(All Teams), Custom String("  {0} Self-Heal Passive Off", Icon String(X)));
+		Small Message(Event Player, Custom String("  {0} Self-Heal Passive Off", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[17] = Custom String("Self-Heal Passive [OFF]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -4210,7 +4253,7 @@ rule("[interface/modifications/modsMenu.ostw] Handle disable self-heal passive b
 		Global._arrayConstructor[17] = Color(Gray);
 		Event Player.ButtonColorGrid[4] = Global._arrayConstructor;
 		Wait Until(!Global.activeModifications[8], 99999);
-		Small Message(All Players(All Teams), Custom String("  {0} Self-Heal Passive On", Icon String(Checkmark)));
+		Small Message(Event Player, Custom String("  {0} Self-Heal Passive On", Icon String(Checkmark)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[4];
 		Global._arrayConstructor[17] = Custom String("Self-Heal Passive [ON]");
 		Event Player.ButtonLabelGrid[4] = Global._arrayConstructor;
@@ -6588,11 +6631,13 @@ rule("[lib/quickActions/quickAction.del] Set up quick actions")
 	{
 		For Global Variable(i, 0, Count Of(Array(Array(Button(Crouch), Button(Reload)), Array(Button(Crouch), Button(Melee)), Array(Button(
 			Crouch), Button(Interact)), Array(Button(Ability 1), Button(Interact)), Array(Button(Ability 2), Button(Interact)), Array(
-			Button(Ultimate), Button(Interact)))), 1);
+			Button(Ultimate), Button(Interact)), Array(Button(Ability 1), Button(Reload)), Array(Button(Ability 2), Button(Reload)), Array(
+			Button(Ultimate), Button(Reload)))), 1);
 			If(Global.ActionSettings[Global.i] > 0);
 				Global.t = Array(Array(Array(Button(Crouch), Button(Reload)), Array(Button(Crouch), Button(Melee)), Array(Button(Crouch), Button(
 					Interact)), Array(Button(Ability 1), Button(Interact)), Array(Button(Ability 2), Button(Interact)), Array(Button(Ultimate),
-					Button(Interact)))[Global.i], Global.QuickActions[Global.ActionSettings[Global.i]]);
+					Button(Interact)), Array(Button(Ability 1), Button(Reload)), Array(Button(Ability 2), Button(Reload)), Array(Button(Ultimate),
+					Button(Reload)))[Global.i], Global.QuickActions[Global.ActionSettings[Global.i]]);
 				Modify Global Variable(_watch_triggers, Append To Array, Array(Global.t));
 			End;
 		End;
