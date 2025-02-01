@@ -9,7 +9,7 @@ rule: "[lib/player/noClip.del] Global noclip setup"
     Subheader: "NoClip Active",
     Text: <"Hold [<0>] - Move Faster", InputBindingString(Button.Reload)>,
     Location: Location.Right,
-    SortOrder: 1,
+    SortOrder: 0.5,
     SubheaderColor: Color.Orange,
     TextColor: LocalPlayer().IsButtonHeld(Button.Reload) ? Color.Orange : Color.Blue,
     Reevaluation: HudTextRev.VisibleToStringAndColor,
