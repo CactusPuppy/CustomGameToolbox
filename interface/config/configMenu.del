@@ -85,6 +85,7 @@ void ConfigMenu_ThrottleLeftRight() {
         break;
       case ConfigItem.AUTO_REGEN_DELAY:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{AUTO_REGEN_DELAY}");
+        break;
       case ConfigItem.BUTTON_SPAM_PERIOD:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
         break;
