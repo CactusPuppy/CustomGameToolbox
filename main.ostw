@@ -19,10 +19,6 @@ A set of tools that make custom games more useful for recreating, testing, and r
             Limit Roles: 1 Tank 2 Offense 2 Support
         }
 
-        Hybrid {
-            Competitive Rules: On
-        }
-
         Clash {
             Competitive Rules: On
         }
