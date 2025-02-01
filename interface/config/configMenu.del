@@ -1,5 +1,6 @@
 enum ConfigItem {
   METERS_OPTIMIZED_FOR_OVER_TIME,
+  AUTO_REGEN_DELAY,
   BUTTON_SPAM_PERIOD,
   SLOW_MOTION_SPEED,
   INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY,
@@ -14,6 +15,7 @@ enum ConfigItem {
 
 String currentConfigItem: [
   "HPS/DPS Meter Optimization",
+  "Auto-Regen Delay",
   "Button Spam Period",
   "Slow Motion Speed",
   "Interact Destroys Deployables In Replay",
@@ -81,6 +83,8 @@ void ConfigMenu_ThrottleLeftRight() {
       case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime ? 'Over Time' : 'Normal'}");
         break;
+      case ConfigItem.AUTO_REGEN_DELAY:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{AUTO_REGEN_DELAY}");
       case ConfigItem.BUTTON_SPAM_PERIOD:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{BUTTON_SPAM_PERIOD}");
         break;
@@ -122,6 +126,27 @@ void ConfigMenu_Left() {
     case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
       OptimizeMetricsForOverTime = !OptimizeMetricsForOverTime;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime ? 'Over Time' : 'Normal'}");
+      break;
+    case ConfigItem.AUTO_REGEN_DELAY:
+      if (AUTO_REGEN_DELAY <= 0.1) return;
+      AUTO_REGEN_DELAY -= IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+      AUTO_REGEN_DELAY = Max(AUTO_REGEN_DELAY, 0.1);
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{AUTO_REGEN_DELAY}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) > 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (AUTO_REGEN_DELAY <= 0.1) {
+          Abort();
+        }
+        AUTO_REGEN_DELAY -= IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+        AUTO_REGEN_DELAY = Max(AUTO_REGEN_DELAY, 0.1);
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{AUTO_REGEN_DELAY}");
+        Wait(0.064, WaitBehavior.AbortWhenFalse);
+      }
       break;
     case ConfigItem.BUTTON_SPAM_PERIOD:
       if (BUTTON_SPAM_PERIOD <= 0.1) return;
@@ -191,6 +216,27 @@ void ConfigMenu_Right() {
     case ConfigItem.METERS_OPTIMIZED_FOR_OVER_TIME:
       OptimizeMetricsForOverTime = !OptimizeMetricsForOverTime;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{OptimizeMetricsForOverTime ? 'Over Time' : 'Normal'}");
+      break;
+    case ConfigItem.AUTO_REGEN_DELAY:
+      if (AUTO_REGEN_DELAY >= 30) return;
+      AUTO_REGEN_DELAY += IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+      AUTO_REGEN_DELAY = Min(AUTO_REGEN_DELAY, 30);
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{AUTO_REGEN_DELAY}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) < 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (AUTO_REGEN_DELAY >= 30) {
+          Abort();
+        }
+        AUTO_REGEN_DELAY += IsButtonHeld(EventPlayer(), Button.Ability1) ? 1 : 0.1;
+        AUTO_REGEN_DELAY = Min(AUTO_REGEN_DELAY, 30);
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{AUTO_REGEN_DELAY}");
+        Wait(0.064, WaitBehavior.AbortWhenFalse);
+      }
       break;
     case ConfigItem.BUTTON_SPAM_PERIOD:
       if (BUTTON_SPAM_PERIOD >= 30) return;
