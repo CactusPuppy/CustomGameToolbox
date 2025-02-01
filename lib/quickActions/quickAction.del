@@ -30,6 +30,14 @@ globalvar (() => void)[] QuickActions = [
     ToggleBotEditMode();
     # Must manually stop camera since we didn't deactivate noclip by using the menu
     if (!isNoClipActive) StopCamera();
+  },
+  () => {
+    ToggleThirdPerson();
+    # For SOME reason trying to do this without opening the menu
+    # causes some baloney and I can't be bothered to figure it out
+    OpenMenuToPage(EventPlayer(), MenuState.MAIN_MENU);
+    MinWait();
+    CloseMenu(EventPlayer());
   }
 ];
 
@@ -41,7 +49,8 @@ String[] QuickActionLabels: [
   "Damage Self",                  // 4
   "Reset Self to Respawn Point",  // 5
   "Reset All Bot Positions",      // 6
-  "Toggle Bot Edit Mode"          // 7
+  "Toggle Bot Edit Mode",         // 7
+  "Toggle Third-Person"           // 8
 ];
 
 String[] PossibleQuickTriggerLabels: [
