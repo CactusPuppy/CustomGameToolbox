@@ -1,19 +1,25 @@
 import "globalTriggers.del";
 
 globalvar (() => void)[] QuickActions = [
+  // 0
   () => {},
+  // 1
   () => {
     # Set the point for the player to return to
     menuActivationPoint = NewResetFromPlayer(EventPlayer());
     ChangeHero();
   },
+  // 2
   () => {
     ToggleNoClip();
     # Must manually stop camera since we didn't deactivate noclip by using the menu
     if (!isNoClipActive) StopCamera();
   },
+  // 3
   PlayAllReplays,
-  () => { Damage(EventPlayer(), null, 50); },
+  // 4
+  () => { Damage(EventPlayer(), null, 0.2 * MaxHealth()); },
+  // 5
   () => {
     if (respawnPoint.location == null) {
       SmallMessage(EventPlayer(), IconString(Icon.Warning) + "No respawn point set");
@@ -23,14 +29,17 @@ globalvar (() => void)[] QuickActions = [
     Respawn();
     TeleportPlayerToResetPoint(EventPlayer(), EventPlayer().respawnPoint);
   },
+  // 6
   () => {
     async! ResetAllBotsToResetPoints();
   },
+  // 7
   () => {
     ToggleBotEditMode();
     # Must manually stop camera since we didn't deactivate noclip by using the menu
     if (!isNoClipActive) StopCamera();
   },
+  // 8
   () => {
     ToggleThirdPerson();
     # For SOME reason trying to do this without opening the menu
@@ -38,7 +47,13 @@ globalvar (() => void)[] QuickActions = [
     OpenMenuToPage(EventPlayer(), MenuState.MAIN_MENU);
     MinWait();
     CloseMenu(EventPlayer());
-  }
+  },
+  // 9
+  () => activeModifications[Modification.FASTER_ABILITIES] = !activeModifications[Modification.FASTER_ABILITIES],
+  // 10
+  () => activeModifications[Modification.SLOW_MOTION] = !activeModifications[Modification.SLOW_MOTION],
+  // 11
+  () => activeModifications[Modification.DISABLE_SUPPORT_PASSIVE] = !activeModifications[Modification.DISABLE_SUPPORT_PASSIVE]
 ];
 
 String[] QuickActionLabels: [
@@ -50,25 +65,37 @@ String[] QuickActionLabels: [
   "Reset Self to Respawn Point",  // 5
   "Reset All Bot Positions",      // 6
   "Toggle Bot Edit Mode",         // 7
-  "Toggle Third-Person"           // 8
+  "Toggle Third-Person",          // 8
+  "Toggle Faster Abilities",      // 9
+  "Toggle Slow Motion",           // 10
+  "Toggle Self-Heal Passive"      // 11
 ];
 
 String[] PossibleQuickTriggerLabels: [
   "Crouch + Reload",
   "Crouch + Melee",
-  "Crouch + Interact"
+  "Crouch + Interact",
+  "Ability 1 + Interact",
+  "Ability 2 + Interact",
+  "Ultimate + Interact"
 ];
 
 Button[][] PossibleQuickTriggers: [
   [Button.Crouch, Button.Reload],
   [Button.Crouch, Button.Melee],
-  [Button.Crouch, Button.Interact]
+  [Button.Crouch, Button.Interact],
+  [Button.Ability1, Button.Interact],
+  [Button.Ability2, Button.Interact],
+  [Button.Ultimate, Button.Interact]
 ];
 
 globalvar Number[] ActionSettings = [
   WorkshopSettingCombo(QuickActionsCategory, "Crouch + Reload",   5, QuickActionLabels, 0),
-  WorkshopSettingCombo(QuickActionsCategory, "Crouch + Melee",    7, QuickActionLabels, 0),
-  WorkshopSettingCombo(QuickActionsCategory, "Crouch + Interact", 1, QuickActionLabels, 0)
+  WorkshopSettingCombo(QuickActionsCategory, "Crouch + Melee",    4, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Crouch + Interact", 8, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Ability 1 + Interact", 9, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Ability 2 + Interact", 6, QuickActionLabels, 0),
+  WorkshopSettingCombo(QuickActionsCategory, "Ultimate + Interact", 1, QuickActionLabels, 0)
 ];
 
 rule: "[lib/quickActions/quickAction.del] Set up quick actions" {
