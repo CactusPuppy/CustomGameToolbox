@@ -2,9 +2,9 @@ settings
 {
     main
     {
-        Mode Name: "CactusPuppy's Toolbox - Stadium"
+        Mode Name: "CactusPuppy's Toolbox - 5v5"
         Description: "CactusPuppy's Toolbox | v2.2.0
-Code: 7JRMA
+Code: OVVVC
 
 A set of tools that make custom games more useful for recreating, testing, and recording Overwatch scenarios."
     }
@@ -12,12 +12,19 @@ A set of tools that make custom games more useful for recreating, testing, and r
     {
         General
         {
+            Hero Limit: 1 Per Team
+            Game Mode Start: Manual
             Tank Role Passive Health Bonus: Disabled
+            Limit Roles: 1 Tank 2 Offense 2 Support
         }
 
         Practice Range {
 
         }
+    }
+    lobby
+    {
+        Match Voice Chat: Enabled
     }
 }
 
