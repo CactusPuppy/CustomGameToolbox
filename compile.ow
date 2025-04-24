@@ -2,7 +2,7 @@ settings
 {
 	main
 	{
-		Description: "CactusPuppy's Toolbox | v2.0.0\r\nCode: OVVVC\r\n\r\nA set of tools that make custom games more useful for recreating, testing, and recording Overwatch scenarios."
+		Description: "CactusPuppy's Toolbox | v2.2.0\nCode: OVVVC\r\n\r\nA set of tools that make custom games more useful for recreating, testing, and recording Overwatch scenarios."
 		Mode Name: "CactusPuppy's Toolbox"
 	}
 
@@ -14,20 +14,40 @@ settings
 	modes
 	{
 		Clash
+		{
+			Capture Speed Modifier: 45%
+			Competitive Rules: Enabled
+		}
 
 		Control
+		{
+			Competitive Rules: Enabled
+		}
 
 		Escort
+		{
+			Competitive Rules: On
+		}
 
 		Flashpoint
+		{
+			Competitive Rules: Enabled
+		}
 
 		Hybrid
+		{
+			Competitive Rules: Enabled
+		}
+
+		Practice Range
 
 		Push
+		{
+			Competitive Rules: On
+		}
 
 		General
 		{
-			Competitive Rules: On
 			Game Mode Start: Manual
 			Limit Roles: 1 Tank 2 Offense 2 Support
 			Tank Role Passive Health Bonus: Disabled
@@ -170,11 +190,13 @@ variables
 		95: replayStateAction
 		96: recordingCountdownText
 		97: currentConfigSelection
-		98: bot
-		99: bot_0
-		100: bot_1
-		101: cacheMenuYIndex
-		102: t
+		98: b
+		99: b_0
+		100: bot
+		101: bot_0
+		102: bot_1
+		103: cacheMenuYIndex
+		104: t
 }
 
 subroutines
@@ -296,12 +318,12 @@ rule("[interface/menu.ostw] Init player")
 		Event Player.ButtonLabelGrid[10] = Array(Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(
 			""), Custom String(""), Custom String("◀"), Array(Custom String("HPS/DPS Meter Optimization"), Custom String(
 			"Auto-Regen Delay"), Custom String("Button Spam Period"), Custom String("Slow Motion Speed"), Custom String(
-			"Interact Destroys Deployables In Replay"), Custom String("Auto Enable Slow-Mo During Recording"), Custom String(
-			"Loop Replay Playback"), Custom String("Show Replay Timecode"), Custom String("Quick Actions Enabled"))
-			[Event Player.currentConfigSelection], Custom String("▶"), Custom String(""), Custom String(""), Custom String(""),
-			Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal"), Custom String(""), Custom String(""),
+			"Punching Bag Health Proportion"), Custom String("Interact Destroys Deployables In Replay"), Custom String(
+			"Auto Enable Slow-Mo During Recording"), Custom String("Loop Replay Playback"), Custom String("Show Replay Timecode"),
+			Custom String("Quick Actions Enabled"))[Event Player.currentConfigSelection], Custom String("▶"), Custom String(""),
+			Custom String(""), Custom String(""), Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal"),
 			Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""),
-			Custom String(""), Custom String(""), Custom String(""), Custom String(""));
+			Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""), Custom String(""));
 		Event Player.ButtonColorGrid = Empty Array;
 		Event Player.ButtonColorGrid[1] = Array(Null, Null, Custom Color(200, 50, 50, 255), Null, Null, Null, Null, Color(Green), Null,
 			Null, Null, Null, Color(Sky Blue), Null, Null, Null, Null, Color(Yellow), Null, Null, Null, Null, Color(Violet), Null, Null);
@@ -420,8 +442,8 @@ rule("Initial Global")
 			0);
 		Global.SLOW_MOTION_SPEED = Workshop Setting Integer(Custom String("04. Mod Settings"), Custom String("Slow Motion Speed"), 25, 10,
 			100, 0);
-		Global.punchingBagTargetHealthProportio = Workshop Setting Real(Custom String("06. Bot and Replay"), Custom String(
-			"Punching Bag Target Health Proportion"), 0.800, 0, 1, 0);
+		Global.punchingBagTargetHealthProportio = Workshop Setting Integer(Custom String("06. Bot and Replay"), Custom String(
+			"Punching Bag Target Health Proportion"), 80, 10, 100, 0);
 		Global.nextSelectionEntityId = 1;
 		Global.uniqueHeroSkinCombosRemaining = 12;
 		Global.rainbowVector = Left - Left;
@@ -438,50 +460,53 @@ rule("Initial Global")
 		Global.interactDestroysDeployableCompen = Workshop Setting Toggle(Custom String("06. Bot and Replay"), Custom String(
 			"Interact Destroys Deployables In Replay"), False, 0);
 		Global.QuickActions = Array(Array(1, Null), Array(2, Null), Array(3, Null), Array(4, Null), Array(5, Null), Array(6, Null), Array(
-			7, Null), Array(8, Null), Array(9, Null), Array(10, Null), Array(11, Null), Array(12, Null));
+			7, Null), Array(8, Null), Array(9, Null), Array(10, Null), Array(11, Null), Array(12, Null), Array(13, Null));
 		Global.ActionSettings = Array(Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String("Crouch + Reload"), 5,
 			Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"), Custom String(
 			"Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"), Custom String(
-			"Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"), Custom String(
-			"Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0),
-			Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String("Crouch + Melee"), 4, Array(Custom String("None"),
-			Custom String("Change Hero"), Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String(
-			"Damage Self"), Custom String("Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String(
-			"Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String(
-			"Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String(
-			"07. Quick Actions"), Custom String("Crouch + Interact"), 8, Array(Custom String("None"), Custom String("Change Hero"),
-			Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String(
-			"Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String(
+			"Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"), Custom String(
+			"Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String(
+			"Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String("Crouch + Melee"),
+			4, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"), Custom String(
+			"Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"), Custom String(
+			"Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"), Custom String(
 			"Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String(
 			"Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
+			"Crouch + Interact"), 8, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
+			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"),
+			Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"),
+			Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
 			"Ability 1 + Interact"), 9, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
 			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
-			Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"),
-			Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0),
-			Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String("Ability 2 + Interact"), 6, Array(Custom String(
-			"None"), Custom String("Change Hero"), Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String(
-			"Damage Self"), Custom String("Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String(
-			"Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String(
-			"Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String(
-			"07. Quick Actions"), Custom String("Ultimate + Interact"), 1, Array(Custom String("None"), Custom String("Change Hero"),
-			Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String(
-			"Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String(
-			"Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String(
-			"Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"),
+			Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"),
+			Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
+			"Ability 2 + Interact"), 6, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
+			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"),
+			Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"),
+			Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
+			"Ultimate + Interact"), 1, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
+			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"),
+			Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"),
+			Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
 			"Ability 1 + Reload"), 0, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
 			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
-			Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"),
-			Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0),
-			Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String("Ability 2 + Reload"), 0, Array(Custom String("None"),
-			Custom String("Change Hero"), Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String(
-			"Damage Self"), Custom String("Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String(
-			"Toggle Bot Edit Mode"), Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String(
-			"Toggle Slow Motion"), Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String(
-			"07. Quick Actions"), Custom String("Ultimate + Reload"), 0, Array(Custom String("None"), Custom String("Change Hero"),
-			Custom String("Toggle Noclip"), Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String(
-			"Reset Self to Respawn Point"), Custom String("Reset All Bot Positions"), Custom String("Toggle Bot Edit Mode"), Custom String(
-			"Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"), Custom String(
-			"Toggle Self-Heal Passive")), 0));
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"),
+			Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"),
+			Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
+			"Ability 2 + Reload"), 0, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
+			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"),
+			Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"),
+			Custom String("Toggle Self-Heal Passive")), 0), Workshop Setting Combo(Custom String("07. Quick Actions"), Custom String(
+			"Ultimate + Reload"), 0, Array(Custom String("None"), Custom String("Change Hero"), Custom String("Toggle Noclip"),
+			Custom String("Play/Pause All Replays"), Custom String("Damage Self"), Custom String("Reset Self to Respawn Point"),
+			Custom String("Reset All Bot Positions"), Custom String("Toggle Damage/Heal Numbers"), Custom String("Toggle Bot Edit Mode"),
+			Custom String("Toggle Third-Person"), Custom String("Toggle Faster Abilities"), Custom String("Toggle Slow Motion"),
+			Custom String("Toggle Self-Heal Passive")), 0));
 		Global._watch_triggers = Empty Array;
 		Global.TRIGGERS_ENABLED = Workshop Setting Toggle(Custom String("07. Quick Actions"), Custom String("Quick Actions Enabled"),
 			False, -1);
@@ -1694,70 +1719,75 @@ rule("[interface/menu.ostw] Menu left-right")
 				If(X Component Of(Throttle Of(Event Player)) > 0);
 					Event Player.currentConfigSelection = Event Player.currentConfigSelection - 1;
 					If(Event Player.currentConfigSelection < 0);
-						Event Player.currentConfigSelection = 8;
+						Event Player.currentConfigSelection = 9;
 					End;
 				Else;
 					Event Player.currentConfigSelection = Event Player.currentConfigSelection + 1;
-					If(Event Player.currentConfigSelection >= 9);
+					If(Event Player.currentConfigSelection >= 10);
 						Event Player.currentConfigSelection = 0;
 					End;
 				End;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[7] = Array(Custom String("HPS/DPS Meter Optimization"), Custom String("Auto-Regen Delay"), Custom String(
-					"Button Spam Period"), Custom String("Slow Motion Speed"), Custom String("Interact Destroys Deployables In Replay"),
-					Custom String("Auto Enable Slow-Mo During Recording"), Custom String("Loop Replay Playback"), Custom String(
-					"Show Replay Timecode"), Custom String("Quick Actions Enabled"))[Event Player.currentConfigSelection];
+					"Button Spam Period"), Custom String("Slow Motion Speed"), Custom String("Punching Bag Health Proportion"), Custom String(
+					"Interact Destroys Deployables In Replay"), Custom String("Auto Enable Slow-Mo During Recording"), Custom String(
+					"Loop Replay Playback"), Custom String("Show Replay Timecode"), Custom String("Quick Actions Enabled"))
+					[Event Player.currentConfigSelection];
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(Array(35, 0, 4, 8, 12, 16, 20, 24, 28, 32)[Index Of Array Value(Array(0, 1, 2, 3, 4, 5, 6, 7, 8),
+				Skip(Array(39, 0, 4, 8, 12, 16, 20, 24, 28, 32, 36)[Index Of Array Value(Array(0, 1, 2, 3, 5, 6, 7, 8, 9, 4),
 					Event Player.currentConfigSelection) + 1]);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal");
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(31);
+				Skip(35);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.AUTO_REGEN_DELAY;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(27);
+				Skip(31);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.BUTTON_SPAM_PERIOD;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(23);
+				Skip(27);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.SLOW_MOTION_SPEED;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(19);
+				Skip(23);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.interactDestroysDeployableCompen;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(15);
+				Skip(19);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.RECORD_IN_SLOW_MOTION;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(11);
+				Skip(15);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.SHOULD_LOOP_CLIP;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(7);
+				Skip(11);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.SHOW_REPLAY_TIMECODES;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(3);
+				Skip(7);
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.TRIGGERS_ENABLED;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(198);
+				Skip(3);
+				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+				Global._arrayConstructor[12] = Global.punchingBagTargetHealthProportio;
+				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+				Skip(240);
 			End;
 			"Modify the current config item"
 			If(X Component Of(Throttle Of(Event Player)) > 0);
-				Skip(Array(96, 0, 5, 28, 51, 72, 77, 82, 87, 92)[Index Of Array Value(Array(0, 1, 2, 3, 4, 5, 6, 7, 8),
+				Skip(Array(117, 0, 5, 28, 51, 72, 77, 82, 87, 92, 97)[Index Of Array Value(Array(0, 1, 2, 3, 5, 6, 7, 8, 9, 4),
 					Event Player.currentConfigSelection) + 1]);
 				Global.OptimizeMetricsForOverTime = !Global.OptimizeMetricsForOverTime;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal");
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(91);
+				Skip(112);
 				If(Global.AUTO_REGEN_DELAY <= 0.100);
-					Skip(89);
+					Skip(110);
 				End;
 				Global.AUTO_REGEN_DELAY -= Is Button Held(Event Player, Button(Ability 1)) ? 1 : 0.100;
 				Global.AUTO_REGEN_DELAY = Max(Global.AUTO_REGEN_DELAY, 0.100);
@@ -1779,9 +1809,9 @@ rule("[interface/menu.ostw] Menu left-right")
 					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
 					Wait(0.064, Abort When False);
 				End;
-				Skip(68);
+				Skip(89);
 				If(Global.BUTTON_SPAM_PERIOD <= 0.100);
-					Skip(66);
+					Skip(87);
 				End;
 				Global.BUTTON_SPAM_PERIOD -= Is Button Held(Event Player, Button(Ability 1)) ? 1 : 0.100;
 				Global.BUTTON_SPAM_PERIOD = Max(Global.BUTTON_SPAM_PERIOD, 0.100);
@@ -1803,9 +1833,9 @@ rule("[interface/menu.ostw] Menu left-right")
 					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
 					Wait(0.064, Abort When False);
 				End;
-				Skip(45);
+				Skip(66);
 				If(Global.SLOW_MOTION_SPEED <= 10);
-					Skip(43);
+					Skip(64);
 				End;
 				Global.SLOW_MOTION_SPEED -= 5;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
@@ -1825,41 +1855,63 @@ rule("[interface/menu.ostw] Menu left-right")
 					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
 					Wait(Is Button Held(Event Player, Button(Ability 1)) ? 0.064 : 0.100, Abort When False);
 				End;
-				Skip(24);
+				Skip(45);
 				Global.interactDestroysDeployableCompen = !Global.interactDestroysDeployableCompen;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.interactDestroysDeployableCompen;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(19);
+				Skip(40);
 				Global.RECORD_IN_SLOW_MOTION = !Global.RECORD_IN_SLOW_MOTION;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.RECORD_IN_SLOW_MOTION;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(14);
+				Skip(35);
 				Global.SHOULD_LOOP_CLIP = !Global.SHOULD_LOOP_CLIP;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.SHOULD_LOOP_CLIP;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(9);
+				Skip(30);
 				Global.SHOW_REPLAY_TIMECODES = !Global.SHOW_REPLAY_TIMECODES;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.SHOW_REPLAY_TIMECODES;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(4);
+				Skip(25);
 				Global.TRIGGERS_ENABLED = !Global.TRIGGERS_ENABLED;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.TRIGGERS_ENABLED;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+				Skip(20);
+				If(Global.punchingBagTargetHealthProportio <= 10);
+					Skip(18);
+				End;
+				Global.punchingBagTargetHealthProportio -= 5;
+				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+				Global._arrayConstructor[12] = Global.punchingBagTargetHealthProportio;
+				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+				Event Player.tempMenuXIndex = Event Player.menuXIndex;
+				Event Player.tempMenuYIndex = Event Player.menuYIndex;
+				Wait(Global.activeModifications[7] ? 0.250 * Global.SLOW_MOTION_SPEED / 100 : 0.250, Abort When False);
+				While(Event Player.currentMenuState == 10 && X Component Of(Throttle Of(Event Player))
+					> 0 && Event Player.menuXIndex == Event Player.tempMenuXIndex && Event Player.menuYIndex == Event Player.tempMenuYIndex);
+					If(Global.punchingBagTargetHealthProportio <= 10);
+						Abort;
+					End;
+					Global.punchingBagTargetHealthProportio -= 5;
+					Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+					Global._arrayConstructor[12] = Global.punchingBagTargetHealthProportio;
+					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+					Wait(Is Button Held(Event Player, Button(Ability 1)) ? 0.064 : 0.100, Abort When False);
+				End;
 			Else;
-				Skip(Array(96, 0, 5, 28, 51, 72, 77, 82, 87, 92)[Index Of Array Value(Array(0, 1, 2, 3, 4, 5, 6, 7, 8),
+				Skip(Array(117, 0, 5, 28, 51, 72, 77, 82, 87, 92, 97)[Index Of Array Value(Array(0, 1, 2, 3, 5, 6, 7, 8, 9, 4),
 					Event Player.currentConfigSelection) + 1]);
 				Global.OptimizeMetricsForOverTime = !Global.OptimizeMetricsForOverTime;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.OptimizeMetricsForOverTime ? Custom String("Over Time") : Custom String("Normal");
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(91);
+				Skip(112);
 				If(Global.AUTO_REGEN_DELAY >= 30);
-					Skip(89);
+					Skip(110);
 				End;
 				Global.AUTO_REGEN_DELAY += Is Button Held(Event Player, Button(Ability 1)) ? 1 : 0.100;
 				Global.AUTO_REGEN_DELAY = Min(Global.AUTO_REGEN_DELAY, 30);
@@ -1881,9 +1933,9 @@ rule("[interface/menu.ostw] Menu left-right")
 					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
 					Wait(0.064, Abort When False);
 				End;
-				Skip(68);
+				Skip(89);
 				If(Global.BUTTON_SPAM_PERIOD >= 30);
-					Skip(66);
+					Skip(87);
 				End;
 				Global.BUTTON_SPAM_PERIOD += Is Button Held(Event Player, Button(Ability 1)) ? 1 : 0.100;
 				Global.BUTTON_SPAM_PERIOD = Min(Global.BUTTON_SPAM_PERIOD, 30);
@@ -1905,9 +1957,9 @@ rule("[interface/menu.ostw] Menu left-right")
 					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
 					Wait(0.064, Abort When False);
 				End;
-				Skip(45);
+				Skip(66);
 				If(Global.SLOW_MOTION_SPEED >= 100);
-					Skip(43);
+					Skip(64);
 				End;
 				Global.SLOW_MOTION_SPEED += 5;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
@@ -1927,31 +1979,53 @@ rule("[interface/menu.ostw] Menu left-right")
 					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
 					Wait(Is Button Held(Event Player, Button(Ability 1)) ? 0.064 : 0.100, Abort When False);
 				End;
-				Skip(24);
+				Skip(45);
 				Global.interactDestroysDeployableCompen = !Global.interactDestroysDeployableCompen;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.interactDestroysDeployableCompen;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(19);
+				Skip(40);
 				Global.RECORD_IN_SLOW_MOTION = !Global.RECORD_IN_SLOW_MOTION;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.RECORD_IN_SLOW_MOTION;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(14);
+				Skip(35);
 				Global.SHOULD_LOOP_CLIP = !Global.SHOULD_LOOP_CLIP;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.SHOULD_LOOP_CLIP;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(9);
+				Skip(30);
 				Global.SHOW_REPLAY_TIMECODES = !Global.SHOW_REPLAY_TIMECODES;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.SHOW_REPLAY_TIMECODES;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
-				Skip(4);
+				Skip(25);
 				Global.TRIGGERS_ENABLED = !Global.TRIGGERS_ENABLED;
 				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
 				Global._arrayConstructor[12] = Global.TRIGGERS_ENABLED;
 				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+				Skip(20);
+				If(Global.punchingBagTargetHealthProportio >= 100);
+					Skip(18);
+				End;
+				Global.punchingBagTargetHealthProportio += 5;
+				Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+				Global._arrayConstructor[12] = Global.punchingBagTargetHealthProportio;
+				Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+				Event Player.tempMenuXIndex = Event Player.menuXIndex;
+				Event Player.tempMenuYIndex = Event Player.menuYIndex;
+				Wait(Global.activeModifications[7] ? 0.250 * Global.SLOW_MOTION_SPEED / 100 : 0.250, Abort When False);
+				While(Event Player.currentMenuState == 10 && X Component Of(Throttle Of(Event Player))
+					< 0 && Event Player.menuXIndex == Event Player.tempMenuXIndex && Event Player.menuYIndex == Event Player.tempMenuYIndex);
+					If(Global.punchingBagTargetHealthProportio >= 100);
+						Abort;
+					End;
+					Global.punchingBagTargetHealthProportio += 5;
+					Global._arrayConstructor = Event Player.ButtonLabelGrid[10];
+					Global._arrayConstructor[12] = Global.punchingBagTargetHealthProportio;
+					Event Player.ButtonLabelGrid[10] = Global._arrayConstructor;
+					Wait(Is Button Held(Event Player, Button(Ability 1)) ? 0.064 : 0.100, Abort When False);
+				End;
 			End;
 			Abort;
 		End;
@@ -3774,7 +3848,9 @@ rule("[interface/information/damageNumbers.ostw] Update Information Menu button 
 		Global._arrayConstructor = Event Player.ButtonColorGrid[3];
 		Global._arrayConstructor[22] = Color(Gray);
 		Event Player.ButtonColorGrid[3] = Global._arrayConstructor;
+		Small Message(Event Player, Custom String(" {0}  Damage/Heal Numbers Shown", Icon String(Checkmark)));
 		Wait Until(!Array Contains(Event Player.activeInfoDisplays, 16), 99999);
+		Small Message(Event Player, Custom String(" {0}  Damage/Heal Numbers Hidden", Icon String(X)));
 		Global._arrayConstructor = Event Player.ButtonLabelGrid[3];
 		Global._arrayConstructor[22] = Custom String("Show Damage/Heal Numbers");
 		Event Player.ButtonLabelGrid[3] = Global._arrayConstructor;
@@ -3802,7 +3878,7 @@ rule("[interface/information/damageNumbers.ostw] When player takes damage, creat
 	{
 		Event Player.lastDamageInstanceAmount = Event Damage;
 		Event Player.lastDamageInstancePosition = Position Of(Event Player);
-		"If we don't have any active ***ulative damage number, reset and create it"
+		"If we don't have any active cumulative damage number, reset and create it"
 		If(Event Player.totalDamageDisplayTextID == -1);
 			Event Player.totalDamage = Event Damage;
 			Create In-World Text(Filtered Array(All Players(All Teams), Array Contains(Current Array Element.activeInfoDisplays, 16)),
@@ -4115,7 +4191,8 @@ rule("[interface/modifications/modsMenu.ostw] Make respawn happen faster if enab
 
 	actions
 	{
-		Wait Until(Is Alive(Event Player), 3);
+		Wait Until(Is Alive(Event Player), Workshop Setting Integer(Custom String("04. Mod Settings"), Custom String(
+			"Faster Respawn Delay"), 3, 0, 12, 0));
 		Abort If(Is Alive(Event Player));
 		Respawn(Event Player);
 	}
@@ -4293,6 +4370,57 @@ rule("[interface/modifications/modsMenu.ostw] Handle preventing heal passive")
 	}
 }
 
+rule("[interface/modifications/fasterAbilities.ostw] DEBUG: show ability cooldowns")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	actions
+	{
+		For Player Variable(Event Player, b, 0, Count Of(Remove From Array(Global.AllButtons, Array(Button(Melee), Button(Jump), Button(
+			Reload), Button(Interact), Button(Ultimate)))), 1);
+			Create HUD Text(Event Player, Custom String("{0} CD: {1}", Evaluate Once(Remove From Array(Global.AllButtons, Array(Button(Melee),
+				Button(Jump), Button(Reload), Button(Interact), Button(Ultimate)))[Event Player.b]), Update Every Frame(Ability Cooldown(
+				Event Player, Evaluate Once(Remove From Array(Global.AllButtons, Array(Button(Melee), Button(Jump), Button(Reload), Button(
+				Interact), Button(Ultimate)))[Event Player.b])))), Custom String("Charges: {0}", Ability Charge(Event Player, Evaluate Once(
+				Remove From Array(Global.AllButtons, Array(Button(Melee), Button(Jump), Button(Reload), Button(Interact), Button(Ultimate)))
+				[Event Player.b]))), Custom String("Resource: {0}{1}", Update Every Frame(Ability Resource(Event Player, Evaluate Once(
+				Remove From Array(Global.AllButtons, Array(Button(Melee), Button(Jump), Button(Reload), Button(Interact), Button(Ultimate)))
+				[Event Player.b]))), Custom String(
+				"                                                                                          ")), Left, 0, Color(White), Color(
+				White), Color(White), Visible To and String, Default Visibility);
+		End;
+	}
+}
+
+rule("[interface/modifications/fasterAbilities.ostw] DEBUG: melee to set cooldowns manually")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Is Button Held(Event Player, Button(Melee)) == True;
+	}
+
+	actions
+	{
+		For Player Variable(Event Player, b_0, 0, Count Of(Global.AllButtons), 1);
+			Set Ability Cooldown(Event Player, Global.AllButtons[Event Player.b_0], 0);
+			Set Ability Resource(Event Player, Global.AllButtons[Event Player.b_0], 100);
+			Set Ability Charge(Event Player, Global.AllButtons[Event Player.b_0], 5);
+		End;
+	}
+}
+
 rule("[interface/modifications/fasterAbilities.ostw] Ultimate")
 {
 	event
@@ -4374,16 +4502,20 @@ rule("[interface/modifications/fasterAbilities.ostw] Secondary fire cooldown")
 	conditions
 	{
 		Global.activeModifications[1] == True;
-		Ability Cooldown(Event Player, Button(Secondary Fire)) > 0;
+		(Ability Cooldown(Event Player, Button(Secondary Fire)) > 0 || ((Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player)
+			: Hero Of(Event Player)) == Hero(Soldier: 76) && Is Firing Secondary(Event Player))) == True;
 	}
 
 	actions
 	{
+		If((Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) == Hero(Soldier: 76));
+			Wait Until(!Is Firing Secondary(Event Player), 1);
+		End;
 		Set Ability Cooldown(Event Player, Button(Secondary Fire), 1);
 	}
 }
 
-rule("[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill D.Va defense matrix")
+rule("[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill D.Va defense matrix + Hog Breather")
 {
 	event
 	{
@@ -4395,13 +4527,38 @@ rule("[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill D.Va 
 	conditions
 	{
 		Global.activeModifications[1] == True;
-		(Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) == Hero(D.Va);
+		Array Contains(Array(Hero(D.Va), Hero(Roadhog)), Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(
+			Event Player)) == True;
 		Ability Resource(Event Player, Button(Secondary Fire)) < 100;
 	}
 
 	actions
 	{
 		Set Ability Resource(Event Player, Button(Secondary Fire), 100);
+		Wait(0.250, Ignore Condition);
+		Loop If Condition Is True;
+	}
+}
+
+rule("[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill Illari Solar Rifle")
+{
+	event
+	{
+		Ongoing - Each Player;
+		All;
+		All;
+	}
+
+	conditions
+	{
+		Global.activeModifications[1] == True;
+		(Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) == Hero(Illari);
+		Ability Resource(Event Player, Button(Secondary Fire)) > 0;
+	}
+
+	actions
+	{
+		Set Ability Resource(Event Player, Button(Secondary Fire), 0);
 		Wait(0.250, Ignore Condition);
 		Loop If Condition Is True;
 	}
@@ -4419,21 +4576,23 @@ rule("[interface/modifications/fasterAbilities.ostw] Ability 1 cooldown")
 	conditions
 	{
 		Global.activeModifications[1] == True;
-		Ability Cooldown(Event Player, Button(Ability 1)) > 0;
+		(Ability Cooldown(Event Player, Button(Ability 1)) > 0 || ((Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player)
+			: Hero Of(Event Player)) == Hero(Genji) && Is Using Ability 1(Event Player))) == True;
 	}
 
 	actions
 	{
-		If(Array Contains(Array(Hero(Roadhog), Hero(Ashe), Hero(Genji)), Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player)
-			: Hero Of(Event Player)));
-			Wait Until(!Is Using Ability 1(Event Player), Ability Cooldown(Event Player, Button(Ability 1)));
+		If(Array Contains(Array(Hero(Roadhog), Hero(Ashe), Hero(Genji), Hero(Bastion)), Is Duplicating(Event Player)
+			? Hero Being Duplicated(Event Player) : Hero Of(Event Player)));
+			Wait Until(!Is Using Ability 1(Event Player), (Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(
+				Event Player)) == Hero(Genji) ? 1 : Ability Cooldown(Event Player, Button(Ability 1)));
 		End;
 		Wait(0.016, Ignore Condition);
 		Set Ability Cooldown(Event Player, Button(Ability 1), 1);
 	}
 }
 
-rule("[interface/modifications/fasterAbilities.ostw] Zarya/Junkrat - 2 Ability 1 charges")
+rule("[interface/modifications/fasterAbilities.ostw] Zarya/Junkrat/Freja - 2 Ability 1 charges")
 {
 	event
 	{
@@ -4445,15 +4604,16 @@ rule("[interface/modifications/fasterAbilities.ostw] Zarya/Junkrat - 2 Ability 1
 	conditions
 	{
 		Global.activeModifications[1] == True;
-		Array Contains(Array(Hero(Zarya), Hero(Junkrat)), Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(
-			Event Player)) == True;
+		Array Contains(Array(Hero(Zarya), Hero(Junkrat), Hero(Freja)), Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player)
+			: Hero Of(Event Player)) == True;
 		Ability Charge(Event Player, Button(Ability 1)) < 2;
 	}
 
 	actions
 	{
 		Wait(1, Abort When False);
-		Set Ability Charge(Event Player, Button(Ability 1), Ability Charge(Event Player, Button(Ability 1)) + 1);
+		Set Ability Charge(Event Player, Button(Ability 1), Array Contains(Array(Hero(Freja), Hero(Zarya)), Is Duplicating(Event Player)
+			? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) ? 2 : Ability Charge(Event Player, Button(Ability 1)) + 1);
 		Loop If Condition Is True;
 	}
 }
@@ -4495,21 +4655,25 @@ rule("[interface/modifications/fasterAbilities.ostw] Ability 2 cooldown")
 	conditions
 	{
 		Global.activeModifications[1] == True;
-		Ability Cooldown(Event Player, Button(Ability 2)) > 0;
+		(Ability Cooldown(Event Player, Button(Ability 2)) > 0 || (Array Contains(Array(Hero(D.Va), Hero(Tracer), Hero(Baptiste)),
+			Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) && Is Using Ability 2(
+			Event Player))) == True;
 	}
 
 	actions
 	{
-		If(Array Contains(Array(Hero(D.Va), Hero(Reaper)), Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(
-			Event Player)));
-			Wait Until(!Is Using Ability 2(Event Player), Ability Cooldown(Event Player, Button(Ability 2)));
+		If(Array Contains(Array(Hero(D.Va), Hero(Tracer), Hero(Reaper), Hero(Baptiste)), Is Duplicating(Event Player)
+			? Hero Being Duplicated(Event Player) : Hero Of(Event Player)));
+			Wait Until(!Is Using Ability 2(Event Player), Array Contains(Array(Hero(D.Va), Hero(Tracer)), Is Duplicating(Event Player)
+				? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) ? 3 : Ability Cooldown(Event Player, Button(Ability 2)));
 		End;
-		Wait(0.016, Ignore Condition);
+		Wait((Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) == Hero(Baptiste) ? 1 : 0.016,
+			Ignore Condition);
 		Set Ability Cooldown(Event Player, Button(Ability 2), 1);
 	}
 }
 
-rule("[interface/modifications/fasterAbilities.ostw] Reinhardt - 2 Ability 2 charges")
+rule("[interface/modifications/fasterAbilities.ostw] Reinhardt/Widowmaker - 2 Ability 2 charges")
 {
 	event
 	{
@@ -4521,14 +4685,15 @@ rule("[interface/modifications/fasterAbilities.ostw] Reinhardt - 2 Ability 2 cha
 	conditions
 	{
 		Global.activeModifications[1] == True;
-		(Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player) : Hero Of(Event Player)) == Hero(Reinhardt);
+		Array Contains(Array(Hero(Reinhardt), Hero(Widowmaker)), Is Duplicating(Event Player) ? Hero Being Duplicated(Event Player)
+			: Hero Of(Event Player)) == True;
 		Ability Charge(Event Player, Button(Ability 2)) < 2;
 	}
 
 	actions
 	{
 		Wait(1, Abort When False);
-		Set Ability Charge(Event Player, Button(Ability 2), Ability Charge(Event Player, Button(Ability 2)) + 1);
+		Set Ability Charge(Event Player, Button(Ability 2), 2);
 		Loop If Condition Is True;
 	}
 }
@@ -4853,12 +5018,12 @@ rule("[interface/dummyBotsAndReplay/botPlacementModule.ostw] Maintain punching b
 	conditions
 	{
 		Event Player.isPunchingBag == True;
-		Absolute Value(Normalized Health(Event Player) - Global.punchingBagTargetHealthProportio) > 0.075;
+		Absolute Value(Normalized Health(Event Player) - Global.punchingBagTargetHealthProportio / 100) > 0.005;
 	}
 
 	actions
 	{
-		Set Player Health(Event Player, Global.punchingBagTargetHealthProportio * Max Health(Event Player));
+		Set Player Health(Event Player, Global.punchingBagTargetHealthProportio / 100 * Max Health(Event Player));
 		Wait(1, Abort When False);
 		Loop If Condition Is True;
 	}
@@ -4951,6 +5116,8 @@ rule("[interface/dummyBotsAndReplay/botPlacementModule.ostw] Initialize selectio
 
 	actions
 	{
+		Event Player._extendedPlayerCollection[2] = Array(Position Of(Event Player), Eye Position(Event Player), Facing Direction Of(
+			Event Player));
 		Event Player.positionControl = Array(Event Player, Global.nextSelectionEntityId, Position Of(Event Player) + Up, 1);
 		Event Player.facingControl = Array(Event Player, Global.nextSelectionEntityId + 1, Eye Position(Event Player)
 			+ Facing Direction Of(Event Player) * 5, 2);
@@ -6740,8 +6907,8 @@ rule("lambda")
 
 	actions
 	{
-		Skip(Array(131, 0, 0, 17, 38, 50, 52, 68, 70, 96, 126, 128, 130)[Index Of Array Value(Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
-			First Of(Last Of(Global.func_group))) + 1]);
+		Skip(Array(144, 0, 0, 17, 38, 50, 52, 68, 70, 83, 109, 139, 141, 143)[Index Of Array Value(Array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+			12, 13), First Of(Last Of(Global.func_group))) + 1]);
 		"Set the point for the player to return to"
 		Event Player.menuActivationPoint = Array(Position Of(Event Player), Eye Position(Event Player), Facing Direction Of(Event Player));
 		Set Player Allowed Heroes(Event Player, Remove From Array(Allowed Heroes(Event Player), Hero Of(Event Player)));
@@ -6760,7 +6927,7 @@ rule("lambda")
 		Wait Until(Angle Between Vectors(Facing Direction Of(Event Player), Event Player.menuActivationPoint[2]) < 0.100, 0.250);
 		Stop Facing(Event Player);
 		Event Player.currentMenuState = 0;
-		Skip(114);
+		Skip(127);
 		If(Event Player.isNoClipActive);
 			"Set new button look"
 			Global._arrayConstructor = Event Player.ButtonLabelGrid[5];
@@ -6784,28 +6951,28 @@ rule("lambda")
 		If(!Event Player.isNoClipActive);
 			Stop Camera(Event Player);
 		End;
-		Skip(93);
+		Skip(106);
 		If(Count Of(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element) && Current Array Element.totalFrames > 0))
 			== 0);
 			Small Message(Event Player, Custom String("  No replays recorded yet!"));
 			Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 100);
-			Skip(89);
+			Skip(102);
 		End;
 		If(Is True For Any(Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element)), Array Contains(Array(Custom String(
 			"PREPARING_FOR_PLAYBACK"), Custom String("PLAYING"), Custom String("REACHED_END_OF_REPLAY")),
 			Current Array Element.replayState)));
 			Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element)).recordingPlayStopFlag = 2;
-			Skip(85);
+			Skip(98);
 		End;
 		Filtered Array(All Players(All Teams), Is Dummy Bot(Current Array Element)).recordingPlayStopFlag = 1;
 		Event Player.currentMenuState = 0;
-		Skip(81);
+		Skip(94);
 		Damage(Event Player, Null, 0.200 * Max Health(Event Player));
-		Skip(79);
+		Skip(92);
 		If(First Of(Event Player._extendedPlayerCollection[2]) == Null);
 			Small Message(Event Player, Custom String("{0}{1}", Icon String(Warning), Custom String("No respawn point set")));
 			Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 100);
-			Skip(75);
+			Skip(88);
 		End;
 		Respawn(Event Player);
 		Teleport(Event Player, First Of(Event Player._extendedPlayerCollection[2]));
@@ -6818,8 +6985,21 @@ rule("lambda")
 		Wait(0.016, Ignore Condition);
 		Wait Until(Angle Between Vectors(Facing Direction Of(Event Player), Event Player._extendedPlayerCollection[2][2]) < 0.100, 0.250);
 		Stop Facing(Event Player);
-		Skip(63);
+		Skip(76);
 		Start Rule(ResetAllBotsToResetPoints, Do Nothing);
+		Skip(74);
+		If(Array Contains(Event Player.activeInfoDisplays, 16));
+			Modify Player Variable(Event Player, activeInfoDisplays, Remove From Array By Value, 16);
+			Skip(71);
+		End;
+		If(Count Of(Event Player.activeInfoDisplays) >= 5);
+			Play Effect(Event Player, Debuff Impact Sound, Null, Event Player, 200);
+			Small Message(Event Player, Custom String("{0} Too many active readouts (max {1}).", Icon String(Warning), 5));
+			Wait(0.150, Ignore Condition);
+			Small Message(Event Player, Custom String("{0} Remove some readouts and try again", Icon String(Warning)));
+			Skip(64);
+		End;
+		Modify Player Variable(Event Player, activeInfoDisplays, Append To Array, 16);
 		Skip(61);
 		If(Event Player.botControlMode == 0);
 			Global._arrayConstructor = Event Player.ButtonLabelGrid[6];
