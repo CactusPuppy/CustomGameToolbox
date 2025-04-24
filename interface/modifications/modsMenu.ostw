@@ -143,7 +143,7 @@ rule: "[interface/modifications/modsMenu.ostw] Make respawn happen faster if ena
 Event.OnDeath
 if (IsModificationActive(Modification.FASTER_RESPAWN))
 {
-  WaitUntil(IsAlive(), 3);
+  WaitUntil(IsAlive(), WorkshopSettingInteger(ModSettingsCategory, "Faster Respawn Delay", 3, 0, 12));
   AbortIf(IsAlive());
   Respawn(EventPlayer());
 }
