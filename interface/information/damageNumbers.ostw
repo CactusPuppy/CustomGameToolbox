@@ -25,7 +25,11 @@ Event.OngoingPlayer
 if (activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS))
 {
   UpdateButtonAppearance(MenuState.INFORMATION, 2, 4, "Hide Damage/Heal Numbers", Color.Gray);
+  SmallMessage(EventPlayer(), <" <0>  Damage/Heal Numbers Shown", IconString(Icon.Checkmark)>);
+
   WaitUntil(!activeInfoDisplays.Contains(InfoAction.DAMAGE_HEAL_NUMBERS), 99999);
+
+  SmallMessage(EventPlayer(), <" <0>  Damage/Heal Numbers Hidden", IconString(Icon.X)>);
   UpdateButtonAppearance(MenuState.INFORMATION, 2, 4, "Show Damage/Heal Numbers", Color.Blue);
 }
 
