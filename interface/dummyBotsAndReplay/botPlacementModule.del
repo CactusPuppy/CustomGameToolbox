@@ -97,6 +97,7 @@ Event.OngoingPlayer
 if (IsControllable())
 if (HasSpawned())
 {
+  respawnPoint = NewResetFromPlayer(EventPlayer());
   positionControl = {
     Id: nextSelectionEntityId,
     Owner: EventPlayer(),
