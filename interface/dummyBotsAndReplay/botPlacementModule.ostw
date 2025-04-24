@@ -16,7 +16,7 @@ globalvar Number punchingBagTargetHealthProportion = WorkshopSettingInteger(BotA
 rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Maintain punching bag health"
 Event.OngoingPlayer
 if (isPunchingBag)
-if (AbsoluteValue(NormalizedHealth() - punchingBagTargetHealthProportion/100) > 0.075)
+if (AbsoluteValue(NormalizedHealth() - punchingBagTargetHealthProportion/100) > 0.005)
 {
   SetPlayerHealth(EventPlayer(), punchingBagTargetHealthProportion/100 * MaxHealth());
   Wait(1, WaitBehavior.AbortWhenFalse);
