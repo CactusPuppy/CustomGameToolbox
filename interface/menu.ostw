@@ -1,4 +1,4 @@
-import "../main.ostw";
+import "../main.del";
 import "./menuDefinitions.ostw";
 import "../lib/utils/Colors.del";
 import "../lib/player/buttonControl.del";

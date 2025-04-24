@@ -1,4 +1,4 @@
-import "../../main.ostw";
+import "../../main.del";
 
 globalvar String logBuffer;
 

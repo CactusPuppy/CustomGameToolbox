@@ -1,4 +1,4 @@
-import "main.ostw";
+import "main.del";
 globalvar Boolean UseRoleQueueHealth = WorkshopSettingToggle(HeroSettingsCategory, "Use Role Queue Tank Health", true, 0);
 
 playervar Any TankHealthPool;
