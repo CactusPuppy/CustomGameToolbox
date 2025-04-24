@@ -69,18 +69,31 @@ if (AbilityResource(EventPlayer(), Button.PrimaryFire) < 95)
 rule: "[interface/modifications/fasterAbilities.ostw] Secondary fire cooldown"
 Event.OngoingPlayer
 if (isFasterAbilitiesActive)
-if (AbilityCooldown(EventPlayer(), Button.SecondaryFire) > 0)
+if (AbilityCooldown(EventPlayer(), Button.SecondaryFire) > 0
+  || (EffectiveHero() == Hero.Soldier76 && IsFiringSecondary()))
 {
+  if (EffectiveHero() == Hero.Soldier76) WaitUntil(!IsFiringSecondary(), 1);
   SetAbilityCooldown(EventPlayer(), Button.SecondaryFire, fasterCooldownDuration);
 }
 
-rule: "[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill D.Va defense matrix"
+rule: "[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill D.Va defense matrix + Hog Breather"
 Event.OngoingPlayer
 if (isFasterAbilitiesActive)
-if (EffectiveHero() == Hero.Dva)
+if ([Hero.Dva, Hero.Roadhog].Contains(EffectiveHero()))
 if (AbilityResource(EventPlayer(), Button.SecondaryFire) < 100)
 {
   SetAbilityResource(EventPlayer(), Button.SecondaryFire, 100);
+  Wait(0.25);
+  LoopIfConditionIsTrue();
+}
+
+rule: "[interface/modifications/fasterCooldown.ostw] Secondary fire: Refill Illari Solar Rifle"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (EffectiveHero() == Hero.Illari)
+if (AbilityResource(EventPlayer(), Button.SecondaryFire) > 0)
+{
+  SetAbilityResource(EventPlayer(), Button.SecondaryFire, 0);
   Wait(0.25);
   LoopIfConditionIsTrue();
 }
@@ -90,21 +103,22 @@ if (AbilityResource(EventPlayer(), Button.SecondaryFire) < 100)
 rule: "[interface/modifications/fasterAbilities.ostw] Ability 1 cooldown"
 Event.OngoingPlayer
 if (isFasterAbilitiesActive)
-if (AbilityCooldown(EventPlayer(), Button.Ability1) > 0)
+if (AbilityCooldown(EventPlayer(), Button.Ability1) > 0
+  || (EffectiveHero() == Hero.Genji && IsUsingAbility1()))
 {
-  if ([Hero.Roadhog, Hero.Ashe, Hero.Genji].Contains(EffectiveHero())) WaitUntil(!IsUsingAbility1(), AbilityCooldown(EventPlayer(), Button.Ability1));
+  if ([Hero.Roadhog, Hero.Ashe, Hero.Genji, Hero.Bastion].Contains(EffectiveHero())) WaitUntil(!IsUsingAbility1(), EffectiveHero() == Hero.Genji ? 1 : AbilityCooldown(EventPlayer(), Button.Ability1));
   MinWait();
   SetAbilityCooldown(EventPlayer(), Button.Ability1, fasterCooldownDuration);
 }
 
-rule: "[interface/modifications/fasterAbilities.ostw] Zarya/Junkrat - 2 Ability 1 charges"
+rule: "[interface/modifications/fasterAbilities.ostw] Zarya/Junkrat/Freja - 2 Ability 1 charges"
 Event.OngoingPlayer
 if (isFasterAbilitiesActive)
-if ([Hero.Zarya, Hero.Junkrat].Contains(EffectiveHero())) // Zarya probably won't work for a long time lmao
+if ([Hero.Zarya, Hero.Junkrat, Hero.Freja].Contains(EffectiveHero())) // Zarya probably won't work for a long time lmao
 if (AbilityCharge(EventPlayer(), Button.Ability1) < 2)
 {
   Wait(fasterCooldownDuration, WaitBehavior.AbortWhenFalse);
-  SetAbilityCharge(EventPlayer(), Button.Ability1, AbilityCharge(Button: Button.Ability1) + 1);
+  SetAbilityCharge(EventPlayer(), Button.Ability1, [Hero.Freja, Hero.Zarya].Contains(EffectiveHero()) ? 2 : AbilityCharge(Button: Button.Ability1) + 1);
   LoopIfConditionIsTrue();
 }
 
@@ -124,21 +138,23 @@ if (AbilityCharge(EventPlayer(), Button.Ability1) < 3)
 rule: "[interface/modifications/fasterAbilities.ostw] Ability 2 cooldown"
 Event.OngoingPlayer
 if (isFasterAbilitiesActive)
-if (AbilityCooldown(EventPlayer(), Button.Ability2) > 0)
+if (AbilityCooldown(EventPlayer(), Button.Ability2) > 0
+  || ([Hero.Dva, Hero.Tracer, Hero.Baptiste].Contains(EffectiveHero()) && IsUsingAbility2()))
 {
-  if ([Hero.Dva, Hero.Reaper].Contains(EffectiveHero())) WaitUntil(!IsUsingAbility2(), AbilityCooldown(EventPlayer(), Button.Ability2));
-  MinWait();
+  if ([Hero.Dva, Hero.Tracer, Hero.Reaper, Hero.Baptiste].Contains(EffectiveHero())) WaitUntil(!IsUsingAbility2(), [Hero.Dva, Hero.Tracer].Contains(EffectiveHero()) ? 3 : AbilityCooldown(EventPlayer(), Button.Ability2));
+  Wait(EffectiveHero() == Hero.Baptiste ? 1 : 0.016);
   SetAbilityCooldown(EventPlayer(), Button.Ability2, fasterCooldownDuration);
 }
 
-rule: "[interface/modifications/fasterAbilities.ostw] Reinhardt - 2 Ability 2 charges"
+rule: "[interface/modifications/fasterAbilities.ostw] Reinhardt/Widowmaker - 2 Ability 2 charges"
 Event.OngoingPlayer
 if (isFasterAbilitiesActive)
-if (EffectiveHero() == Hero.Reinhardt)
+if ([Hero.Reinhardt, Hero.Widowmaker].Contains(EffectiveHero()))
 if (AbilityCharge(Button: Button.Ability2) < 2)
 {
   Wait(fasterCooldownDuration, WaitBehavior.AbortWhenFalse);
-  SetAbilityCharge(EventPlayer(), Button.Ability2, AbilityCharge(Button: Button.Ability2) + 1);
+  // SetAbilityCharge(EventPlayer(), Button.Ability2, AbilityCharge(Button: Button.Ability2) + 1);
+  SetAbilityCharge(EventPlayer(), Button.Ability2, 2);
   LoopIfConditionIsTrue();
 }
 
