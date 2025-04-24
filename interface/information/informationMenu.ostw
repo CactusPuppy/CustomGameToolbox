@@ -22,7 +22,7 @@ enum InfoAction {
   THROTTLE
 }
 
-Number maxActiveDisplays: 5;
+Number MAX_ACTIVE_DISPLAYS: 5;
 playervar InfoAction[] activeInfoDisplays = [];
 playervar Any[] infoDisplayEntities = [];
 
@@ -58,9 +58,9 @@ void HandleInformationMenuClick() {
     RemoveInfoDisplayHandler();
     return;
   }
-  if (CountOf(activeInfoDisplays) >= maxActiveDisplays) {
+  if (CountOf(activeInfoDisplays) >= MAX_ACTIVE_DISPLAYS) {
     PlayEffect(EventPlayer(), PlayEffect.DebuffImpactSound, null, EventPlayer(), 200);
-    SmallMessage(EventPlayer(), <"<0> Too many active readouts (max <1>).", IconString(Icon.Warning), maxActiveDisplays>);
+    SmallMessage(EventPlayer(), <"<0> Too many active readouts (max <1>).", IconString(Icon.Warning), MAX_ACTIVE_DISPLAYS>);
     Wait(0.15);
     SmallMessage(EventPlayer(), <"<0> Remove some readouts and try again", IconString(Icon.Warning)>);
     return;
