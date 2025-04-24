@@ -26,7 +26,6 @@ String currentConfigItem: [
   "Quick Actions Enabled"
 ][currentConfigSelection];
 
-// globalvar Boolean SHOULD_PUNCHIING_BAG_NAME_CHANGE = WorkshopSettingToggle(BotAndReplaySettingsCategory, "Should Punching Bag Name Change", true);
 
 playervar ConfigItem currentConfigSelection;
 
@@ -212,7 +211,8 @@ void ConfigMenu_Left() {
       break;
     case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
       if (punchingBagTargetHealthProportion <= 10) return;
-      punchingBagTargetHealthProportion -= 5;
+      punchingBagTargetHealthProportion -= IsButtonHeld(EventPlayer(), Button.Ability1) ? 5 : 1;
+      ModifyVariable(punchingBagTargetHealthProportion, Operation.Max, 10);
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
       tempMenuXIndex = menuXIndex;
       tempMenuYIndex = menuYIndex;
@@ -224,7 +224,8 @@ void ConfigMenu_Left() {
         if (punchingBagTargetHealthProportion <= 10) {
           Abort();
         }
-        punchingBagTargetHealthProportion -= 5;
+        punchingBagTargetHealthProportion -= IsButtonHeld(EventPlayer(), Button.Ability1) ? 5 : 1;
+        ModifyVariable(punchingBagTargetHealthProportion, Operation.Max, 10);
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
@@ -321,7 +322,8 @@ void ConfigMenu_Right() {
       break;
     case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
       if (punchingBagTargetHealthProportion >= 100) return;
-      punchingBagTargetHealthProportion += 5;
+      punchingBagTargetHealthProportion += IsButtonHeld(EventPlayer(), Button.Ability1) ? 5 : 1;
+      ModifyVariable(punchingBagTargetHealthProportion, Operation.Min, 100);
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
       tempMenuXIndex = menuXIndex;
       tempMenuYIndex = menuYIndex;
@@ -333,7 +335,8 @@ void ConfigMenu_Right() {
         if (punchingBagTargetHealthProportion >= 100) {
           Abort();
         }
-        punchingBagTargetHealthProportion += 5;
+        punchingBagTargetHealthProportion += IsButtonHeld(EventPlayer(), Button.Ability1) ? 5 : 1;
+        ModifyVariable(punchingBagTargetHealthProportion, Operation.Min, 100);
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
