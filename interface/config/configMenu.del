@@ -3,12 +3,12 @@ enum ConfigItem {
   AUTO_REGEN_DELAY,
   BUTTON_SPAM_PERIOD,
   SLOW_MOTION_SPEED,
+  PUNCHING_BAG_HEALTH_PERCENTAGE,
   INTERACT_DESTROYS_DEPLOYABLES_IN_REPLAY,
   RECORD_IN_SLOW_MOTION,
   LOOP_REPLAY,
   SHOW_REPLAY_TIMECODE,
   TOGGLE_QUICK_ACTIONS,
-  // PUNCHING_BAG_HEALTH_PERCENTAGE,
   // SHOULD_PUNCHIING_BAG_NAME_CHANGE,
   END_SENTINEL
 }
@@ -18,6 +18,7 @@ String currentConfigItem: [
   "Auto-Regen Delay",
   "Button Spam Period",
   "Slow Motion Speed",
+  "Punching Bag Health Proportion",
   "Interact Destroys Deployables In Replay",
   "Auto Enable Slow-Mo During Recording",
   "Loop Replay Playback",
@@ -107,9 +108,9 @@ void ConfigMenu_ThrottleLeftRight() {
       case ConfigItem.TOGGLE_QUICK_ACTIONS:
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{TRIGGERS_ENABLED}");
         break;
-      // case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
-      //   UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion * 100}");
-      //   break;
+      case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
+        break;
     }
     return;
   }
@@ -209,6 +210,25 @@ void ConfigMenu_Left() {
       TRIGGERS_ENABLED = !TRIGGERS_ENABLED;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{TRIGGERS_ENABLED}");
       break;
+    case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
+      if (punchingBagTargetHealthProportion <= 10) return;
+      punchingBagTargetHealthProportion -= 5;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) > 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (punchingBagTargetHealthProportion <= 10) {
+          Abort();
+        }
+        punchingBagTargetHealthProportion -= 5;
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
+        Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
+      }
+      break;
   }
 }
 
@@ -298,6 +318,25 @@ void ConfigMenu_Right() {
     case ConfigItem.TOGGLE_QUICK_ACTIONS:
       TRIGGERS_ENABLED = !TRIGGERS_ENABLED;
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{TRIGGERS_ENABLED}");
+      break;
+    case ConfigItem.PUNCHING_BAG_HEALTH_PERCENTAGE:
+      if (punchingBagTargetHealthProportion >= 100) return;
+      punchingBagTargetHealthProportion += 5;
+      UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
+      tempMenuXIndex = menuXIndex;
+      tempMenuYIndex = menuYIndex;
+      SlowMoAgnosticWait(0.25, WaitBehavior.AbortWhenFalse);
+      while (currentMenuState == MenuState.CONFIG
+        && XOf(ThrottleOf()) < 0
+        && menuXIndex == tempMenuXIndex
+        && menuYIndex == tempMenuYIndex) {
+        if (punchingBagTargetHealthProportion >= 100) {
+          Abort();
+        }
+        punchingBagTargetHealthProportion += 5;
+        UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{punchingBagTargetHealthProportion}");
+        Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
+      }
       break;
   }
 }

@@ -12,13 +12,13 @@ void Menu_CreateBot() {
   );
 }
 
-globalvar Number punchingBagTargetHealthProportion = WorkshopSettingReal(BotAndReplayCategory, "Punching Bag Target Health Proportion", 0.8, 0, 1, 0.01);
+globalvar Number punchingBagTargetHealthProportion = WorkshopSettingInteger(BotAndReplayCategory, "Punching Bag Target Health Proportion", 80, 10, 100, 0.01);
 rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Maintain punching bag health"
 Event.OngoingPlayer
 if (isPunchingBag)
-if (AbsoluteValue(NormalizedHealth() - punchingBagTargetHealthProportion) > 0.075)
+if (AbsoluteValue(NormalizedHealth() - punchingBagTargetHealthProportion/100) > 0.075)
 {
-  SetPlayerHealth(EventPlayer(), punchingBagTargetHealthProportion * MaxHealth());
+  SetPlayerHealth(EventPlayer(), punchingBagTargetHealthProportion/100 * MaxHealth());
   Wait(1, WaitBehavior.AbortWhenFalse);
   LoopIfConditionIsTrue();
 }
