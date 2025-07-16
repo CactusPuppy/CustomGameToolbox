@@ -13,7 +13,8 @@ enum BotEditAction {
   RECORD_REPLAY,
   EDIT_REPLAY,
   DELETE_REPLAY,
-  TOGGLE_PUNCHING_BAG
+  TOGGLE_PUNCHING_BAG,
+  CYCLE_SCALE
 }
 
 playervar BotEditAction selectedBotEditAction;
@@ -23,7 +24,7 @@ BotEditAction[] BotEditActionGrid: ButtonActionGrid[MenuState.EDITING_DUMMY_BOT]
 
 BotEditAction[] botEditPageButtonActions: [
   BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.EDIT_BUTTON_CONTROL, BotEditAction.NONE,                BotEditAction.NONE,
-  BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.SET_RESPAWN_POINT,   BotEditAction.TOGGLE_PUNCHING_BAG, BotEditAction.NONE,
+  BotEditAction.NONE, BotEditAction.CYCLE_SCALE,          BotEditAction.SET_RESPAWN_POINT,   BotEditAction.TOGGLE_PUNCHING_BAG, BotEditAction.NONE,
   BotEditAction.DELETE_REPLAY, BotEditAction.EDIT_REPLAY, BotEditAction.RECORD_REPLAY,       BotEditAction.CHANGE_HERO,         BotEditAction.CHANGE_TEAM,
   BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.PIN_BOT_TO_POSITION, BotEditAction.NONE,                BotEditAction.NONE,
   BotEditAction.NONE, BotEditAction.NONE,                 BotEditAction.DELETE,              BotEditAction.NONE,                BotEditAction.NONE
@@ -31,7 +32,7 @@ BotEditAction[] botEditPageButtonActions: [
 
 String[] botEditPageButtonLabels: [
   "", "", "Buttons", "", "",
-  "", "", "Set Respawn Point", "Make Punching Bag", "",
+  "", "Scale: 1x", "Set Respawn Point", "Make Punching Bag", "",
   "Delete Replay", "Edit Replay", "Record Replay", "Change Hero", "Switch Team",
   "", "", "Pin Bot To Position", "", "",
   "", "", "Delete", "", ""
@@ -39,7 +40,7 @@ String[] botEditPageButtonLabels: [
 
 Color[] botEditPageButtonColors: [
   null, null, Color.Aqua, null, null,
-  null, null, Color.Yellow, Color.Purple, null,
+  null, CustomColor(178, 22, 184, 255), Color.Yellow, Color.Purple, null,
   Color.Gray, Color.Gray, CustomColor(186, 70, 213, 255), Color.Green, Color.Blue,
   null, null, Color.Orange, null, null,
   null, null, Color.Red, null, null
@@ -185,6 +186,11 @@ if (selectedBotEditAction != BotEditAction.NONE)
       PinUnpinHandler();
       break;
 
+    case BotEditAction.CYCLE_SCALE:
+      # [CASE] cycle player scale
+      CycleBotScale();
+      break;
+
     case BotEditAction.RECORD_REPLAY:
       # [CASE] Record replay
       HandleRecordReplayPress();
@@ -293,6 +299,11 @@ void PinUnpinHandler() {
     SmallMessage(EventPlayer(), "  Unpinned bot");
     UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 2, 3, "Pin Bot", Color.Orange);
   }
+}
+
+void CycleBotScale() {
+  CyclePlayerScale(selectedBot);
+  UpdateButtonLabel(MenuState.EDITING_DUMMY_BOT, 1, 1, $"Scale: {selectedBot.playerScale}x", EventPlayer());
 }
 
 rule: "[interface/dummyBotsAndReplay/botEditPage.del] Handle pinning bot to current position"

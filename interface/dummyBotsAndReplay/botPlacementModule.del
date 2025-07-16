@@ -177,9 +177,9 @@ rule: "[interface/dummyBotsAndReplay/botPlacementModule.ostw] Update position co
 Event.OngoingPlayer
 if (IsDummyBot())
 if (replayState == ReplayState.NONE)
-if (DistanceBetween(EventPlayer().Position() + Up(), positionControl.Position) > 0.01)
+if (DistanceBetween(EventPlayer().Position() + Up() * playerScale, positionControl.Position) > 0.01)
 {
-  positionControl.Position = EventPlayer().Position() + Up();
+  positionControl.Position = EventPlayer().Position() + Up() * playerScale;
   MinWait();
   LoopIfConditionIsTrue();
 }
