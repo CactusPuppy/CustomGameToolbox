@@ -84,7 +84,12 @@ if (buttonControlStates[indexOfButton(Button.PrimaryFire)] != ButtonControlState
     StartHoldingButton(EventPlayer(), Button.PrimaryFire);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.PrimaryFire);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.PrimaryFire)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.PrimaryFire)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.PrimaryFire)]), 1000000);
   LoopIfConditionIsTrue();
@@ -103,7 +108,12 @@ if (buttonControlStates[indexOfButton(Button.SecondaryFire)] != ButtonControlSta
     StartHoldingButton(EventPlayer(), Button.SecondaryFire);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.SecondaryFire);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.SecondaryFire)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.SecondaryFire)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.SecondaryFire)]), 1000000);
   LoopIfConditionIsTrue();
@@ -122,7 +132,12 @@ if (buttonControlStates[indexOfButton(Button.Ability1)] != ButtonControlState.NO
     StartHoldingButton(EventPlayer(), Button.Ability1);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Ability1);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Ability1)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Ability1)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Ability1)]), 1000000);
   LoopIfConditionIsTrue();
@@ -141,7 +156,12 @@ if (buttonControlStates[indexOfButton(Button.Ability2)] != ButtonControlState.NO
     StartHoldingButton(EventPlayer(), Button.Ability2);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Ability2);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Ability2)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Ability2)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Ability2)]), 1000000);
   LoopIfConditionIsTrue();
@@ -160,7 +180,12 @@ if (buttonControlStates[indexOfButton(Button.Ultimate)] != ButtonControlState.NO
     StartHoldingButton(EventPlayer(), Button.Ultimate);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Ultimate);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Ultimate)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Ultimate)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Ultimate)]), 1000000);
   LoopIfConditionIsTrue();
@@ -179,7 +204,12 @@ if (buttonControlStates[indexOfButton(Button.Interact)] != ButtonControlState.NO
     StartHoldingButton(EventPlayer(), Button.Interact);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Interact);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Interact)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Interact)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Interact)]), 1000000);
   LoopIfConditionIsTrue();
@@ -198,7 +228,12 @@ if (buttonControlStates[indexOfButton(Button.Reload)] != ButtonControlState.NONE
     StartHoldingButton(EventPlayer(), Button.Reload);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Reload);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Reload)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Reload)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Reload)]), 1000000);
   LoopIfConditionIsTrue();
@@ -217,7 +252,12 @@ if (buttonControlStates[indexOfButton(Button.Jump)] != ButtonControlState.NONE)
     StartHoldingButton(EventPlayer(), Button.Jump);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Jump);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Jump)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Jump)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Jump)]), 1000000);
   LoopIfConditionIsTrue();
@@ -236,7 +276,12 @@ if (buttonControlStates[indexOfButton(Button.Crouch)] != ButtonControlState.NONE
     StartHoldingButton(EventPlayer(), Button.Crouch);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Crouch);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Crouch)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Crouch)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Crouch)]), 1000000);
   LoopIfConditionIsTrue();
@@ -255,7 +300,12 @@ if (buttonControlStates[indexOfButton(Button.Melee)] != ButtonControlState.NONE)
     StartHoldingButton(EventPlayer(), Button.Melee);
     Wait(0.064);
     StopHoldingButton(EventPlayer(), Button.Melee);
-    Wait(BUTTON_SPAM_PERIOD, WaitBehavior.AbortWhenFalse);
+    WaitUntil(
+      buttonControlStates[indexOfButton(Button.Melee)] == ButtonControlState.NONE
+      || TotalTimeElapsed() - EvaluateOnce(TotalTimeElapsed()) >= BUTTON_SPAM_PERIOD - 0.064,
+      1000000
+    );
+    AbortIfConditionIsFalse();
   }
   WaitUntil(buttonControlStates[indexOfButton(Button.Melee)] != EvaluateOnce(buttonControlStates[indexOfButton(Button.Melee)]), 1000000);
   LoopIfConditionIsTrue();
