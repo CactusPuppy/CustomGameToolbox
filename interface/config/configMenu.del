@@ -173,6 +173,7 @@ void ConfigMenu_Left() {
     case ConfigItem.SLOW_MOTION_SPEED:
       if (SLOW_MOTION_SPEED <= 10) return;
       SLOW_MOTION_SPEED -= 5;
+      SetSlowMotion(SLOW_MOTION_SPEED);
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
       tempMenuXIndex = menuXIndex;
       tempMenuYIndex = menuYIndex;
@@ -185,6 +186,7 @@ void ConfigMenu_Left() {
           Abort();
         }
         SLOW_MOTION_SPEED -= 5;
+        SetSlowMotion(SLOW_MOTION_SPEED);
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
@@ -284,6 +286,7 @@ void ConfigMenu_Right() {
     case ConfigItem.SLOW_MOTION_SPEED:
       if (SLOW_MOTION_SPEED >= 100) return;
       SLOW_MOTION_SPEED += 5;
+      SetSlowMotion(SLOW_MOTION_SPEED);
       UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
       tempMenuXIndex = menuXIndex;
       tempMenuYIndex = menuYIndex;
@@ -296,6 +299,7 @@ void ConfigMenu_Right() {
           Abort();
         }
         SLOW_MOTION_SPEED += 5;
+        SetSlowMotion(SLOW_MOTION_SPEED);
         UpdateButtonLabel(MenuState.CONFIG, 2, 2, $"{SLOW_MOTION_SPEED}");
         Wait(IsButtonHeld(EventPlayer(), Button.Ability1) ? 0.064 : 0.1, WaitBehavior.AbortWhenFalse);
       }
