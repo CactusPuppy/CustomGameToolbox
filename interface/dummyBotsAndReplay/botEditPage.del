@@ -81,6 +81,7 @@ if (selectedBot != null)
   } else {
     UpdateButtonAppearance(MenuState.EDITING_DUMMY_BOT, 3, 1, "Make Punching Bag", Color.Purple);
   }
+  UpdateButtonLabel(MenuState.EDITING_DUMMY_BOT, 1, 1, $"Scale: {selectedBot.playerScale}x", EventPlayer());
   WaitUntil(selectedBot != EvaluateOnce(selectedBot) || selectedBot.totalFrames != EvaluateOnce(selectedBot.totalFrames), 1000000);
   LoopIfConditionIsTrue();
 }
