@@ -323,7 +323,7 @@ void ToggleInvisibility()
   CloseMenu(EventPlayer());
 }
 
-globalvar Number[] SCALE_FACTORS! = [0.2, 0.5, 1, 1.5, 2, 3, 5];
+globalvar Number[] SCALE_FACTORS! = [0.2, 0.5, 0.75, 1, 1.5, 2, 3, 5];
 playervar Number playerScale = 1;
 void CyclePlayerScale(in Player p = EventPlayer())
 {
