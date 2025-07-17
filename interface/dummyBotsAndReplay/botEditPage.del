@@ -303,7 +303,7 @@ void PinUnpinHandler() {
 }
 
 void CycleBotScale() {
-  CyclePlayerScale(selectedBot);
+  CyclePlayerScale(EvaluateOnce(selectedBot));
   UpdateButtonLabel(MenuState.EDITING_DUMMY_BOT, 1, 1, $"Scale: {selectedBot.playerScale}x", EventPlayer());
 }
 
