@@ -147,7 +147,7 @@ Event.OnDeath
 
 void ChangeHero()
 {
-  SetAllowedHeroes(EventPlayer(), AllowedHeroes().Remove(HeroOf()));
+  SetAllowedHeroes(EventPlayer(), AllHeroes().Remove(HeroOf()));
   WaitUntil(!HasSpawned(), 3);
   ResetHeroAvailability(EventPlayer());
   WaitUntil(HasSpawned(), 9999);
