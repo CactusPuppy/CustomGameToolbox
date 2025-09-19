@@ -1,7 +1,7 @@
 import "../main.del";
 import "./menuDefinitions.ostw";
 import "../lib/utils/Colors.del";
-import "../lib/player/buttonControl.del";
+import "../OSTWUtils/ButtonControl.del";
 
 import "tools/toolsMenu.ostw";
 import "information/informationMenu.ostw";

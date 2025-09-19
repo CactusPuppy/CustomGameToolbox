@@ -1,5 +1,5 @@
 import "../../main.del";
-import "../../lib/player/buttonControl.del";
+import "../../OSTWUtils/ButtonControl.del";
 
 enum RulerState {
   HIDDEN,
