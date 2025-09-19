@@ -118,6 +118,8 @@ if ([Hero.Zarya, Hero.Junkrat, Hero.Freja].Contains(EffectiveHero())) // Zarya p
 if (AbilityCharge(EventPlayer(), Button.Ability1) < 2)
 {
   Wait(fasterCooldownDuration, WaitBehavior.AbortWhenFalse);
+  // Freja's ability 1 is recharged via cooldown despite being a charge ability
+  SetAbilityCooldown(EventPlayer(), Button.Ability1, 0);
   SetAbilityCharge(EventPlayer(), Button.Ability1, [Hero.Freja, Hero.Zarya].Contains(EffectiveHero()) ? 2 : AbilityCharge(Button: Button.Ability1) + 1);
   LoopIfConditionIsTrue();
 }
@@ -196,4 +198,13 @@ if (isFasterAbilitiesActive)
 if (AbilityCooldown(EventPlayer(), Button.Jump) > 0)
 {
   SetAbilityCooldown(EventPlayer(), Button.Jump, fasterCooldownDuration);
+}
+
+/** ==== Reload ==== */
+rule: "[interface/modifications/fasterAbilities.ostw] Reload cooldown"
+Event.OngoingPlayer
+if (isFasterAbilitiesActive)
+if (AbilityCooldown(EventPlayer(), Button.Reload) > 0)
+{
+  SetAbilityCooldown(EventPlayer(), Button.Reload, fasterCooldownDuration);
 }
