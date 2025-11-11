@@ -68,7 +68,9 @@ globalvar (() => void)[] QuickActions = [
   // 11
   () => activeModifications[Modification.SLOW_MOTION] = !activeModifications[Modification.SLOW_MOTION],
   // 12
-  () => activeModifications[Modification.DISABLE_SUPPORT_PASSIVE] = !activeModifications[Modification.DISABLE_SUPPORT_PASSIVE]
+  () => activeModifications[Modification.DISABLE_SUPPORT_PASSIVE] = !activeModifications[Modification.DISABLE_SUPPORT_PASSIVE],
+  // 13
+  () => Kill(EventPlayer(), null)
 ];
 
 String[] QuickActionLabels: [
@@ -84,7 +86,8 @@ String[] QuickActionLabels: [
   "Toggle Third-Person",          // 9
   "Toggle Faster Abilities",      // 10
   "Toggle Slow Motion",           // 11
-  "Toggle Self-Heal Passive"      // 12
+  "Toggle Self-Heal Passive",      // 12
+  "Kill Self"                     // 13
 ];
 
 String[] PossibleQuickTriggerLabels: [
