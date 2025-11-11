@@ -86,14 +86,3 @@ if (IsInSetup())
     isTimePaused = true;
   }
 }
-
-// // DEBUG
-// rule: "[main.ostw] self-damage on melee"
-// Event.OngoingPlayer
-// if (WorkshopSettingToggle(GeneralSettingsCategory, "Self-Damage On Melee", false))
-// if (IsMeleeing())
-// {
-//   Damage(EventPlayer(), null, 75);
-// }
-
-// import "voicelineFarmingModule.ostw";
