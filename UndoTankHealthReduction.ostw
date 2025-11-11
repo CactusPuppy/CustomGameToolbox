@@ -3,6 +3,15 @@ globalvar Boolean UseRoleQueueHealth = WorkshopSettingToggle(HeroSettingsCategor
 
 playervar Any TankHealthPool;
 
+rule: "Force use role queue health to false in practice range"
+if (
+  <"<0>", CurrentGameMode()> == <"<0>", GameMode.PracticeRange>
+  || <"<0>", CurrentGameMode()> == <"<0>", GameMode.Stadium>
+)
+{
+  UseRoleQueueHealth = false;
+}
+
 rule: "Create tank health pool"
 Event.OngoingPlayer
 if (UseRoleQueueHealth)
