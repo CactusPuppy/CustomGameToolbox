@@ -1,0 +1,24 @@
+settings {
+    main
+    {
+      Mode Name: "CactusPuppy's Toolbox - Practice Range"
+      Description: "CactusPuppy's Toolbox | v2.3.4
+Code: ?????
+
+A set of tools that make custom games more useful for recreating, testing, and recording Overwatch scenarios."
+    }
+
+    modes
+    {
+      General {
+        Hero Limit: Off
+        Limit Roles: Off
+      }
+
+      Practice Range {
+
+      }
+    }
+}
+
+import "main.del";

@@ -2,22 +2,15 @@ settings
 {
     main
     {
-        Mode Name: "CactusPuppy's Toolbox - Stadium"
-        Description: "CactusPuppy's Toolbox | v2.2.0
+        Mode Name: "CactusPuppy's Toolbox - Stadium Practice Range"
+        Description: "CactusPuppy's Toolbox | v2.3.4
 Code: 7JRMA
 
 A set of tools that make custom games more useful for recreating, testing, and recording Overwatch scenarios."
     }
     modes
     {
-        General
-        {
-            Tank Role Passive Health Bonus: Disabled
-        }
-
-        Practice Range {
-
-        }
+        Stadium
     }
 }
 
