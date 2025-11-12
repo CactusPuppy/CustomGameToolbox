@@ -24,9 +24,11 @@ Number fasterCooldownDuration: 1;
 // if (IsButtonHeld(EventPlayer(), Button.Melee))
 // {
 //   foreach(Button b in AllButtons) {
+//     // SmallMessage(AllPlayers(), $"Refreshing ${b}");
 //     SetAbilityCooldown(EventPlayer(), b, 0);
 //     SetAbilityResource(EventPlayer(), b, 100);
 //     SetAbilityCharge(EventPlayer(), b, 5);
+//     // Wait(1);
 //   }
 // }
 
